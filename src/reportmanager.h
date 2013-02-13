@@ -4,11 +4,7 @@
 #include <vector>
 
 #include "dyndbdriver.h"
-
-class DetectionReport
-{
-  // TODO implement this
-};
+#include "detectionreport.h"
 
 class ReportManager
 {
