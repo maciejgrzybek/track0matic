@@ -9,6 +9,9 @@
 
 #include "dyndbdriver.h"
 
+namespace DB
+{
+
 DynDBDriver::DynDBDriver(const std::string& options_path)
 {
   { // read configuration from file
@@ -24,7 +27,6 @@ DynDBDriver::DynDBDriver(const std::string& options_path)
       throw;
     }
   }
-  std::cout << options_.toString() << std::endl;
   db_connection_ = new pqxx::connection(options_.toString());
 }
 
@@ -100,3 +102,26 @@ std::string DynDBDriver::DBDriverOptions::sslModeToString() const
       break;
   }
 }
+
+} // namespace DB
+
+// FIXME remove this, only for testing purpose
+/*#include <iostream>
+int main(void)
+{
+  DB::DynDBDriver dbdrv("options.xml");
+  DB::DynDBDriver::DRCursor cursor(dbdrv);
+  DB::DynDBDriver::DRCursor::DR_row row = cursor.fetchRow();
+  std::cout << row.sensor_id << " " << row.dr_id << " "
+            << row.lon << " " << row.lat << " "
+            << row.mos << " " << row.sensor_time << " "
+            << row.upload_time << std::endl;
+
+  row = cursor.fetchRow();
+  std::cout << row.sensor_id << " " << row.dr_id << " "
+            << row.lon << " " << row.lat << " "
+            << row.mos << " " << row.sensor_time << " "
+            << row.upload_time << std::endl;
+
+  row = cursor.fetchRow();
+}*/
