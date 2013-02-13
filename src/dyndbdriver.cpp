@@ -1,4 +1,4 @@
-#include <iostream>
+#include <memory>
 #include <fstream>
 #include <string>
 
@@ -57,17 +57,23 @@ std::vector<Sensor*> DynDBDriver::getSensors(SensorFactory* producer)
   if (resultIterator == result.end()) // if after fetching, result is empty - tell interested ones.
     throw DB::exceptions::NoResultAvailable();
 
+  std::unique_ptr<SensorFactory> prod;
+  if (producer == NULL)
+    prod = std::unique_ptr<SensorFactory>(new SensorFactory());
+  else
+    prod = std::unique_ptr<SensorFactory>(producer);
+
   std::vector<Sensor*> resultVector;
 
   for (; resultIterator != result.end(); ++resultIterator)
   {
     pqxx::result::const_iterator row = resultIterator;
-    Sensor* sensor = producer->produce(row[0].as<int>(),
-                                       row[1].as<double>(),
-                                       row[2].as<double>(),
-                                       row[3].as<double>(),
-                                       row[4].as<double>(),
-                                       row[5].as<std::string>());
+    Sensor* sensor = prod->produce(row[0].as<int>(),
+                                   row[1].as<double>(),
+                                   row[2].as<double>(),
+                                   row[3].as<double>(),
+                                   row[4].as<double>(),
+                                   row[5].as<std::string>());
     resultVector.push_back(sensor);
   }
 

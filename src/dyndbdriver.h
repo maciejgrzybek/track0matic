@@ -215,7 +215,7 @@ public:
   DRCursor getDRCursor(time_t timestamp = 0,
                        unsigned packetSize = 20);
 
-  std::vector<Sensor*> getSensors(class SensorFactory* producer);
+  std::vector<Sensor*> getSensors(class SensorFactory* producer = NULL);
 
 private:
   class DBDriverOptions
