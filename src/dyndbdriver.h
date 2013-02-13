@@ -1,6 +1,7 @@
 #ifndef DYNDBDRIVER_H
 #define DYNDBDRIVER_H
 
+#include <vector>
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -101,8 +102,7 @@ public:
           "sensor_time >= to_timestamp($1) LIMIT $2 OFFSET $3";
 
       // prepare statement (query) for connection
-      pqxx::connection& conn = *(dbdriver.db_connection_);
-      conn.prepare("DR_select_statement",sql);
+      dbdriver.db_connection_->prepare("DR_select_statement",sql);
     }
 
     /**
@@ -184,14 +184,38 @@ public:
     pqxx::result result_;
   };
 
+  struct Sensor_row
+  {
+    Sensor_row(int sensor_id,
+               double lon,
+               double lat,
+               double mos,
+               double range,
+               std::string type)
+      : sensor_id(sensor_id),
+        lon(lon),
+        lat(lat),
+        mos(mos),
+        range(range),
+        type(type)
+    {
+    }
+
+    int sensor_id;
+    double lon;
+    double lat;
+    double mos;
+    double range;
+    std::string type;
+  };
+
   DynDBDriver(const std::string& options_path);
   ~DynDBDriver();
 
   DRCursor getDRCursor(time_t timestamp = 0,
-                       unsigned packetSize = 20)
-  {
-    return DRCursor(*this,timestamp,packetSize);
-  }
+                       unsigned packetSize = 20);
+
+  std::vector<Sensor_row> getSensors();
 
 private:
   class DBDriverOptions

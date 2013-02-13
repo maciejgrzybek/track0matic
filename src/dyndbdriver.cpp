@@ -6,6 +6,7 @@
 #include <boost/archive/xml_iarchive.hpp>
 
 #include <pqxx/connection>
+#include <pqxx/transaction>
 
 #include "dyndbdriver.h"
 
@@ -33,6 +34,43 @@ DynDBDriver::DynDBDriver(const std::string& options_path)
 DynDBDriver::~DynDBDriver()
 {
   delete db_connection_;
+}
+
+DynDBDriver::DRCursor DynDBDriver::getDRCursor(time_t timestamp,
+                                               unsigned packetSize)
+{
+  return DRCursor(*this,timestamp,packetSize);
+}
+
+std::vector<DynDBDriver::Sensor_row> DynDBDriver::getSensors()
+{
+  const std::string sql
+      = "SELECT s.sensorid,s.lon,s.lat,s.mos,s.range,st.sensortype FROM sensors as s, sensortypes as st "
+      "WHERE s.typeid = st.typeid";
+
+  pqxx::work t(*db_connection_,"Sensors fetcher");
+  pqxx::result result = t.exec(sql);
+
+  pqxx::result::const_iterator resultIterator = result.begin();
+  if (resultIterator == result.end()) // if after fetching, result is empty - tell interested ones.
+    throw DB::exceptions::NoResultAvailable();
+
+  std::vector<DynDBDriver::Sensor_row> resultVector;
+
+  for (; resultIterator != result.end(); ++resultIterator)
+  {
+    pqxx::result::const_iterator row = resultIterator;
+    resultVector.push_back(Sensor_row(row[0].as<int>(), // id
+                                      row[1].as<double>(), // lon
+                                      row[2].as<double>(), // lat
+                                      row[3].as<double>(), // mos
+                                      row[4].as<double>(), // range
+                                      row[5].as<std::string>() // type
+                                      )
+                           );
+  }
+
+  return resultVector;
 }
 
 DynDBDriver::DBDriverOptions::DBDriverOptions(const std::string& host,
@@ -111,6 +149,8 @@ int main(void)
 {
   DB::DynDBDriver dbdrv("options.xml");
   DB::DynDBDriver::DRCursor cursor(dbdrv);
+
+  std::cout << "DRs:" << std::endl;
   try
   {
     while (1)
@@ -126,5 +166,18 @@ int main(void)
   {
     std::cout << ex.what() << std::endl;
   }
-
-}*/
+  try
+  {
+    std::cout << "Sensors:" << std::endl;
+    std::vector<DB::DynDBDriver::Sensor_row> sensors = dbdrv.getSensors();
+    for (auto it : sensors)
+    {
+      std::cout << it.sensor_id << " " << it.lon << " " << it.lat << " " << it.mos << " " << it.range << " " << it.type << std::endl;
+    }
+  }
+  catch (const DB::exceptions::NoResultAvailable& ex)
+  {
+    std::cout << ex.what() << std::endl;
+  }
+}
+*/
