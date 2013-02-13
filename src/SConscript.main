@@ -1,0 +1,18 @@
+# vim: ft=python
+
+sourceTargets = [ 'alignmentprocessor.cpp',
+                  'candidateselector.cpp',
+#                  'dataassociator.cpp',
+                  'detectionreport.cpp',
+                  'dyndbdriver.cpp',
+#                  'reportmanager.cpp','
+                  'sensor.cpp',
+                  'sensorfactory.cpp',
+                  'track.cpp' ]
+
+env = Environment(
+                    CCFLAGS = '-O2 -std=c++0x -g',
+                    LINKFLAGS = '-std=c++0x -lpthread -lboost_serialization -lpqxx'
+                 )
+
+env.Program('tracker',sourceTargets)
