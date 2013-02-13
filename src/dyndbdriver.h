@@ -14,7 +14,30 @@ namespace DB
 
 namespace exceptions
 {
-  // TODO implement this
+  class DBException : public std::exception
+  {
+  public:
+    virtual ~DBException() throw()
+    {}
+
+    virtual const char* what() const throw()
+    {
+      return "Unknown DB driver exception.";
+    }
+  };
+
+  class NoResultAvailable : public DBException
+  {
+  public:
+    virtual ~NoResultAvailable() throw()
+    {}
+
+    virtual const char* what() const throw()
+    {
+      return "No result available - maybe empty result.";
+    }
+
+  };
 } // namespace exceptions
 
 class DynDBDriver
@@ -142,6 +165,9 @@ public:
           (offset_).exec();
 
       resultIterator_ = result_.begin();
+      if (resultIterator_ == result_.end()) // if after fetching, result is empty - tell interested ones.
+        throw DB::exceptions::NoResultAvailable();
+
       resultInitialized_ = true;
     }
 

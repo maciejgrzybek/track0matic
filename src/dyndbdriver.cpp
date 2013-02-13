@@ -111,17 +111,20 @@ int main(void)
 {
   DB::DynDBDriver dbdrv("options.xml");
   DB::DynDBDriver::DRCursor cursor(dbdrv);
-  DB::DynDBDriver::DRCursor::DR_row row = cursor.fetchRow();
-  std::cout << row.sensor_id << " " << row.dr_id << " "
-            << row.lon << " " << row.lat << " "
-            << row.mos << " " << row.sensor_time << " "
-            << row.upload_time << std::endl;
+  try
+  {
+    while (1)
+    {
+      DB::DynDBDriver::DRCursor::DR_row row = cursor.fetchRow();
+      std::cout << row.sensor_id << " " << row.dr_id << " "
+                << row.lon << " " << row.lat << " "
+                << row.mos << " " << row.sensor_time << " "
+                << row.upload_time << std::endl;
+    }
+  }
+  catch (const DB::exceptions::NoResultAvailable& ex)
+  {
+    std::cout << ex.what() << std::endl;
+  }
 
-  row = cursor.fetchRow();
-  std::cout << row.sensor_id << " " << row.dr_id << " "
-            << row.lon << " " << row.lat << " "
-            << row.mos << " " << row.sensor_time << " "
-            << row.upload_time << std::endl;
-
-  row = cursor.fetchRow();
 }*/
