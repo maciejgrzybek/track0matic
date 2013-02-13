@@ -14,7 +14,7 @@ CHECK(
   VALUE between -90.0 and 90.0
 );
 
-CREATE DOMAIN metersOverSee AS numeric(7,2)
+CREATE DOMAIN metersOverSea AS numeric(7,2)
 CHECK(
   VALUE between -420.0 and 8850
 );
@@ -27,7 +27,7 @@ CREATE TABLE DETECTION_REPORTS(
   DR_ID SERIAL,
   LON longitude not null,
   LAT latitude not null,
-  METERS_OVER_SEE metersOverSee not null,
+  METERS_OVER_SEA metersOverSea not null,
   UPLOAD_TIME timestamp not null default current_timestamp,
   SENSOR_TIME timestamp not null,
 
@@ -38,7 +38,7 @@ CREATE TABLE DETECTION_REPORTS(
 COMMENT ON TABLE DETECTION_REPORTS IS 'Table contains detection reports provided by sensors (camers and others)';
 COMMENT ON COLUMN DETECTION_REPORTS.LON IS 'Longitude (x) of where object was seen';
 COMMENT ON COLUMN DETECTION_REPORTS.LAT IS 'Latitude (y) of where object was seen';
-COMMENT ON COLUMN DETECTION_REPORTS.METERS_OVER_SEE IS 'Meters over see (z) of where object was seen';
+COMMENT ON COLUMN DETECTION_REPORTS.METERS_OVER_SEA IS 'Meters over sea (z) of where object was seen';
 COMMENT ON COLUMN DETECTION_REPORTS.UPLOAD_TIME IS 'Time of data upload - when given DR appeared in system, its synchronized time for whole system';
 COMMENT ON COLUMN DETECTION_REPORTS.SENSOR_TIME IS 'Time of data capture - when given DR was taken by sensor (its sensor time, NOT synchronized with whole system)';
 
