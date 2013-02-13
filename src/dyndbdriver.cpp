@@ -8,6 +8,8 @@
 #include <pqxx/connection>
 #include <pqxx/transaction>
 
+#include "sensorfactory.h"
+
 #include "dyndbdriver.h"
 
 namespace DB
@@ -42,7 +44,7 @@ DynDBDriver::DRCursor DynDBDriver::getDRCursor(time_t timestamp,
   return DRCursor(*this,timestamp,packetSize);
 }
 
-std::vector<DynDBDriver::Sensor_row> DynDBDriver::getSensors()
+std::vector<Sensor*> DynDBDriver::getSensors(SensorFactory* producer)
 {
   const std::string sql
       = "SELECT s.sensorid,s.lon,s.lat,s.mos,s.range,st.sensortype FROM sensors as s, sensortypes as st "
@@ -55,19 +57,18 @@ std::vector<DynDBDriver::Sensor_row> DynDBDriver::getSensors()
   if (resultIterator == result.end()) // if after fetching, result is empty - tell interested ones.
     throw DB::exceptions::NoResultAvailable();
 
-  std::vector<DynDBDriver::Sensor_row> resultVector;
+  std::vector<Sensor*> resultVector;
 
   for (; resultIterator != result.end(); ++resultIterator)
   {
     pqxx::result::const_iterator row = resultIterator;
-    resultVector.push_back(Sensor_row(row[0].as<int>(), // id
-                                      row[1].as<double>(), // lon
-                                      row[2].as<double>(), // lat
-                                      row[3].as<double>(), // mos
-                                      row[4].as<double>(), // range
-                                      row[5].as<std::string>() // type
-                                      )
-                           );
+    Sensor* sensor = producer->produce(row[0].as<int>(),
+                                       row[1].as<double>(),
+                                       row[2].as<double>(),
+                                       row[3].as<double>(),
+                                       row[4].as<double>(),
+                                       row[5].as<std::string>());
+    resultVector.push_back(sensor);
   }
 
   return resultVector;

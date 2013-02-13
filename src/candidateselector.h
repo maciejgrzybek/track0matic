@@ -34,7 +34,7 @@ public:
 
 private:
   DB::DynDBDriver& dbdriver_;
-  const std::vector<DB::DynDBDriver::Sensor_row> sensors_;
+  const std::vector<Sensor*> sensors_;
 };
 
 #endif // CANDIDATESELECTOR_H
