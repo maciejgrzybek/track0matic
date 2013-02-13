@@ -4,8 +4,11 @@
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/serialization/access.hpp>
+#include <boost/serialization/nvp.hpp>
 #include <boost/lexical_cast.hpp>
 
+#include <pqxx/connection>
 #include <pqxx/transaction>
 #include <pqxx/prepared_statement>
 
@@ -184,9 +187,10 @@ public:
   DynDBDriver(const std::string& options_path);
   ~DynDBDriver();
 
-  DRCursor getDRCursor()
+  DRCursor getDRCursor(time_t timestamp = 0,
+                       unsigned packetSize = 20)
   {
-    return DRCursor(*this);
+    return DRCursor(*this,timestamp,packetSize);
   }
 
 private:
