@@ -2,6 +2,7 @@
 #define DYNDBDRIVER_H
 
 #include <vector>
+#include <set>
 #include <string>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
@@ -215,7 +216,7 @@ public:
   DRCursor getDRCursor(time_t timestamp = 0,
                        unsigned packetSize = 20);
 
-  std::vector<Sensor*> getSensors(class SensorFactory* producer = NULL);
+  std::set<class Sensor*> getSensors(class SensorFactory* producer = NULL);
 
 private:
   class DBDriverOptions

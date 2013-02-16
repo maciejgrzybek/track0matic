@@ -44,7 +44,7 @@ DynDBDriver::DRCursor DynDBDriver::getDRCursor(time_t timestamp,
   return DRCursor(*this,timestamp,packetSize);
 }
 
-std::vector<Sensor*> DynDBDriver::getSensors(SensorFactory* producer)
+std::set<Sensor*> DynDBDriver::getSensors(SensorFactory* producer)
 {
   const std::string sql
       = "SELECT s.sensorid,s.lon,s.lat,s.mos,s.range,st.sensortype FROM sensors as s, sensortypes as st "
@@ -63,7 +63,7 @@ std::vector<Sensor*> DynDBDriver::getSensors(SensorFactory* producer)
   else
     prod = std::unique_ptr<SensorFactory>(producer);
 
-  std::vector<Sensor*> resultVector;
+  std::set<Sensor*> resultSet;
 
   for (; resultIterator != result.end(); ++resultIterator)
   {
@@ -74,10 +74,10 @@ std::vector<Sensor*> DynDBDriver::getSensors(SensorFactory* producer)
                                    row[3].as<double>(),
                                    row[4].as<double>(),
                                    row[5].as<std::string>());
-    resultVector.push_back(sensor);
+    resultSet.insert(sensor);
   }
 
-  return resultVector;
+  return resultSet;
 }
 
 DynDBDriver::DBDriverOptions::DBDriverOptions(const std::string& host,

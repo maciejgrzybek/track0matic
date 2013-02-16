@@ -1,6 +1,9 @@
 #ifndef CANDIDATESELECTOR_H
 #define CANDIDATESELECTOR_H
 
+#include <set>
+#include <vector>
+
 #include "sensor.h"
 #include "detectionreport.h"
 #include "dyndbdriver.h"
@@ -11,6 +14,8 @@
 // (e.g. because of partial common coverage of view), but in fact DR could not be seen by 2 sensors from this kind of neighborhood.
 // In such a case, it's important to check DRs each other for neighborhood, according to their sensors details.
 // Warning! Consider complexity of such operation, maybe it's not worth spending so much time calculating "improvemed" version, which gives almost zero impact on final result
+// IMPORTANT! This class has to provide uniqueness of assignment DRs to groups, to avoid clonning DRs!
+// The best solution is probably to choose this group for DR, which has more sensors.
 class CandidateSelector
 {
 public:
@@ -29,12 +34,12 @@ public:
    *  Each DR
    * @return collection of collection of DRs
    */
-  std::vector<std::vector<DetectionReport> >
-  getMeasurementGroups(const std::vector<DetectionReport>&) const;
+  std::vector<std::set<DetectionReport> >
+  getMeasurementGroups(const std::set<DetectionReport> &) const;
 
 private:
   DB::DynDBDriver& dbdriver_;
-  const std::vector<Sensor*> sensors_;
+  const std::set<Sensor*> sensors_;
 };
 
 #endif // CANDIDATESELECTOR_H

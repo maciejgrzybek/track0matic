@@ -9,8 +9,8 @@ CandidateSelector::CandidateSelector(DB::DynDBDriver& dbdriver)
 }
 
 
-std::vector<std::vector<DetectionReport> >
-CandidateSelector::getMeasurementGroups(const std::vector<DetectionReport>&) const
+std::vector<std::set<DetectionReport> >
+CandidateSelector::getMeasurementGroups(const std::set<DetectionReport>&) const
 {
   // TODO implement this
 }
