@@ -1,5 +1,7 @@
 # vim: ft=python
 
+modelDir = 'Model'
+
 sourceTargets = [ 'alignmentprocessor.cpp',
                   'candidateselector.cpp',
 #                  'dataassociator.cpp',
@@ -10,9 +12,13 @@ sourceTargets = [ 'alignmentprocessor.cpp',
                   'sensorfactory.cpp',
                   'track.cpp' ]
 
+targets = []
+for source in sourceTargets:
+  targets.append(modelDir + '/' + source)
+
 env = Environment(
                     CCFLAGS = '-O2 -std=c++0x -g',
                     LINKFLAGS = '-std=c++0x -lpthread -lboost_serialization -lpqxx'
                  )
 
-env.Program('tracker',sourceTargets)
+env.Library('Model',targets)

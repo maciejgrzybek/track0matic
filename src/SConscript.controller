@@ -1,0 +1,17 @@
+# vim: ft=python
+
+modelDir = 'Controller'
+
+# nothing to build yet
+sourceTargets = []
+
+targets = []
+for source in sourceTargets:
+  targets.append(modelDir + '/' + source)
+
+env = Environment(
+                    CCFLAGS = '-O2 -std=c++0x -g',
+                    LINKFLAGS = '-std=c++0x -lpthread -lboost_serialization -lpqxx'
+                 )
+
+env.Library('Controller',targets)
