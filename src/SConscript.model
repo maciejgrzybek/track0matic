@@ -7,6 +7,7 @@ sourceTargets = [ 'alignmentprocessor.cpp',
                   'dataassociator.cpp',
                   'detectionreport.cpp',
                   'dyndbdriver.cpp',
+                  'fusionexecutor.cpp',
 #                  'reportmanager.cpp','
                   'resultcomparator.cpp',
                   'sensor.cpp',
