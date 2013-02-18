@@ -4,10 +4,11 @@ modelDir = 'Model'
 
 sourceTargets = [ 'alignmentprocessor.cpp',
                   'candidateselector.cpp',
-#                  'dataassociator.cpp',
+                  'dataassociator.cpp',
                   'detectionreport.cpp',
                   'dyndbdriver.cpp',
 #                  'reportmanager.cpp','
+                  'resultcomparator.cpp',
                   'sensor.cpp',
                   'sensorfactory.cpp',
                   'track.cpp' ]
