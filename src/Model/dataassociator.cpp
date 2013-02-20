@@ -28,3 +28,7 @@ void DataAssociator::setListResultComparator(std::unique_ptr<ListResultComparato
   listResultComparator = std::move(comparator);
 }
 
+void DataAssociator::setFeatureExtractor(std::unique_ptr<FeatureExtractor> extractor)
+{
+  featureExtractor = std::move(extractor);
+}

@@ -7,6 +7,7 @@
 #include <vector>
 
 #include "detectionreport.h"
+#include "featureextractor.h"
 #include "resultcomparator.h"
 #include "track.h"
 
@@ -63,6 +64,12 @@ public:
    */
   void setListResultComparator(std::unique_ptr<ListResultComparator> comparator);
 
+  /**
+   * @brief Sets FeatureExtractor, used to associate DRs and rate associations.
+   * @param FeatureExtractor
+   */
+  void setFeatureExtractor(std::unique_ptr<FeatureExtractor> extractor);
+
 private:
   /**
    * @brief Returns best fit list of DRs for given track.
@@ -113,6 +120,7 @@ private:
   std::map<Track,std::set<DetectionReport> > associatedDRs;
   std::unique_ptr<ResultComparator> resultComparator;
   std::unique_ptr<ListResultComparator> listResultComparator;
+  std::unique_ptr<FeatureExtractor> featureExtractor;
 };
 
 #endif // DATAASSOCIATOR_H
