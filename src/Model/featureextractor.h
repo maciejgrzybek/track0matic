@@ -29,6 +29,23 @@ public:
   // creates PlateVisitor => second feature is PlateFeature
   virtual void visit(const PlateFeature&);
 
+protected:
+  /*
+   * Implementations of concrete comparators.
+   * Can be overloaded to provide other comparators for color and plate features.
+   */
+  virtual double compare(const ColorFeature& a, const ColorFeature& b) const;
+  virtual double compare(const PlateFeature& a, const PlateFeature& b) const;
+  //comparing Plate with Color does not make sense for the moment, but if possible - implement applicable comparator
+
+  /*
+   * Implementation of concrete fusioners;
+   * Can be overloaded to provide different type of color fusion.
+   */
+  virtual Feature* fuse(const ColorFeature& a, const ColorFeature& b) const;
+  //Feature fuse(const PlateFeature& a, const PlateFeature& b) const;
+  //fusing Plate with Color does not make sense for the moment, but if possible in future, implement applicable fuser
+
 private:
   class ColorVisitor : public FeatureVisitor
   {
@@ -52,15 +69,6 @@ private:
     Feature* fValue;
   };
 
-  /* implementations of concrete comparators */
-  double compare(const ColorFeature& a, const ColorFeature& b) const;
-  double compare(const PlateFeature& a, const PlateFeature& b) const;
-  //comparing Plate with Color does not make sense for the moment, but if possible - implement applicable comparator
-
-  /* implementation of concrete fusioners */
-  Feature* fuse(const ColorFeature& a, const ColorFeature& b) const;
-  //Feature fuse(const PlateFeature& a, const PlateFeature& b) const;
-  //fusing Plate with Color does not make sense for the moment, but if possible in future, implement applicable fuser
 };
 
 #endif // FEATUREEXTRACTOR_H
