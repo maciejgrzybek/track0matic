@@ -16,11 +16,9 @@ template <class StateModel = PositionAndVelocityModel>
 class EstimationFilter
 {
 public:
-  EstimationFilter();
-
-  std::array<typename StateModel::values_type,StateModel::Dimensions>
+  virtual std::array<typename StateModel::values_type,StateModel::Dimensions>
     predict(double u = 0) = 0;
-  std::array<typename StateModel::values_type,StateModel::Dimensions>
+  virtual std::array<typename StateModel::values_type,StateModel::Dimensions>
     correct(double z) = 0;
 };
 

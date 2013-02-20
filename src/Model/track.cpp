@@ -1,6 +1,8 @@
 #include "track.h"
 
-Track::Track(boost::posix_time::ptime creationTime)
+Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
+             boost::posix_time::ptime creationTime)
+  : estimationFilter_(std::move(filter))
 {
   if (creationTime != boost::posix_time::not_a_date_time) // if creationTime is valid (is given), use it
     refreshTime_ = creationTime;
@@ -11,4 +13,9 @@ Track::Track(boost::posix_time::ptime creationTime)
 void Track::refresh(boost::posix_time::ptime refreshTime)
 {
   refreshTime_ = refreshTime;
+}
+
+void Track::setEstimationFilter(std::unique_ptr<estimation::EstimationFilter<> > filter)
+{
+  estimationFilter_ = std::move(filter);
 }
