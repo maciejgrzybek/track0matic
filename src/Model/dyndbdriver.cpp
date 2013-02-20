@@ -44,7 +44,7 @@ DynDBDriver::DRCursor DynDBDriver::getDRCursor(time_t timestamp,
   return DRCursor(*this,timestamp,packetSize);
 }
 
-std::set<Sensor*> DynDBDriver::getSensors(SensorFactory* producer)
+std::set<Sensor*> DynDBDriver::getSensors()
 {
   const std::string sql
       = "SELECT s.sensorid,s.lon,s.lat,s.mos,s.range,st.sensortype FROM sensors as s, sensortypes as st "
@@ -57,23 +57,20 @@ std::set<Sensor*> DynDBDriver::getSensors(SensorFactory* producer)
   if (resultIterator == result.end()) // if after fetching, result is empty - tell interested ones.
     throw DB::exceptions::NoResultAvailable();
 
-  std::unique_ptr<SensorFactory> prod;
-  if (producer == NULL)
-    prod = std::unique_ptr<SensorFactory>(new SensorFactory());
-  else
-    prod = std::unique_ptr<SensorFactory>(producer);
-
   std::set<Sensor*> resultSet;
 
   for (; resultIterator != result.end(); ++resultIterator)
   {
     pqxx::result::const_iterator row = resultIterator;
-    Sensor* sensor = prod->produce(row[0].as<int>(),
-                                   row[1].as<double>(),
-                                   row[2].as<double>(),
-                                   row[3].as<double>(),
-                                   row[4].as<double>(),
-                                   row[5].as<std::string>());
+    Sensor* sensor
+        = SensorFactory::getInstance()
+            .produce(row[0].as<int>(),
+                     row[1].as<double>(),
+                     row[2].as<double>(),
+                     row[3].as<double>(),
+                     row[4].as<double>(),
+                     row[5].as<std::string>());
+
     resultSet.insert(sensor);
   }
 
