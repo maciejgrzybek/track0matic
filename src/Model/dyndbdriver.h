@@ -14,6 +14,8 @@
 #include <pqxx/transaction>
 #include <pqxx/prepared_statement>
 
+class Sensor;
+
 namespace DB
 {
 
@@ -58,8 +60,8 @@ public:
              double lon,
              double lat,
              double mos,
-             long upload_time,
-             long sensor_time)
+             time_t upload_time,
+             time_t sensor_time)
         : sensor_id(sensor_id),
           dr_id(dr_id),
           lon(lon),
@@ -75,8 +77,9 @@ public:
       double lon;
       double lat;
       double mos;
-      long upload_time;
-      long sensor_time;
+      time_t upload_time;
+      time_t sensor_time;
+      Sensor* sensor; // TODO implement this, when needed: should fetch Sensor data from DB and produce it with SensorFactory
     };
 
     /**
