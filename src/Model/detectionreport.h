@@ -1,11 +1,56 @@
 #ifndef DETECTIONREPORT_H
 #define DETECTIONREPORT_H
 
-// TODO implement this
+#include <ctime>
+#include <unordered_set>
+
+#include "dyndbdriver.h"
+
+class Feature;
+class Sensor;
+
 class DetectionReport
 {
 public:
-  DetectionReport();
+  typedef std::unordered_set<Feature*> features_set_t;
+
+  DetectionReport(const DB::DynDBDriver::DRCursor::DR_row&,
+                  const features_set_t& features = features_set_t());
+  DetectionReport(int sensor_id, int dr_id, double lon, double lat, double mos,
+                  time_t upload_time, time_t sensor_time, Sensor* sensor = nullptr,
+                  const features_set_t& features = features_set_t());
+
+  int getSensorId() const;
+  int getDrId() const;
+  double getLongitude() const;
+  double getLatitude() const;
+  double getMetersOverSea() const;
+  boost::posix_time::ptime getUploadTime() const;
+  boost::posix_time::ptime getSensorTime() const;
+  Sensor* getSensor() const;
+
+protected:
+  features_set_t features;
+
+private:
+  int sensor_id;
+  int dr_id;
+  double lon;
+  double lat;
+  double mos;
+  time_t uploadTime;
+  time_t sensorTime;
+  Sensor* sensor;
+};
+
+class HumanDR : public DetectionReport
+{
+ // TODO implement this when needed
+};
+
+class VehicleDR : public DetectionReport
+{
+ // TODO implement this when needed
 };
 
 #endif // DETECTIONREPORT_H
