@@ -14,7 +14,6 @@
 class DataAssociator
 {
 public:
-  DataAssociator();
 
   /**
    * @brief Iterates over tracks and tries to associate DRs for each.
@@ -32,7 +31,7 @@ public:
    *  If necessary compute() will be invoked here.
    * @return Map of associations Track -> DRs
    */
-  std::map<Track,std::set<DetectionReport> > getDRsForTracks();
+  std::map<std::shared_ptr<Track>,std::set<DetectionReport> > getDRsForTracks();
 
   /**
    * @brief If any DR is not associated to Track
@@ -107,7 +106,7 @@ private:
    * @return pair of two values: rate and collection of matching DRs
    */
   std::pair<double,std::set<DetectionReport> >
-  rateListForTrack(std::set<DetectionReport>&,const Track&) const;
+    rateListForTrack(std::set<DetectionReport>&,const Track&) const;
 
   /**
    * @brief Returns 0-1 grade for DR, in comparation for Track.
