@@ -53,4 +53,25 @@ class VehicleDR : public DetectionReport
  // TODO implement this when needed
 };
 
+namespace std
+{
+
+template <>
+struct less<DetectionReport>
+{
+  bool operator()(const DetectionReport& l, const DetectionReport& r) const
+  {
+    boost::posix_time::ptime lTime = l.getSensorTime();
+    boost::posix_time::ptime rTime = r.getSensorTime();
+    if (lTime < rTime)
+      return true;
+    else if (lTime == rTime)
+      return l.getDrId() < r.getDrId();
+    else
+      return false;
+  }
+};
+
+} // namespace std
+
 #endif // DETECTIONREPORT_H

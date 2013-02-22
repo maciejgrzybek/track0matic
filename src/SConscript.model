@@ -10,7 +10,7 @@ sourceTargets = [ 'alignmentprocessor.cpp',
                   'feature.cpp',
                   'featureextractor.cpp',
                   'fusionexecutor.cpp',
-#                  'reportmanager.cpp','
+                  'reportmanager.cpp',
                   'resultcomparator.cpp',
                   'sensor.cpp',
                   'sensorfactory.cpp',

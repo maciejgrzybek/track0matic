@@ -1,12 +1,22 @@
 #include "reportmanager.h"
 
-ReportManager::ReportManager(DB::DynDBDriver& dbdriver)
+ReportManager::ReportManager(DB::DynDBDriver& dbdriver, std::size_t packetSize)
   : dbdriver_(dbdriver),
-    drCursor_(dbdriver_.getDRCursor()) // TODO add parametrization for this
+    drCursor_(dbdriver_.getDRCursor()), // TODO add parametrization for this
+    packetSize_(packetSize)
 {
 }
 
-std::vector<DetectionReport> ReportManager::getDRs() const
+std::set<DetectionReport> ReportManager::getDRs()
 {
-  // TODO implement this
+  std::set<DetectionReport> result;
+  for (std::size_t i = 0;i<packetSize_;++i)
+  {
+    DB::DynDBDriver::DRCursor::DR_row row = drCursor_.fetchRow();
+    // TODO get features for DR
+    DetectionReport dr(row);
+    result.insert(dr);
+  }
+
+  return result;
 }
