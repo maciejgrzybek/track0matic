@@ -2,8 +2,7 @@
 
 modelDir = 'Controller'
 
-# nothing to build yet
-sourceTargets = []
+sourceTargets = [ 'datamanager.cpp' ]
 
 targets = []
 for source in sourceTargets:
