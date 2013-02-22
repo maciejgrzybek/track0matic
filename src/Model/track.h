@@ -2,6 +2,7 @@
 #define TRACK_H
 
 #include <memory>
+#include <unordered_set>
 
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
@@ -10,6 +11,7 @@
 class Track
 {
 public:
+  typedef std::unordered_set<class Feature*> features_set_t;
 
   /**
    * @brief c-tor. Creates track based on given creation time.
@@ -39,6 +41,7 @@ public:
   void setEstimationFilter(std::unique_ptr<estimation::EstimationFilter<> > filter);
 
 private:
+  features_set_t features_;
   std::unique_ptr<estimation::EstimationFilter<> > estimationFilter_;
   boost::posix_time::ptime refreshTime_;
 };

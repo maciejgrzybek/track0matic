@@ -16,16 +16,20 @@ template <class StateModel = PositionAndVelocityModel>
 class EstimationFilter
 {
 public:
-  virtual std::array<typename StateModel::values_type,StateModel::Dimensions>
-    predict(double u = 0) = 0;
-  virtual std::array<typename StateModel::values_type,StateModel::Dimensions>
-    correct(double z) = 0;
+  typedef typename std::array<typename StateModel::values_type,StateModel::Dimensions> vector_t;
+  virtual vector_t predict(vector_t u = vector_t()) = 0;
+  virtual vector_t correct(vector_t z) = 0;
 };
 
 template <class StateModel = PositionAndVelocityModel>
 class KalmanFilter : public EstimationFilter<StateModel>
 {
+public:
+  typedef typename EstimationFilter<StateModel>::vector_t vector_t;
+
   // TODO implement this
+  virtual vector_t predict(vector_t u = vector_t());
+  virtual vector_t correct(vector_t z);
 };
 
 } // namespace estimation

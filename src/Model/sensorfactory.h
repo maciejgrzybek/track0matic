@@ -20,6 +20,7 @@ public:
                           double range,
                           std::string type);
 
+private:
   sensors_map_t sensorsMap;
 };
 
