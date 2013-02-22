@@ -1,6 +1,6 @@
 #include "alignmentprocessor.h"
 
-AlignmentProcessor::AlignmentProcessor(boost::posix_time::time_period dt)
+AlignmentProcessor::AlignmentProcessor(boost::posix_time::time_duration dt)
   : dt_(dt)
 {
 }

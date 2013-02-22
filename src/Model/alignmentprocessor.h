@@ -30,7 +30,7 @@ public:
    *  as taken from the same time period.
    * @param delta time
    */
-  AlignmentProcessor(boost::posix_time::time_period dt);
+  AlignmentProcessor(boost::posix_time::time_duration dt);
 
   /**
    * @brief Gives next aligned group from DRs_ collection,
@@ -59,7 +59,7 @@ public:
 
 private:
   std::vector<DetectionReport> DRs_;
-  const boost::posix_time::time_period dt_;
+  const boost::posix_time::time_duration dt_;
 };
 
 #endif // ALIGNMENTPROCESSOR_H
