@@ -12,10 +12,17 @@ std::set<DetectionReport> ReportManager::getDRs()
   std::set<DetectionReport> result;
   for (std::size_t i = 0;i<packetSize_;++i)
   {
-    DB::DynDBDriver::DRCursor::DR_row row = drCursor_.fetchRow();
-    // TODO get features for DR
-    DetectionReport dr(row);
-    result.insert(dr);
+    try
+    {
+      DB::DynDBDriver::DRCursor::DR_row row = drCursor_.fetchRow();
+      // TODO get features for DR
+      DetectionReport dr(row);
+      result.insert(dr);
+    }
+    catch (const DB::exceptions::NoResultAvailable& /*ex*/)
+    {
+      break; // if no more results available, end loop
+    }
   }
 
   return result;
