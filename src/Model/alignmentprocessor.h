@@ -49,7 +49,7 @@ public:
    * @return collection of DRs with time interval not higher than dt_
    * @throws exceptions::NoDRsAvailable
    */
-  std::vector<DetectionReport> getNextAlignedGroup() const;
+  std::vector<DetectionReport> getNextAlignedGroup();
 
   /**
    * @brief Copies given collection of DRs, for further manipulation by AlignmentProcessor
