@@ -21,7 +21,6 @@ std::vector<DetectionReport> AlignmentProcessor::getNextAlignedGroup()
   {
     if (it->getSensorTime() - lastTime <= dt_)
     {
-      lastTime = it->getSensorTime();
       result.push_back(std::move(*it));
       it = DRs_.erase(it);
     }
