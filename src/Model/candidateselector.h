@@ -20,6 +20,12 @@ class CandidateSelector
 {
 public:
   /**
+   * @brief c-tor loads sensors descriptions from given set.
+   * @param Reference to set of Sensor pointers.
+   */
+  CandidateSelector(const std::set<Sensor*>& sensorsSet);
+
+  /**
    * @brief c-tor loads sensors descriptions (from DynDBDriver).
    * @param Reference to Dynamic DB Driver, which will be used to get sensors descriptions
    */
@@ -33,12 +39,13 @@ public:
    *  To determine neighborhood, range and location of sensors are used.
    *  Each DR
    * @return collection of collection of DRs
+   * @note This is a possible place to optimize (high complexity of current implementation).
    */
   std::vector<std::set<DetectionReport> >
   getMeasurementGroups(const std::set<DetectionReport> &) const;
 
 private:
-  DB::DynDBDriver& dbdriver_;
+  DB::DynDBDriver const* dbdriver_;
   const std::set<Sensor*> sensors_;
 };
 

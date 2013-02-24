@@ -77,7 +77,7 @@ private:
    *  for each set (containing DRs from neighborhood) - rateListForTrack is invoked
    *  list (set) with best rate is chosen (each chosen DR is removed from input collection),
    *  "lost" DRs are left in collection, because will be saved into notAssociated vector,
-   *  but before it happens, we need to finish iterations over tracks, because rejected DRs for one Track could matching for other.
+   *  but before it happens, we need to finish iterations over tracks, because rejected DRs for one Track could match other.
    *
    *  IMPORTANT: We assume that one chosen DR cannot be associated for other Track.
    *    It's not best solution, because it may happen, that one list of DRs fits better for Track which will be checked later,
