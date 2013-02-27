@@ -1,11 +1,13 @@
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE Tracker Model
+#include <set>
 #include <vector>
 
 #include <boost/test/unit_test.hpp>
 
-#include "../src/Model/alignmentprocessor.h"
-#include "../src/Model/detectionreport.h"
+#include <Model/alignmentprocessor.h>
+#include <Model/candidateselector.h>
+#include <Model/detectionreport.h>
+#include <Model/sensor.h>
 
 BOOST_AUTO_TEST_SUITE( AlignmentProcessor_test )
 
@@ -148,3 +150,4 @@ BOOST_AUTO_TEST_CASE( AlignmentTest4 )
 }
 
 BOOST_AUTO_TEST_SUITE_END()
+

@@ -1,12 +1,28 @@
 # vim ft=python
 
-env = Environment(
-                    CCFLAGS = '-O2 -std=c++0x',
-                    LINKFLAGS = '-std=c++0x'
-                 )
+Import('env')
+
+envCopy = env.Clone()
+
+modelDir = 'Model'
+
+envCopy.Append(
+                CPPPATH = '../src/',
+                CCFLAGS = '-O2 -std=c++0x',
+                LINKFLAGS = '-std=c++0x -lpthread -lboost_serialization -lpqxx'
+              )
+
+
+sourceTargets = [ 'modelTest.cpp',
+                  'AlignmentProcessor.cpp',]
+#                  'CandidateSelector.cpp' ]
+
+targets = []
+for source in sourceTargets:
+  targets.append(modelDir + '/' + source)
 
 # Build one or more test runners.
-program = env.Program('test', [ 'modelTest.cpp' ], LIBS=['boost_unit_test_framework','Model'],LIBPATH='../build')
+program = envCopy.Program('test', targets, LIBS=['boost_unit_test_framework','Model'],LIBPATH='../build')
 # Depend on the runner to ensure that it's built before running it - Note: using abspath.
 test_alias = Alias('test', [program], program[0].abspath)
 # Simply required.  Without it, 'test' is never considered out of date.
