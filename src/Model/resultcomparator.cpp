@@ -16,7 +16,7 @@ double AndComparator::operator()(const feature_grade_map_t& featureGrades)
   return evaluateGrades(featureGrades);
 }
 
-double AndComparator::evaluateGrades(const feature_grade_map_t& featureGrades)
+double AndComparator::evaluateGrades(const feature_grade_map_t& featureGrades) const
 {
   double result = 1;
   for (auto& feature : featureGrades)
@@ -45,7 +45,7 @@ double OrComparator::operator()(const feature_grade_map_t& featureGrades)
   return evaluateGrades(featureGrades);
 }
 
-double OrComparator::evaluateGrades(const feature_grade_map_t& featureGrades)
+double OrComparator::evaluateGrades(const feature_grade_map_t& featureGrades) const
 {
   int i = 0;
   double result = 0;
@@ -64,4 +64,38 @@ double OrComparator::evaluateGrades(const feature_grade_map_t& featureGrades)
     ++i;
   }
   return result/i; // normalize to number of features
+}
+
+double AndListComparator::operator()(const rates_collection_t& c)
+{
+  return evaluateRates(c);
+}
+
+double AndListComparator::evaluateRates(const rates_collection_t& c) const
+{
+  double result = 1;
+  for (auto i : c)
+  {
+    result *= i;
+  }
+
+  return result;
+}
+
+double OrListComparator::operator()(const rates_collection_t& c)
+{
+  return evaluateRates(c);
+}
+
+double OrListComparator::evaluateRates(const rates_collection_t& c) const
+{
+  double result = 0;
+  int cnt = 0;
+  for (auto i : c)
+  {
+    result += i;
+    ++cnt;
+  }
+
+  return result/cnt; // normalize to number of rates
 }

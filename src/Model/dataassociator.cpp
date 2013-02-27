@@ -44,15 +44,39 @@ void DataAssociator::setFeatureExtractor(std::unique_ptr<FeatureExtractor> extra
   featureExtractor = std::move(extractor);
 }
 
+void DataAssociator::setDRRateThreshold(double threshold)
+{
+  DRRateThreshold = threshold;
+}
+
 std::set<DetectionReport> DataAssociator::getListForTrack(const Track&)
 {
   // TODO implement this
 }
 
 std::pair<double,std::set<DetectionReport> >
-DataAssociator::rateListForTrack(std::set<DetectionReport>&,const Track&) const
+DataAssociator::rateListForTrack(std::set<DetectionReport>& DRs,const Track& track) const
 {
-  // TODO implement this
+  std::vector<double> rates;
+  std::set<DetectionReport> result;
+  auto it = DRs.begin();
+  auto endIt = DRs.end();
+  while (it != endIt)
+  {
+    double DRRate = rateDRForTrack(*it, track);
+    if (DRRate >= DRRateThreshold)
+    {
+      // take item from DRs set and put into result collection
+      result.insert(*it);
+      rates.push_back(DRRate);
+
+      it = DRs.erase(it);
+    }
+  }
+  // here, all choosen detection reports were taken out of DRs collection
+  // there are only not matching left.
+  double overallRate = listResultComparator->operator()(rates);
+  return std::pair<double,std::set<DetectionReport> >(overallRate,result);
 }
 
 double DataAssociator::rateDRForTrack(const DetectionReport& dr, const Track& track) const

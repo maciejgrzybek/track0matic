@@ -69,6 +69,12 @@ public:
    */
   void setFeatureExtractor(std::unique_ptr<FeatureExtractor> extractor);
 
+  /**
+   * @brief Sets DR rate threshold, which is used to choose DRs as good enough for further computation (in rateListForTrack).
+   * @param threshold
+   */
+  void setDRRateThreshold(double threshold);
+
 private:
   /**
    * @brief Returns best fit list of DRs for given track.
@@ -120,6 +126,8 @@ private:
   std::unique_ptr<ResultComparator> resultComparator;
   std::unique_ptr<ListResultComparator> listResultComparator;
   std::unique_ptr<FeatureExtractor> featureExtractor;
+
+  double DRRateThreshold;
 };
 
 #endif // DATAASSOCIATOR_H
