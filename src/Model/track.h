@@ -40,6 +40,10 @@ public:
    */
   void setEstimationFilter(std::unique_ptr<estimation::EstimationFilter<> > filter);
 
+  features_set_t getFeatures() const;
+
+  const features_set_t& getFeaturesRef() const;
+
 private:
   features_set_t features_;
   std::unique_ptr<estimation::EstimationFilter<> > estimationFilter_;

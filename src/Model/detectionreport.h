@@ -29,6 +29,9 @@ public:
   boost::posix_time::ptime getSensorTime() const;
   Sensor* getSensor() const;
 
+  features_set_t getFeatures() const;
+  features_set_t& getFeaturesRef();
+
 protected:
   features_set_t features;
 

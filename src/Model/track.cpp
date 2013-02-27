@@ -19,3 +19,13 @@ void Track::setEstimationFilter(std::unique_ptr<estimation::EstimationFilter<> >
 {
   estimationFilter_ = std::move(filter);
 }
+
+Track::features_set_t Track::getFeatures() const
+{
+  return features_;
+}
+
+const Track::features_set_t& Track::getFeaturesRef() const
+{
+  return features_;
+}

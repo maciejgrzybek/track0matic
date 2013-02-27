@@ -70,3 +70,13 @@ Sensor* DetectionReport::getSensor() const
 {
   return sensor;
 }
+
+DetectionReport::features_set_t DetectionReport::getFeatures() const
+{
+  return features;
+}
+
+DetectionReport::features_set_t& DetectionReport::getFeaturesRef()
+{
+  return features;
+}

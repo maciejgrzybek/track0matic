@@ -55,7 +55,25 @@ DataAssociator::rateListForTrack(std::set<DetectionReport>&,const Track&) const
   // TODO implement this
 }
 
-double DataAssociator::rateDRForTrack(const DetectionReport&,const Track&) const
+double DataAssociator::rateDRForTrack(const DetectionReport& dr, const Track& track) const
 {
-  // TODO implement this
+  ResultComparator::feature_grade_map_t m;
+  for (Feature* drFeature : dr.getFeatures())
+  {
+    std::string name = drFeature->getName();
+    Track::features_set_t trackFeatures = track.getFeatures();
+    m[name] = 0;
+
+    // TODO can be optimized - linear search vs logarithmic
+    for (Feature* feature : trackFeatures)
+    {
+      if (feature->getName() == name)
+      {
+        double result = featureExtractor->compare(*drFeature,*feature);
+        m[name] = result; // we assume, that there are only one Feature with given name in set
+      }
+    }
+  }
+
+  return resultComparator->operator()(m);
 }
