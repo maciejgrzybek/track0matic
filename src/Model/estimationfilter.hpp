@@ -19,6 +19,7 @@ public:
   typedef typename std::array<typename StateModel::values_type,StateModel::Dimensions> vector_t;
   virtual vector_t predict(vector_t u = vector_t()) = 0;
   virtual vector_t correct(vector_t z) = 0;
+  virtual EstimationFilter* clone() const = 0;
 };
 
 template <class StateModel = PositionAndVelocityModel>
@@ -30,6 +31,7 @@ public:
   // TODO implement this
   virtual vector_t predict(vector_t u = vector_t());
   virtual vector_t correct(vector_t z);
+  virtual EstimationFilter<StateModel>* clone() const;
 };
 
 } // namespace estimation
