@@ -32,6 +32,8 @@ public:
   features_set_t getFeatures() const;
   features_set_t& getFeaturesRef();
 
+  Feature* getFeatureOfGivenName(const std::string& name) const;
+
 protected:
   features_set_t features;
 

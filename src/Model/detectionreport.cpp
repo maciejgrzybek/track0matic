@@ -1,6 +1,7 @@
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "dyndbdriver.h"
+#include "feature.h"
 
 #include "detectionreport.h"
 
@@ -79,4 +80,16 @@ DetectionReport::features_set_t DetectionReport::getFeatures() const
 DetectionReport::features_set_t& DetectionReport::getFeaturesRef()
 {
   return features;
+}
+
+Feature* DetectionReport::getFeatureOfGivenName(const std::string& name) const
+{
+  // TODO can be optimized (linear vs logarithmic search)
+  for (auto& feature : features)
+  {
+    if (feature->getName() == name)
+      return feature;
+  }
+
+  return nullptr;
 }
