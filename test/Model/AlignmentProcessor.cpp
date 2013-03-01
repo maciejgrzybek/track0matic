@@ -13,7 +13,7 @@ BOOST_AUTO_TEST_SUITE( AlignmentProcessor_test )
 
 namespace Helpers
 {
-  std::set<int> VectorToSet(const std::vector<DetectionReport>& vec)
+  std::set<int> SetToSet(const std::set<DetectionReport>& vec)
   {
     std::set<int> result;
     for (auto& i : vec)
@@ -26,7 +26,7 @@ namespace Helpers
 
 BOOST_AUTO_TEST_CASE( AlignmentTest1 )
 {
-  std::vector<DetectionReport> DRs
+  std::set<DetectionReport> DRs
       = {
     DetectionReport(1,1,10,10,0,100,95),
     DetectionReport(1,2,20,20,0,120,95),
@@ -40,22 +40,22 @@ BOOST_AUTO_TEST_CASE( AlignmentTest1 )
   AlignmentProcessor* ap = new AlignmentProcessor(boost::posix_time::seconds(1));
   ap->setDRsCollection(DRs);
 
-  std::vector<DetectionReport> alignedVec = ap->getNextAlignedGroup();
-  std::set<int> aligned = Helpers::VectorToSet(alignedVec);
+  std::set<DetectionReport> alignedVec = ap->getNextAlignedGroup();
+  std::set<int> aligned = Helpers::SetToSet(alignedVec);
   BOOST_CHECK_EQUAL(aligned.size(),2);
   // first group has to contain DRs with id = 1 and 2
   BOOST_CHECK(aligned.find(1) != aligned.end());
   BOOST_CHECK(aligned.find(2) != aligned.end());
 
   alignedVec = ap->getNextAlignedGroup();
-  aligned = Helpers::VectorToSet(alignedVec);
+  aligned = Helpers::SetToSet(alignedVec);
   BOOST_CHECK_EQUAL(aligned.size(),3);
   BOOST_CHECK(aligned.find(3) != aligned.end());
   BOOST_CHECK(aligned.find(8) != aligned.end());
   BOOST_CHECK(aligned.find(10) != aligned.end());
 
   alignedVec = ap->getNextAlignedGroup();
-  aligned = Helpers::VectorToSet(alignedVec);
+  aligned = Helpers::SetToSet(alignedVec);
   BOOST_CHECK_EQUAL(aligned.size(),2);
   BOOST_CHECK(aligned.find(4) != aligned.end());
   BOOST_CHECK(aligned.find(7) != aligned.end());
@@ -65,11 +65,11 @@ BOOST_AUTO_TEST_CASE( AlignmentTest1 )
 
 BOOST_AUTO_TEST_CASE( AlignmentTest2 )
 {
-  std::vector<DetectionReport> DRs;
+  std::set<DetectionReport> DRs;
 
   AlignmentProcessor* ap = new AlignmentProcessor(boost::posix_time::seconds(1));
   ap->setDRsCollection(DRs);
-  std::vector<DetectionReport> aligned = ap->getNextAlignedGroup();
+  std::set<DetectionReport> aligned = ap->getNextAlignedGroup();
   BOOST_CHECK_EQUAL(aligned.size(),0);
 
   aligned = ap->getNextAlignedGroup(); // should not fail/throw etc.
@@ -80,7 +80,7 @@ BOOST_AUTO_TEST_CASE( AlignmentTest2 )
 
 BOOST_AUTO_TEST_CASE( AlignmentTest3 )
 {
-  std::vector<DetectionReport> DRs
+  std::set<DetectionReport> DRs
       = {
     DetectionReport(1,1,10,10,0,100,95),
     DetectionReport(1,2,20,20,0,120,95),
@@ -94,21 +94,21 @@ BOOST_AUTO_TEST_CASE( AlignmentTest3 )
   AlignmentProcessor* ap = new AlignmentProcessor(boost::posix_time::seconds(3));
   ap->setDRsCollection(DRs);
 
-  std::vector<DetectionReport> alignedVec = ap->getNextAlignedGroup();
-  std::set<int> aligned = Helpers::VectorToSet(alignedVec);
+  std::set<DetectionReport> alignedVec = ap->getNextAlignedGroup();
+  std::set<int> aligned = Helpers::SetToSet(alignedVec);
   BOOST_CHECK_EQUAL(aligned.size(),3);
   BOOST_CHECK(aligned.find(1) != aligned.end());
   BOOST_CHECK(aligned.find(2) != aligned.end());
   BOOST_CHECK(aligned.find(3) != aligned.end());
 
   alignedVec = ap->getNextAlignedGroup();
-  aligned = Helpers::VectorToSet(alignedVec);
+  aligned = Helpers::SetToSet(alignedVec);
   BOOST_CHECK_EQUAL(aligned.size(),2);
   BOOST_CHECK(aligned.find(8) != aligned.end());
   BOOST_CHECK(aligned.find(10) != aligned.end());
 
   alignedVec = ap->getNextAlignedGroup();
-  aligned = Helpers::VectorToSet(alignedVec);
+  aligned = Helpers::SetToSet(alignedVec);
   BOOST_CHECK_EQUAL(aligned.size(),2);
   BOOST_CHECK(aligned.find(4) != aligned.end());
   BOOST_CHECK(aligned.find(7) != aligned.end());
@@ -118,7 +118,7 @@ BOOST_AUTO_TEST_CASE( AlignmentTest3 )
 
 BOOST_AUTO_TEST_CASE( AlignmentTest4 )
 {
-  std::vector<DetectionReport> DRs
+  std::set<DetectionReport> DRs
       = {
     DetectionReport(1,1,10,10,0,100,95),
     DetectionReport(1,2,20,20,0,120,95),
@@ -132,8 +132,8 @@ BOOST_AUTO_TEST_CASE( AlignmentTest4 )
   AlignmentProcessor* ap = new AlignmentProcessor(boost::posix_time::seconds(20));
   ap->setDRsCollection(DRs);
 
-  std::vector<DetectionReport> alignedVec = ap->getNextAlignedGroup();
-  std::set<int> aligned = Helpers::VectorToSet(alignedVec);
+  std::set<DetectionReport> alignedVec = ap->getNextAlignedGroup();
+  std::set<int> aligned = Helpers::SetToSet(alignedVec);
   BOOST_CHECK_EQUAL(aligned.size(),7);
   BOOST_CHECK(aligned.find(1) != aligned.end());
   BOOST_CHECK(aligned.find(2) != aligned.end());

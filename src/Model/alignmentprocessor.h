@@ -1,7 +1,8 @@
 #ifndef ALIGNMENTPROCESSOR_H
 #define ALIGNMENTPROCESSOR_H
 
-#include <vector>
+#include <set>
+
 #include <boost/date_time/posix_time/posix_time_types.hpp>
 
 #include "detectionreport.h"
@@ -49,16 +50,16 @@ public:
    * @return collection of DRs with time interval not higher than dt_
    * @throws exceptions::NoDRsAvailable
    */
-  std::vector<DetectionReport> getNextAlignedGroup();
+  std::set<DetectionReport> getNextAlignedGroup();
 
   /**
    * @brief Copies given collection of DRs, for further manipulation by AlignmentProcessor
    * @param reference to vector of DRs, which will be copied.
    */
-  void setDRsCollection(const std::vector<DetectionReport>&);
+  void setDRsCollection(const std::set<DetectionReport>&);
 
 private:
-  std::vector<DetectionReport> DRs_;
+  std::set<DetectionReport> DRs_;
   const boost::posix_time::time_duration dt_;
 };
 
