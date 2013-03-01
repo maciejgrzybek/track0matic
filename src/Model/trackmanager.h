@@ -17,11 +17,13 @@ public:
    * @brief Iterates over collection of DRs groups (sets) to initialize Track for each group
    *
    *  Invokes initilizeTrack() method, for each group.
-   * @param Collection of DRs sets, to be initilized. Each set is initializes a separate Track.
+   * @param Collection of DRs sets, to be initilized. Each set results in initialization as a separate Track.
+   * @param Estimation filter to be used for initialized Track.
    * @return Track->DRs map, where Track is based on given DRs.
    */
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
-    initializeTracks(const std::vector<std::set<DetectionReport> >&);
+    initializeTracks(const std::vector<std::set<DetectionReport> >&,
+                     std::unique_ptr<estimation::EstimationFilter<> >);
 
   /**
    * @brief Sets FeatureExtractor, used to merge (fuse) DRs' features

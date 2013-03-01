@@ -22,9 +22,13 @@ public:
    *  So, whenever you want to create Track without outside time synchronizer and the moment of creation is a moment when track appeared in system,
    *  use default argument to c-tor.
    * @param Estimation filter to use, when predicting next state of Track
+   * @param longitude of Track
+   * @param latitude of Track
+   * @param meters over sea position of Track
    * @param Time of track creation, needed to maintain track (remove after no-update time).
    */
   Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
+        double longitude, double latitude, double metersOverSea,
         boost::posix_time::ptime = boost::posix_time::ptime());
 
   /**
@@ -45,6 +49,10 @@ public:
   const features_set_t& getFeaturesRef() const;
 
 private:
+  double lon_;
+  double lat_;
+  double mos_;
+
   features_set_t features_;
   std::unique_ptr<estimation::EstimationFilter<> > estimationFilter_;
   boost::posix_time::ptime refreshTime_;

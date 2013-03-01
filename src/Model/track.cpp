@@ -1,8 +1,12 @@
 #include "track.h"
 
 Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
+             double longitude, double latitude, double metersOverSea,
              boost::posix_time::ptime creationTime)
-  : estimationFilter_(std::move(filter))
+  : estimationFilter_(std::move(filter)),
+    lon_(longitude),
+    lat_(latitude),
+    mos_(metersOverSea)
 {
   if (creationTime != boost::posix_time::not_a_date_time) // if creationTime is valid (is given), use it
     refreshTime_ = creationTime;
