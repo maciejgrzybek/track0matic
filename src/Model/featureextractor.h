@@ -19,7 +19,7 @@ public:
 class FeatureExtractor
 {
 public:
-  FeatureExtractor();
+  virtual ~FeatureExtractor();
 
   double compare(const Feature& a, const Feature& b) const;
   Feature* fuse(const Feature& a, const Feature& b) const;
