@@ -93,3 +93,21 @@ Feature* DetectionReport::getFeatureOfGivenName(const std::string& name) const
 
   return nullptr;
 }
+
+
+bool DetectionReport::operator==(const DetectionReport& o) const
+{
+  return (getSensorTime() == o.getSensorTime())
+      && (getDrId() == o.getDrId());
+}
+
+std::ostream& operator<<(std::ostream& out, const DetectionReport& dr)
+{
+  return out << "DetectionReport: id = "<< dr.getDrId()
+             << " longitude = " << dr.getLongitude()
+             << " latitude = " << dr.getLatitude()
+             << " meters over sea = " << dr.getMetersOverSea()
+             << " upload time = " << dr.getUploadTime()
+             << " sensor time = " << dr.getSensorTime();
+}
+

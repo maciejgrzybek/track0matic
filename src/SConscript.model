@@ -14,7 +14,8 @@ sourceTargets = [ 'alignmentprocessor.cpp',
                   'resultcomparator.cpp',
                   'sensor.cpp',
                   'sensorfactory.cpp',
-                  'track.cpp' ]
+                  'track.cpp',
+                  'trackmanager.cpp' ]
 
 targets = []
 for source in sourceTargets:

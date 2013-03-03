@@ -28,10 +28,27 @@ class KalmanFilter : public EstimationFilter<StateModel>
 public:
   typedef typename EstimationFilter<StateModel>::vector_t vector_t;
 
-  // TODO implement this
-  virtual vector_t predict(vector_t u = vector_t());
-  virtual vector_t correct(vector_t z);
-  virtual EstimationFilter<StateModel>* clone() const;
+
+  virtual vector_t predict(vector_t u = vector_t())
+  {
+    // TODO implement this
+  }
+
+  virtual vector_t correct(vector_t z)
+  {
+    // TODO implement this
+  }
+
+  virtual EstimationFilter<StateModel>* clone() const
+  {
+    return new KalmanFilter<StateModel>(); // FIXME add proper arguments for constructor
+  }
+
+private:
+  /*
+   vector_t stateVector_;
+   ...
+   */
 };
 
 } // namespace estimation

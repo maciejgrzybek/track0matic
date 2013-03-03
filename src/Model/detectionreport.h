@@ -2,6 +2,7 @@
 #define DETECTIONREPORT_H
 
 #include <ctime>
+#include <iostream>
 #include <unordered_set>
 
 #include "dyndbdriver.h"
@@ -34,6 +35,8 @@ public:
 
   Feature* getFeatureOfGivenName(const std::string& name) const;
 
+  bool operator==(const DetectionReport& o) const;
+
 protected:
   features_set_t features;
 
@@ -47,6 +50,8 @@ private:
   time_t sensorTime;
   Sensor* sensor;
 };
+
+std::ostream& operator<<(std::ostream&, const DetectionReport&);
 
 class HumanDR : public DetectionReport
 {
