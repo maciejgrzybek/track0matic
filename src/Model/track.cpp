@@ -33,3 +33,18 @@ const Track::features_set_t& Track::getFeaturesRef() const
 {
   return features_;
 }
+
+double Track::getLongitude() const
+{
+  return lon_;
+}
+
+double Track::getLatitude() const
+{
+  return lat_;
+}
+
+double Track::getMetersOverSea() const
+{
+  return mos_;
+}

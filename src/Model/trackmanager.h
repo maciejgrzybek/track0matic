@@ -46,7 +46,12 @@ struct tuple_less
 class TrackManager
 {
 public:
-  // TODO comment this
+  /**
+   * @brief c-tor sets threshold for initialization.
+   *  Threshold determines minimum DR comparation rate,
+   *  to consider two DRs for the same Track.
+   * @param initializationThreshold
+   */
   TrackManager(double initializationThreshold);
 
   /**
@@ -60,6 +65,18 @@ public:
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
     initializeTracks(const std::vector<std::set<DetectionReport> >&,
                      std::unique_ptr<estimation::EstimationFilter<> >);
+
+  /**
+   * @brief Returns reference to collection of Tracks
+   * @return Reference to set of shared_ptr<Track>
+   */
+  const std::set<std::shared_ptr<Track> >& getTracksRef() const;
+
+  /**
+   * @brief Returns copy of collection of Tracks
+   * @return Copied set of shared_ptr<Track>
+   */
+  std::set<std::shared_ptr<Track> > getTracks() const;
 
   /**
    * @brief Sets FeatureExtractor, used to merge (fuse) DRs' features

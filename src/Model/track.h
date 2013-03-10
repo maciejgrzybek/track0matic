@@ -45,8 +45,11 @@ public:
   void setEstimationFilter(std::unique_ptr<estimation::EstimationFilter<> > filter);
 
   features_set_t getFeatures() const;
-
   const features_set_t& getFeaturesRef() const;
+
+  double getLongitude() const;
+  double getLatitude() const;
+  double getMetersOverSea() const;
 
 private:
   double lon_;

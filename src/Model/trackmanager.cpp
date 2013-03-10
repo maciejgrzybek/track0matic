@@ -16,7 +16,6 @@ std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> > result;
   for (auto DRs : DRsGroups) // copies group, to allow modification
   { // for each DR set
-
     auto rated = getRatedPairs(DRs);
     std::vector<std::set<DetectionReport> > groups = chooseFromRated(rated);
 
@@ -32,6 +31,16 @@ std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
   }
 
   return result;
+}
+
+const std::set<std::shared_ptr<Track> >& TrackManager::getTracksRef() const
+{
+  return tracks_;
+}
+
+std::set<std::shared_ptr<Track> > TrackManager::getTracks() const
+{
+  return tracks_;
 }
 
 void TrackManager::setFeatureExtractor(std::unique_ptr<FeatureExtractor> extractor)
