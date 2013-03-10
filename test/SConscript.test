@@ -15,6 +15,7 @@ envCopy.Append(
 
 sourceTargets = [ 'modelTest.cpp',
                   'AlignmentProcessor.cpp',
+                  'DataAssociator.cpp',
                   'TrackManager.cpp', ]
 #                  'CandidateSelector.cpp' ]
 
