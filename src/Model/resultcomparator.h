@@ -5,12 +5,17 @@
 #include <string>
 #include <vector>
 
+class DetectionReport;
+class Track;
+
 class ResultComparator
 {
 public:
   typedef std::map<std::string,double> feature_grade_map_t;
 
-  virtual double operator()(const feature_grade_map_t&) = 0;
+  virtual double operator()(const feature_grade_map_t&,
+                            const DetectionReport&,
+                            const Track&) = 0;
 
 protected:
   ResultComparator(const feature_grade_map_t& gradeRates);
@@ -21,20 +26,28 @@ class AndComparator : public ResultComparator
 {
 public:
   AndComparator(const feature_grade_map_t& gradeRates);
-  virtual double operator()(const feature_grade_map_t&);
+  virtual double operator()(const feature_grade_map_t&,
+                            const DetectionReport&,
+                            const Track&);
 
 private:
-  double evaluateGrades(const feature_grade_map_t& featureGrades) const;
+  double evaluateGrades(const feature_grade_map_t& featureGrades,
+                        const DetectionReport& dr,
+                        const Track& t) const;
 };
 
 class OrComparator : public ResultComparator
 {
 public:
   OrComparator(const feature_grade_map_t& gradeRates);
-  virtual double operator()(const feature_grade_map_t&);
+  virtual double operator()(const feature_grade_map_t&,
+                            const DetectionReport&,
+                            const Track&);
 
 private:
-  double evaluateGrades(const feature_grade_map_t& featureGrades) const;
+  double evaluateGrades(const feature_grade_map_t& featureGrades,
+                        const DetectionReport& dr,
+                        const Track& t) const;
 };
 
 // TODO implement this
