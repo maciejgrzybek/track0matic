@@ -1,8 +1,9 @@
 #include "reportmanager.h"
 
-ReportManager::ReportManager(DB::DynDBDriver& dbdriver, std::size_t packetSize)
+ReportManager::ReportManager(std::shared_ptr<DB::DynDBDriver> dbdriver,
+                             std::size_t packetSize)
   : dbdriver_(dbdriver),
-    drCursor_(dbdriver_.getDRCursor()), // TODO add parametrization for this
+    drCursor_(dbdriver_->getDRCursor()), // TODO add parametrization for this
     packetSize_(packetSize)
 {
 }

@@ -1,6 +1,7 @@
 #ifndef CANDIDATESELECTOR_H
 #define CANDIDATESELECTOR_H
 
+#include <memory>
 #include <set>
 #include <vector>
 
@@ -27,9 +28,9 @@ public:
 
   /**
    * @brief c-tor loads sensors descriptions (from DynDBDriver).
-   * @param Reference to Dynamic DB Driver, which will be used to get sensors descriptions
+   * @param Shared ptr to Dynamic DB Driver, which will be used to get sensors descriptions
    */
-  CandidateSelector(DB::DynDBDriver& dbdriver);
+  CandidateSelector(std::shared_ptr<DB::DynDBDriver> dbdriver);
 
   /**
    * @brief Method groups DRs by characteristics of sensor,
@@ -39,13 +40,12 @@ public:
    *  To determine neighborhood, range and location of sensors are used.
    *  Each DR
    * @return collection of collection of DRs
-   * @note This is a possible place to optimize (high complexity of current implementation).
    */
   std::vector<std::set<DetectionReport> >
-  getMeasurementGroups(const std::set<DetectionReport> &) const;
+    getMeasurementGroups(const std::set<DetectionReport> &) const;
 
 private:
-  DB::DynDBDriver const* dbdriver_;
+  std::shared_ptr<const DB::DynDBDriver> dbdriver_;
   const std::set<Sensor*> sensors_;
 };
 

@@ -8,9 +8,9 @@ CandidateSelector::CandidateSelector(const std::set<Sensor*>& sensorsSet)
 {
 }
 
-CandidateSelector::CandidateSelector(DB::DynDBDriver& dbdriver)
-  : dbdriver_(&dbdriver),
-    sensors_(dbdriver.getSensors())
+CandidateSelector::CandidateSelector(std::shared_ptr<DB::DynDBDriver> dbdriver)
+  : dbdriver_(dbdriver),
+    sensors_(dbdriver->getSensors())
 {
 }
 
@@ -20,7 +20,8 @@ CandidateSelector::getMeasurementGroups(const std::set<DetectionReport>& DRs) co
 {
   // TODO improve this!
   // simple implementation which puts all DRs into the same group
-  // can be errorneous, because e.g. distant DRs could be associated for one Track.
+  // can be errorneous,
+  // because e.g. distant DRs could be associated for one Track.
   std::vector<std::set<DetectionReport> > result;
   result.push_back(DRs);
   return result;
