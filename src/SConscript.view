@@ -1,17 +1,18 @@
 # vim: ft=python
 
-modelDir = 'View'
+Import('env')
 
-# nothing to build yet
-sourceTargets = []
+viewDir = 'View'
+
+sourceTargets = [ 'gnuplot.cpp' ]
 
 targets = []
 for source in sourceTargets:
-  targets.append(modelDir + '/' + source)
+  targets.append(viewDir + '/' + source)
 
-env = Environment(
-                    CCFLAGS = '-O2 -std=c++0x -g',
-                    LINKFLAGS = '-std=c++0x -lpthread -lboost_serialization -lpqxx'
-                 )
+envCopy = env.Clone()
 
-env.Library('View',targets)
+program = env.Program(target = '../bin/gnuplot',
+                      source = targets,
+                      LIBS = [ 'Controller', 'Model' ],
+                      LIBPATH = '.')

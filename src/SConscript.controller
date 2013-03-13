@@ -1,16 +1,13 @@
 # vim: ft=python
 
-modelDir = 'Controller'
+Import('env')
+
+controllerDir = 'Controller'
 
 sourceTargets = [ 'datamanager.cpp' ]
 
 targets = []
 for source in sourceTargets:
-  targets.append(modelDir + '/' + source)
-
-env = Environment(
-                    CCFLAGS = '-O2 -std=c++0x -g',
-                    LINKFLAGS = '-std=c++0x -lpthread -lboost_serialization -lpqxx'
-                 )
+  targets.append(controllerDir + '/' + source)
 
 env.Library('Controller',targets)

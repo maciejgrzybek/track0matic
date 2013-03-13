@@ -8,8 +8,6 @@ modelDir = 'Model'
 
 envCopy.Append(
                 CPPPATH = '../src/',
-                CCFLAGS = '-O2 -std=c++0x',
-                LINKFLAGS = '-std=c++0x -lpthread -lboost_serialization -lpqxx'
               )
 
 

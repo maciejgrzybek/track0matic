@@ -1,5 +1,7 @@
 # vim: ft=python
 
+Import('env')
+
 modelDir = 'Model'
 
 sourceTargets = [ 'alignmentprocessor.cpp',
@@ -20,10 +22,5 @@ sourceTargets = [ 'alignmentprocessor.cpp',
 targets = []
 for source in sourceTargets:
   targets.append(modelDir + '/' + source)
-
-env = Environment(
-                    CCFLAGS = '-O2 -std=c++0x -g',
-                    LINKFLAGS = '-std=c++0x -lpthread -lboost_serialization -lpqxx'
-                 )
 
 env.Library('Model',targets)
