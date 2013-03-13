@@ -89,8 +89,6 @@ double OrComparator::evaluateGrades(const feature_grade_map_t& featureGrades,
     ++i;
   }
 
-  std::cout << "featuresResult = " << featuresResult << std::endl;
-
   double positionResult = 1/sqrt(
           pow((dr.getLongitude() - t.getLongitude()),2)
           +
@@ -137,7 +135,6 @@ double OrListComparator::evaluateRates(const rates_collection_t& c) const
   int cnt = 0;
   for (auto i : c)
   {
-    std::cout << "i=" << i << std::endl;
     result += i;
     ++cnt;
   }

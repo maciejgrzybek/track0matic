@@ -1,57 +1,123 @@
 #include <utility>
+#include <tuple>
 
 #include "dataassociator.h"
 
+DataAssociator::DataAssociator(std::unique_ptr<TrackManager>
+                                trackManager,
+                               std::unique_ptr<ResultComparator>
+                                resultComparator,
+                               std::unique_ptr<ListResultComparator>
+                                listResultComparator,
+                               double threshold)
+  : resultComparator_(std::move(resultComparator)),
+    listResultComparator_(std::move(listResultComparator)),
+    trackManager_(std::move(trackManager)),
+    DRRateThreshold_(threshold),
+    computed_(false)
+{
+}
+
 void DataAssociator::compute()
 {
-  /*
-   foreach Track
-   {
-    DRs = getListForTrack(Track); // after this line, DRGroups are thiner of DRs (chosen ones)
-    associatedTracks.append(DRs);
-    //notAssociatedTracks are built by getListForTrack method.
-   }
-   */
+  if (computed_)
+    return;
+
+  const std::set<std::shared_ptr<Track> >& tracks
+      = trackManager_->getTracksRef();
+  for (std::shared_ptr<Track> track : tracks)
+  {
+    std::set<DetectionReport> DRs = getListForTrack(*track);
+    associatedDRs_[track] = DRs;
+  }
+  // not associated DRs are stored now in DRGroups
+  computed_ = true;
 }
 
-std::map<std::shared_ptr<Track>,std::set<DetectionReport> > DataAssociator::getDRsForTracks()
+std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
+DataAssociator::getDRsForTracks()
 {
-  // TODO implement this
+  compute();
+  return associatedDRs_;
 }
 
-std::set<DetectionReport> DataAssociator::getNotAssociated()
+std::vector<std::set<DetectionReport> >
+DataAssociator::getNotAssociated()
 {
-  // TODO implement this
+  compute();
+  return DRGroups_;
 }
 
-void DataAssociator::setInput(std::vector<std::set<DetectionReport> > DRsGroups)
+void DataAssociator::setInput(std::vector<std::set<DetectionReport> >& DRsGroups)
 {
-  DRGroups = std::move(DRsGroups);
+  DRGroups_ = std::move(DRsGroups);
+  computed_ = false; // new data set - not yet computed
 }
 
 void DataAssociator::setDRResultComparator(std::unique_ptr<ResultComparator> comparator)
 {
-  resultComparator = std::move(comparator);
+  resultComparator_ = std::move(comparator);
 }
 
 void DataAssociator::setListResultComparator(std::unique_ptr<ListResultComparator> comparator)
 {
-  listResultComparator = std::move(comparator);
+  listResultComparator_ = std::move(comparator);
 }
 
 void DataAssociator::setFeatureExtractor(std::unique_ptr<FeatureExtractor> extractor)
 {
-  featureExtractor = std::move(extractor);
+  featureExtractor_ = std::move(extractor);
+}
+
+void DataAssociator::setTrackManager(std::unique_ptr<TrackManager> manager)
+{
+  trackManager_ = std::move(manager);
 }
 
 void DataAssociator::setDRRateThreshold(double threshold)
 {
-  DRRateThreshold = threshold;
+  DRRateThreshold_ = threshold;
 }
 
-std::set<DetectionReport> DataAssociator::getListForTrack(const Track&)
+std::set<DetectionReport> DataAssociator::getListForTrack(const Track& track)
 {
-  // TODO implement this
+  std::tuple<
+      double,
+      std::set<DetectionReport>, // choosen group
+      std::set<DetectionReport> // rest group (not choosen)
+      > choosen(-1,std::set<DetectionReport>(),std::set<DetectionReport>());
+
+  std::vector<std::set<DetectionReport> >::iterator it = DRGroups_.begin();
+  std::vector<std::set<DetectionReport> >::const_iterator endIt
+      = DRGroups_.end();
+
+  std::vector<std::set<DetectionReport> >::iterator choosenIt
+      = DRGroups_.end();
+
+  for (; it != endIt; ++it)
+  {
+    std::set<DetectionReport> group = *it; // copy current group,
+                                        // because rateListForTrack modifies it
+    std::pair<double,std::set<DetectionReport> >
+        current = rateListForTrack(group,track);
+
+    if (current.first > std::get<0>(choosen)) // if rate is better
+    {
+      // current is choosen
+      choosenIt = it;
+      choosen = std::make_tuple(current.first,current.second,group);
+    }
+  }
+
+  if (choosenIt != endIt) // if any DR was choosen
+  {
+    // after checking all groups
+    // remove from main DR collection (DRGroups), those DRs which were choosen
+
+    *choosenIt = std::get<2>(choosen); // overwrite choosen group, to have there only not picked DRs
+  }
+
+  return std::get<1>(choosen);
 }
 
 std::pair<double,std::set<DetectionReport> >
@@ -64,7 +130,7 @@ DataAssociator::rateListForTrack(std::set<DetectionReport>& DRs,const Track& tra
   while (it != endIt)
   {
     double DRRate = rateDRForTrack(*it, track);
-    if (DRRate >= DRRateThreshold)
+    if (DRRate >= DRRateThreshold_)
     {
       // take item from DRs set and put into result collection
       result.insert(*it);
@@ -72,10 +138,12 @@ DataAssociator::rateListForTrack(std::set<DetectionReport>& DRs,const Track& tra
 
       it = DRs.erase(it);
     }
+    else
+      ++it;
   }
   // here, all choosen detection reports were taken out of DRs collection
   // there are only not matching left.
-  double overallRate = listResultComparator->operator()(rates);
+  double overallRate = listResultComparator_->operator()(rates);
   return std::pair<double,std::set<DetectionReport> >(overallRate,result);
 }
 
@@ -93,11 +161,13 @@ double DataAssociator::rateDRForTrack(const DetectionReport& dr, const Track& tr
     {
       if (feature->getName() == name)
       {
-        double result = featureExtractor->compare(*drFeature,*feature);
-        m[name] = result; // we assume, that there are only one Feature with given name in set
+        // FIXME uncomment this, after implementing compare() method
+
+        //double result = featureExtractor->compare(*drFeature,*feature);
+        //m[name] = result; // we assume, that there are only one Feature with given name in set
       }
     }
   }
 
-  return resultComparator->operator()(m);
+  return resultComparator_->operator()(m,dr,track);
 }

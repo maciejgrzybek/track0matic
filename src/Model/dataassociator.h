@@ -10,10 +10,27 @@
 #include "featureextractor.h"
 #include "resultcomparator.h"
 #include "track.h"
+#include "trackmanager.h"
 
 class DataAssociator
 {
 public:
+
+  /**
+   * @brief c-tor. Initializes necessary internal variables.
+   *  Like computed flag (which indicates whether association was already done.
+   *
+   * @param track manager - takes ownership
+   * @param resultcomparator - takes ownership
+   * @param listResultComparator - takes ownership
+   * @param threshold for DR->Track similarity. If compare(DR,Track) gives result
+   *  above given threshold, DR is associated to Track.
+   *  Allowed values: 0.0 - 1.0
+   */
+  DataAssociator(std::unique_ptr<TrackManager> trackManager,
+                 std::unique_ptr<ResultComparator> resultComparator,
+                 std::unique_ptr<ListResultComparator> listResultComparator,
+                 double threshold = 1.0);
 
   /**
    * @brief Iterates over tracks and tries to associate DRs for each.
@@ -28,7 +45,7 @@ public:
 
   /**
    * @brief Gives map of Track->collection of corresponding DRs
-   *  If necessary compute() will be invoked here.
+   *  If necessary, compute() will be invoked here.
    * @return Map of associations Track -> DRs
    */
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> > getDRsForTracks();
@@ -36,9 +53,11 @@ public:
   /**
    * @brief If any DR is not associated to Track
    *  (i.e. new object's been seen in system), will be returned by this method.
-   * @return Set of DRs which have no appropriate Track for them.
+   * @return Vector of sets of DRs which have no appropriate Track for them
+   *  (each position in vector hold set of DRs grouped (by CandidateSelector criteria))
    */
-  std::set<DetectionReport> getNotAssociated();
+  std::vector<std::set<DetectionReport> >
+    getNotAssociated();
 
   /**
    * @brief Puts DRs to compute into DataAssociator.
@@ -46,8 +65,9 @@ public:
    *  any invokation of getDRsForTracks() or getNotAssociated(),
    *  will cause invoking compute()
    * @param collection of grouped (by neighborhood of sensors) DRs
+   *  Be careful, this method moves content of collection!
    */
-  void setInput(std::vector<std::set<DetectionReport> >);
+  void setInput(std::vector<std::set<DetectionReport> >&);
 
 
   /**
@@ -68,6 +88,12 @@ public:
    * @param FeatureExtractor
    */
   void setFeatureExtractor(std::unique_ptr<FeatureExtractor> extractor);
+
+  /**
+   * @brief Sets TrackManager, used to obtain Tracks for compute() method.
+   * @param TrackManager
+   */
+  void setTrackManager(std::unique_ptr<TrackManager> trackManager);
 
   /**
    * @brief Sets DR rate threshold, which is used to choose DRs as good enough for further computation (in rateListForTrack).
@@ -96,6 +122,8 @@ private:
    *    It's too complex and would be bottleneck of whole Tracker, so we decide that if one list is chosen for Track,
    *    it cannot be assigned to any other Track anymore.
    *
+   *  DR groups are disjunctive, so we can use rateListForTrack (which removes DRs from set), for them.
+   *
    * @param Track for which we are looking associations for.
    * @return set of matching DRs
    * @see rateListForTrack
@@ -121,13 +149,15 @@ private:
    */
   double rateDRForTrack(const DetectionReport&,const Track&) const;
 
-  std::vector<std::set<DetectionReport> > DRGroups;
-  std::map<Track,std::set<DetectionReport> > associatedDRs;
-  std::unique_ptr<ResultComparator> resultComparator;
-  std::unique_ptr<ListResultComparator> listResultComparator;
-  std::unique_ptr<FeatureExtractor> featureExtractor;
+  std::vector<std::set<DetectionReport> > DRGroups_;
+  std::map<std::shared_ptr<Track>,std::set<DetectionReport> > associatedDRs_;
+  std::unique_ptr<ResultComparator> resultComparator_;
+  std::unique_ptr<ListResultComparator> listResultComparator_;
+  std::unique_ptr<FeatureExtractor> featureExtractor_;
+  std::unique_ptr<TrackManager> trackManager_;
 
-  double DRRateThreshold;
+  double DRRateThreshold_;
+  bool computed_;
 };
 
 #endif // DATAASSOCIATOR_H

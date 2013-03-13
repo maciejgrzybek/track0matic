@@ -89,7 +89,7 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test, Helpers::Fixture )
   std::vector<std::set<DetectionReport> > DRsGroups;
   std::set<DetectionReport> group = {
     DetectionReport(1,8,0,0.1,0,100,95), // should be assigned to Track with DRs {1,4}
-    DetectionReport(2,9,1.01,0,0,100,95) // should be assigned to Track with DRs {2,3}
+    DetectionReport(2,9,1.0,0,0,100,95) // should be assigned to Track with DRs {2,3}
   };
   DRsGroups.push_back(group);
 
@@ -102,7 +102,7 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test, Helpers::Fixture )
   }
   {
     std::set<DetectionReport> correctSecond = {
-      DetectionReport(2,9,1.01,0,0,100,95)
+      DetectionReport(2,9,1.0,0,0,100,95)
     };
     correct.push_back(correctSecond);
   }
@@ -143,9 +143,9 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test2, Helpers::Fixture )
   std::vector<std::set<DetectionReport> > DRsGroups;
   std::set<DetectionReport> group = {
     DetectionReport(1,8,0,0.1,0,100,95), // should be assigned to Track with DRs {1,4}
-    DetectionReport(2,9,1.01,0,0,100,95), // should be assigned to Track with DRs {2,3}
+    DetectionReport(2,9,1.0,0,0,100,95), // should be assigned to Track with DRs {2,3}
     DetectionReport(1,10,0,0.6,0,100,105), // should be assigned to Track with DRs {1,4}
-    DetectionReport(2,11,0.96,0,0,99,101), // should be assigned to Track with DRs {2,3}
+    DetectionReport(2,11,1.0,0.1,0,99,101), // should be assigned to Track with DRs {2,3}
   };
   DRsGroups.push_back(group);
 
@@ -160,8 +160,8 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test2, Helpers::Fixture )
 
   {
     std::set<DetectionReport> correctSecond = {
-      DetectionReport(2,9,1.01,0,0,100,95),
-      DetectionReport(2,11,0.96,0,0,99,101)
+      DetectionReport(2,9,1.0,0,0,100,95),
+      DetectionReport(2,11,1.0,0.1,0,99,101)
     };
     correct.push_back(correctSecond);
   }
