@@ -48,3 +48,8 @@ double Track::getMetersOverSea() const
 {
   return mos_;
 }
+
+estimation::EstimationFilter<>& Track::getEstimationFilter() const
+{
+  return *estimationFilter_;
+}

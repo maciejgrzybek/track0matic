@@ -11,6 +11,7 @@ DataManager::DataManager(const std::string& paramsPath,
                          std::unique_ptr<DataAssociator> dataAssociator,
                          std::unique_ptr<TrackManager> trackManager,
                          std::unique_ptr<FeatureExtractor> featureExtractor,
+                         std::unique_ptr<FusionExecutor> fusionExecutor,
                          std::unique_ptr<estimation::EstimationFilter<> > filter)
 {
   if (dynDbDriver)
@@ -75,6 +76,13 @@ DataManager::DataManager(const std::string& paramsPath,
           new FeatureExtractor()
           );
 
+  if (fusionExecutor)
+    fusionExecutor_ = std::move(fusionExecutor);
+  else
+    fusionExecutor_ = std::unique_ptr<FusionExecutor>(
+          new FusionExecutor()
+          );
+
   if (filter)
     filter_ = std::move(filter);
   else
@@ -119,20 +127,23 @@ void DataManager::compute()
           = candidateSelector_->getMeasurementGroups(alignedGroup);
 
       dataAssociator_->setInput(DRsGroups);
-      /*std::map<std::shared_ptr<Track>,std::set<DetectionReport> > associated
-          = dataAssociator_->getDRsForTracks();*/
+      std::map<std::shared_ptr<Track>,std::set<DetectionReport> > associated
+          = dataAssociator_->getDRsForTracks();
       std::vector<std::set<DetectionReport> > notAssociated
           = dataAssociator_->getNotAssociated();
 
       std::unique_ptr<estimation::EstimationFilter<> > filter(
             filter_->clone());
 
-      /* initialized = */
-      trackManager_->initializeTracks(notAssociated,std::move(filter));
+      std::map<std::shared_ptr<Track>,std::set<DetectionReport> > initialized
+          = trackManager_->initializeTracks(notAssociated,std::move(filter));
       // here we have Tracks:
       // associated - for these DRs which matched existing Tracks
       // initialized - for these DRs which didn't match existing Tracks
       //  (new Tracks were created)
+
+      fusionExecutor_->fuseDRs(associated);
+      fusionExecutor_->fuseDRs(initialized);
 
       alignedGroup = alignmentProcessor_->getNextAlignedGroup();
     }

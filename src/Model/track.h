@@ -51,6 +51,8 @@ public:
   double getLatitude() const;
   double getMetersOverSea() const;
 
+  estimation::EstimationFilter<>& getEstimationFilter() const;
+
 private:
   double lon_;
   double lat_;

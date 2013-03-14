@@ -16,7 +16,9 @@ template <class StateModel = PositionAndVelocityModel>
 class EstimationFilter
 {
 public:
-  typedef typename std::array<typename StateModel::values_type,StateModel::Dimensions> vector_t;
+  typedef typename std::array<
+                        typename StateModel::values_type,StateModel::Dimensions
+                             > vector_t;
   virtual vector_t predict(vector_t u = vector_t()) = 0;
   virtual vector_t correct(vector_t z) = 0;
   virtual EstimationFilter* clone() const = 0;

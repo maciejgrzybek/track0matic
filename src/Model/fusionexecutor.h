@@ -11,8 +11,6 @@
 class FusionExecutor
 {
 public:
-  FusionExecutor();
-
   /**
    * @brief Makes detection reports fusion on given collection.
    *  Collection will be changed after this call!
@@ -22,7 +20,12 @@ public:
    *  Default fusion invokes correct() on estimation filter,
    *  connected with Track for each DR of it's interest.
    */
-  virtual void fuseDRs(std::map<std::shared_ptr<Track>,std::set<DetectionReport> >&);
+  virtual void fuseDRs(std::map<std::shared_ptr<Track>,
+                       std::set<DetectionReport> >&);
+
+private:
+  estimation::EstimationFilter<>::vector_t DRToVector(std::shared_ptr<Track>,
+                                                      const DetectionReport&);
 };
 
 #endif // FUSIONEXECUTOR_H
