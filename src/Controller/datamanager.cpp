@@ -30,7 +30,7 @@ DataManager::DataManager(const std::string& paramsPath,
     alignmentProcessor_ = std::move(alignmentProcessor);
   else
     alignmentProcessor_ = std::unique_ptr<AlignmentProcessor>(
-          new AlignmentProcessor(boost::posix_time::seconds(1)) // TODO read params from params file (options.xml)
+          new AlignmentProcessor(boost::chrono::seconds(1)) // TODO read params from params file (options.xml)
           );
 
   if (candidateSelector)

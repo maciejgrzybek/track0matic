@@ -1,4 +1,4 @@
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include <ctime>
 
 #include "dyndbdriver.h"
 #include "feature.h"
@@ -57,14 +57,14 @@ double DetectionReport::getMetersOverSea() const
   return mos;
 }
 
-boost::posix_time::ptime DetectionReport::getUploadTime() const
+time_types::ptime_t DetectionReport::getUploadTime() const
 {
-  return boost::posix_time::from_time_t(uploadTime);
+  return time_types::clock_t::from_time_t(uploadTime);
 }
 
-boost::posix_time::ptime DetectionReport::getSensorTime() const
+time_types::ptime_t DetectionReport::getSensorTime() const
 {
-  return boost::posix_time::from_time_t(sensorTime);
+  return time_types::clock_t::from_time_t(sensorTime);
 }
 
 Sensor* DetectionReport::getSensor() const

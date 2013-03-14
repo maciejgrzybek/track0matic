@@ -10,8 +10,6 @@ targets = []
 for source in sourceTargets:
   targets.append(viewDir + '/' + source)
 
-envCopy = env.Clone()
-
 program = env.Program(target = '../bin/gnuplot',
                       source = targets,
                       LIBS = [ 'Controller', 'Model' ],

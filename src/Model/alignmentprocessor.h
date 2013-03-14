@@ -3,8 +3,7 @@
 
 #include <set>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
-
+#include "common/time.h"
 #include "detectionreport.h"
 
 namespace exceptions
@@ -31,7 +30,7 @@ public:
    *  as taken from the same time period.
    * @param delta time
    */
-  AlignmentProcessor(boost::posix_time::time_duration dt);
+  AlignmentProcessor(time_types::duration_t dt);
 
   /**
    * @brief Gives next aligned group from DRs_ collection,
@@ -60,7 +59,7 @@ public:
 
 private:
   std::set<DetectionReport> DRs_;
-  const boost::posix_time::time_duration dt_;
+  const time_types::duration_t dt_;
 };
 
 #endif // ALIGNMENTPROCESSOR_H

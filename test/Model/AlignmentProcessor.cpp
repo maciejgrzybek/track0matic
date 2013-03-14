@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_CASE( AlignmentTest1 )
     DetectionReport(7,10,5,6,2,105,99)
         };
 
-  AlignmentProcessor* ap = new AlignmentProcessor(boost::posix_time::seconds(1));
+  AlignmentProcessor* ap = new AlignmentProcessor(boost::chrono::seconds(1));
   ap->setDRsCollection(DRs);
 
   std::set<DetectionReport> alignedVec = ap->getNextAlignedGroup();
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_CASE( AlignmentTest2 )
 {
   std::set<DetectionReport> DRs;
 
-  AlignmentProcessor* ap = new AlignmentProcessor(boost::posix_time::seconds(1));
+  AlignmentProcessor* ap = new AlignmentProcessor(boost::chrono::seconds(1));
   ap->setDRsCollection(DRs);
   std::set<DetectionReport> aligned = ap->getNextAlignedGroup();
   BOOST_CHECK_EQUAL(aligned.size(),0);
@@ -91,7 +91,7 @@ BOOST_AUTO_TEST_CASE( AlignmentTest3 )
     DetectionReport(7,10,5,6,2,105,99)
         };
 
-  AlignmentProcessor* ap = new AlignmentProcessor(boost::posix_time::seconds(3));
+  AlignmentProcessor* ap = new AlignmentProcessor(boost::chrono::seconds(3));
   ap->setDRsCollection(DRs);
 
   std::set<DetectionReport> alignedVec = ap->getNextAlignedGroup();
@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_CASE( AlignmentTest4 )
     DetectionReport(7,10,5,6,2,105,99)
         };
 
-  AlignmentProcessor* ap = new AlignmentProcessor(boost::posix_time::seconds(20));
+  AlignmentProcessor* ap = new AlignmentProcessor(boost::chrono::seconds(20));
   ap->setDRsCollection(DRs);
 
   std::set<DetectionReport> alignedVec = ap->getNextAlignedGroup();

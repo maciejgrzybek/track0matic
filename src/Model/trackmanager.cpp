@@ -1,5 +1,6 @@
 #include <algorithm>
 
+#include "common/time.h"
 #include "trackmanager.h"
 
 TrackManager::TrackManager(double initializationThreshold)
@@ -58,7 +59,7 @@ std::shared_ptr<Track> TrackManager::initializeTrack(const std::set<DetectionRep
   double lats = 0;
   double moses = 0;
   std::size_t cnt = 0;
-  boost::posix_time::ptime maxTime;
+  time_types::ptime_t maxTime;
   for (auto& DR : DRs)
   {
     lons += DR.getLongitude();

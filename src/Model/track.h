@@ -4,7 +4,7 @@
 #include <memory>
 #include <unordered_set>
 
-#include <boost/date_time/posix_time/posix_time_types.hpp>
+#include "common/time.h"
 
 #include "estimationfilter.hpp"
 
@@ -29,14 +29,13 @@ public:
    */
   Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
         double longitude, double latitude, double metersOverSea,
-        boost::posix_time::ptime = boost::posix_time::ptime());
+        time_types::ptime_t = time_types::clock_t::now());
 
   /**
    * @brief Refreshes Track (sets it's last update time to given)
    * @param Time of refresh
    */
-  void refresh(boost::posix_time::ptime refreshTime);
-
+  void refresh(time_types::ptime_t refreshTime);
 
   /**
    * @brief Sets estimation filter to be used when predicting next state of track.
@@ -53,6 +52,9 @@ public:
 
   estimation::EstimationFilter<>& getEstimationFilter() const;
 
+  bool isTrackValid(time_types::ptime_t currentTime,
+                    time_types::duration_t TTL) const;
+
 private:
   double lon_;
   double lat_;
@@ -60,7 +62,7 @@ private:
 
   features_set_t features_;
   std::unique_ptr<estimation::EstimationFilter<> > estimationFilter_;
-  boost::posix_time::ptime refreshTime_;
+  time_types::ptime_t refreshTime_;
 };
 
 class HumanTrack : public Track

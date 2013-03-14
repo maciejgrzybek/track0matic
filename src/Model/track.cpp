@@ -2,19 +2,16 @@
 
 Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
              double longitude, double latitude, double metersOverSea,
-             boost::posix_time::ptime creationTime)
+             time_types::ptime_t creationTime)
   : estimationFilter_(std::move(filter)),
     lon_(longitude),
     lat_(latitude),
-    mos_(metersOverSea)
+    mos_(metersOverSea),
+    refreshTime_(creationTime)
 {
-  if (creationTime != boost::posix_time::not_a_date_time) // if creationTime is valid (is given), use it
-    refreshTime_ = creationTime;
-  else // otherwise - get current time
-    refreshTime_ = boost::posix_time::second_clock::local_time();
 }
 
-void Track::refresh(boost::posix_time::ptime refreshTime)
+void Track::refresh(time_types::ptime_t refreshTime)
 {
   refreshTime_ = refreshTime;
 }
@@ -52,4 +49,9 @@ double Track::getMetersOverSea() const
 estimation::EstimationFilter<>& Track::getEstimationFilter() const
 {
   return *estimationFilter_;
+}
+
+bool Track::isTrackValid(time_types::ptime_t currentTime, time_types::duration_t TTL) const
+{
+// TODO implement this
 }

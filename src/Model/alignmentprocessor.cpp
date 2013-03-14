@@ -2,7 +2,7 @@
 
 #include "alignmentprocessor.h"
 
-AlignmentProcessor::AlignmentProcessor(boost::posix_time::time_duration dt)
+AlignmentProcessor::AlignmentProcessor(time_types::duration_t dt)
   : dt_(dt)
 {
 }
@@ -14,7 +14,7 @@ std::set<DetectionReport> AlignmentProcessor::getNextAlignedGroup()
   if (it == DRs_.end())
     return result;
 
-  boost::posix_time::ptime lastTime = it->getSensorTime();
+  time_types::ptime_t lastTime = it->getSensorTime();
   result.insert(std::move(*it));
   it = DRs_.erase(it);
   while (it != DRs_.end())

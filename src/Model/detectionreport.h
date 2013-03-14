@@ -6,6 +6,7 @@
 #include <unordered_set>
 
 #include "dyndbdriver.h"
+#include "common/time.h"
 
 class Feature;
 class Sensor;
@@ -26,8 +27,8 @@ public:
   double getLongitude() const;
   double getLatitude() const;
   double getMetersOverSea() const;
-  boost::posix_time::ptime getUploadTime() const;
-  boost::posix_time::ptime getSensorTime() const;
+  time_types::ptime_t getUploadTime() const;
+  time_types::ptime_t getSensorTime() const;
   Sensor* getSensor() const;
 
   features_set_t getFeatures() const;
@@ -46,8 +47,8 @@ private:
   double lon;
   double lat;
   double mos;
-  time_t uploadTime;
-  time_t sensorTime;
+  std::time_t uploadTime;
+  std::time_t sensorTime;
   Sensor* sensor;
 };
 
@@ -71,8 +72,8 @@ struct less<DetectionReport>
 {
   bool operator()(const DetectionReport& l, const DetectionReport& r) const
   {
-    boost::posix_time::ptime lTime = l.getSensorTime();
-    boost::posix_time::ptime rTime = r.getSensorTime();
+    time_types::ptime_t lTime = l.getSensorTime();
+    time_types::ptime_t rTime = r.getSensorTime();
     if (lTime < rTime)
       return true;
     else if (lTime == rTime)

@@ -4,7 +4,7 @@ env=DefaultEnvironment()
 
 env = Environment(
                     CCFLAGS = '-std=c++0x -g',
-                    LINKFLAGS = '-std=c++0x -lpthread -lboost_serialization -lpqxx'
+                    LINKFLAGS = '-std=c++0x -lpthread -lboost_serialization -lboost_system -lboost_chrono -lpqxx'
                  )
 
 SConscript('src/SConscript.model', variant_dir='build', duplicate=0, exports = ['env'])
