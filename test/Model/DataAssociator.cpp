@@ -25,9 +25,15 @@ namespace Helpers
   struct Fixture
   {
     Fixture()
-      : tm_(new TrackManager(1)),
-        filter_(new estimation::KalmanFilter<>())
+      : tm_(new TrackManager(1))
     {
+      estimation::KalmanFilter<>::Matrix A(4,4);
+      estimation::KalmanFilter<>::Matrix B;
+      estimation::KalmanFilter<>::Matrix R(2,2);
+      estimation::KalmanFilter<>::Matrix Q(4,4);
+      estimation::KalmanFilter<>::Matrix H(2,4);
+      filter_.reset(new estimation::KalmanFilter<>(A,B,R,Q,H));
+
       std::set<DetectionReport> group = {
         DetectionReport(1,1,0,0,0,100,95),
         DetectionReport(2,2,1,0,0,100,95),
@@ -37,14 +43,12 @@ namespace Helpers
 
       groups_.push_back(group);
       // these DRs will produce two Tracks: {1,4} and {2,3}
-      tm_->initializeTracks(groups_,
-                            std::unique_ptr<estimation::EstimationFilter<> >
-                            (filter_));
+      tm_->initializeTracks(groups_,std::move(filter_));
     }
 
     std::vector<std::set<DetectionReport> > groups_;
     std::unique_ptr<TrackManager> tm_;
-    estimation::EstimationFilter<>* filter_;
+    std::unique_ptr<estimation::EstimationFilter<> > filter_;
     ResultComparator::feature_grade_map_t grade_map_;
   };
 

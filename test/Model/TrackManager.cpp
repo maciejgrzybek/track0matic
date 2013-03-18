@@ -17,13 +17,18 @@ namespace TrackManager_test
   struct Fixture
   {
     Fixture()
-      : featureExtractor(new FeatureExtractor()),
-        filter(new estimation::KalmanFilter<>())
+      : featureExtractor(new FeatureExtractor())
     {
+      estimation::KalmanFilter<>::Matrix A(4,4);
+      estimation::KalmanFilter<>::Matrix B;
+      estimation::KalmanFilter<>::Matrix R(2,2);
+      estimation::KalmanFilter<>::Matrix Q(4,4);
+      estimation::KalmanFilter<>::Matrix H(2,4);
+      filter.reset(new estimation::KalmanFilter<>(A,B,R,Q,H));
     }
 
-    FeatureExtractor* featureExtractor;
-    estimation::EstimationFilter<>* filter;
+    std::unique_ptr<FeatureExtractor> featureExtractor;
+    std::unique_ptr<estimation::EstimationFilter<> > filter;
   };
 
   std::vector<std::set<DetectionReport> >
@@ -67,7 +72,7 @@ namespace TrackManager_test
 BOOST_FIXTURE_TEST_CASE( TrackInitialization_simple_groups, TrackManager_test::Fixture )
 {
   TrackManager* tm = new TrackManager(1);
-  tm->setFeatureExtractor(std::unique_ptr<FeatureExtractor>(featureExtractor));
+  tm->setFeatureExtractor(std::move(featureExtractor));
 
   std::vector<std::set<DetectionReport> > groups;
   {
@@ -126,7 +131,7 @@ BOOST_FIXTURE_TEST_CASE( TrackInitialization_simple_groups, TrackManager_test::F
   std::map<std::shared_ptr<Track>,
       std::set<DetectionReport> > result
       = tm->initializeTracks(groups,
-                             std::unique_ptr<estimation::EstimationFilter<> >(filter));
+                             std::move(filter));
 
   TrackManager_test::checkConsistency(result,correctResult);
 
@@ -136,7 +141,7 @@ BOOST_FIXTURE_TEST_CASE( TrackInitialization_simple_groups, TrackManager_test::F
 BOOST_FIXTURE_TEST_CASE( TrackInitialization_simple_merging, TrackManager_test::Fixture )
 {
   TrackManager* tm = new TrackManager(0.5);
-  tm->setFeatureExtractor(std::unique_ptr<FeatureExtractor>(featureExtractor));
+  tm->setFeatureExtractor(std::move(featureExtractor));
 
   std::vector<std::set<DetectionReport> > groups;
   {
@@ -160,8 +165,7 @@ BOOST_FIXTURE_TEST_CASE( TrackInitialization_simple_merging, TrackManager_test::
 
   std::map<std::shared_ptr<Track>,
       std::set<DetectionReport> > result
-      = tm->initializeTracks(groups,
-                             std::unique_ptr<estimation::EstimationFilter<> >(filter));
+      = tm->initializeTracks(groups,std::move(filter));
 
   TrackManager_test::checkConsistency(result,correctResult);
 
@@ -171,7 +175,7 @@ BOOST_FIXTURE_TEST_CASE( TrackInitialization_simple_merging, TrackManager_test::
 BOOST_FIXTURE_TEST_CASE( TrackInitialization_exclusive_merging, TrackManager_test::Fixture )
 {
   TrackManager* tm = new TrackManager(0.6);
-  tm->setFeatureExtractor(std::unique_ptr<FeatureExtractor>(featureExtractor));
+  tm->setFeatureExtractor(std::move(featureExtractor));
 
   std::vector<std::set<DetectionReport> > groups;
   {
@@ -199,8 +203,7 @@ BOOST_FIXTURE_TEST_CASE( TrackInitialization_exclusive_merging, TrackManager_tes
 
   std::map<std::shared_ptr<Track>,
       std::set<DetectionReport> > result
-      = tm->initializeTracks(groups,
-                             std::unique_ptr<estimation::EstimationFilter<> >(filter));
+      = tm->initializeTracks(groups,std::move(filter));
 
   TrackManager_test::checkConsistency(result,correctResult);
 

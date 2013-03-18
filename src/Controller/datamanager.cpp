@@ -86,9 +86,17 @@ DataManager::DataManager(const std::string& paramsPath,
   if (filter)
     filter_ = std::move(filter);
   else
-    filter_ = std::unique_ptr<estimation::EstimationFilter<> >(
-          new estimation::KalmanFilter<>()
-          );
+  {
+    estimation::KalmanFilter<>::Matrix A(4,4);
+    estimation::KalmanFilter<>::Matrix B;
+    estimation::KalmanFilter<>::Matrix R(2,2);
+    estimation::KalmanFilter<>::Matrix Q(4,4);
+    estimation::KalmanFilter<>::Matrix H(2,4);
+    std::unique_ptr<estimation::EstimationFilter<> > kf(
+                new estimation::KalmanFilter<>(A,B,R,Q,H)
+              );
+    filter_ = std::move(kf);
+  }
 }
 
 void DataManager::startSynchronousTracking()
