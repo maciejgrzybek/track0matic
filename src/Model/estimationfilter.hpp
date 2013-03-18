@@ -42,7 +42,7 @@ public:
    * @return pair of corrected state and it's variance, as vectors
    */
   virtual std::pair<vector_t,vector_t> correct(const vector_t& z) = 0;
-  virtual EstimationFilter* clone() const = 0;
+  virtual std::unique_ptr<EstimationFilter<StateModel> > clone() const = 0;
 };
 
 /**
@@ -203,9 +203,11 @@ public:
     return correctedCovarianceError;
   }
 
-  virtual EstimationFilter<StateModel>* clone() const
+  virtual std::unique_ptr<EstimationFilter<StateModel> > clone() const
   {
-    return new KalmanFilter<StateModel>(*this);
+    std::unique_ptr<EstimationFilter<StateModel> > result(
+          new KalmanFilter<StateModel>(*this));
+    return result;
   }
 
 private:
