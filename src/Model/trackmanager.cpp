@@ -50,8 +50,9 @@ void TrackManager::setFeatureExtractor(std::unique_ptr<FeatureExtractor> extract
   featureExtractor_ = std::move(extractor);
 }
 
-std::shared_ptr<Track> TrackManager::initializeTrack(const std::set<DetectionReport>& DRs,
-                                                     std::unique_ptr<estimation::EstimationFilter<> > filter)
+std::shared_ptr<Track>
+  TrackManager::initializeTrack(const std::set<DetectionReport>& DRs,
+                                std::unique_ptr<estimation::EstimationFilter<> > filter)
 {
   // TODO implement merging features from DRs for Track (based on FeatureExtractor's fuse() method).
 
@@ -60,7 +61,7 @@ std::shared_ptr<Track> TrackManager::initializeTrack(const std::set<DetectionRep
   double moses = 0;
   std::size_t cnt = 0;
   time_types::ptime_t maxTime;
-  for (auto& DR : DRs)
+  for (const DetectionReport& DR : DRs)
   {
     lons += DR.getLongitude();
     lats += DR.getLatitude();
@@ -76,11 +77,11 @@ std::shared_ptr<Track> TrackManager::initializeTrack(const std::set<DetectionRep
   double mos = moses/cnt;
 
   std::shared_ptr<Track> track(
-        new Track(std::unique_ptr<estimation::EstimationFilter<> >(filter->clone()),
-                  lon,
-                  lat,
-                  mos,
-                  maxTime)
+          new Track(filter->clone(),
+                    lon,
+                    lat,
+                    mos,
+                    maxTime)
         );
 
   return track;

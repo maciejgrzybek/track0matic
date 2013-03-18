@@ -8,6 +8,8 @@
 
 #include "estimationfilter.hpp"
 
+class DetectionReport;
+
 class Track
 {
 public:
@@ -21,6 +23,7 @@ public:
    *  Default value causes setting current local time, instead of given.
    *  So, whenever you want to create Track without outside time synchronizer and the moment of creation is a moment when track appeared in system,
    *  use default argument to c-tor.
+   *  Initializes estimation filter with given longitude, latitude and metersOverSea.
    * @param Estimation filter to use, when predicting next state of Track
    * @param longitude of Track
    * @param latitude of Track
@@ -50,7 +53,22 @@ public:
   double getLatitude() const;
   double getMetersOverSea() const;
 
-  estimation::EstimationFilter<>& getEstimationFilter() const;
+  /**
+   * @brief Puts model state of given DR to Track's estimation filter
+   *  It's invoking correct() method on EstimationFilter assigned to Track,
+   *  with values corresponding to the measured.
+   * @param DetectionReport representing measurement
+   */
+  void applyMeasurement(const DetectionReport&);
+
+  /**
+   * @brief Puts appropriate data into model state in EstimationFilter.
+   * @param longitude
+   * @param latitude
+   * @param meters over sea
+   * @overload applyMeasurement(const DetectionReport&);
+   */
+  void applyMeasurement(double longitude, double latitude, double mos);
 
   bool isTrackValid(time_types::ptime_t currentTime,
                     time_types::duration_t TTL) const;

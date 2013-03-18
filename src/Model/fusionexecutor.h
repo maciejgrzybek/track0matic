@@ -22,10 +22,6 @@ public:
    */
   virtual void fuseDRs(std::map<std::shared_ptr<Track>,
                        std::set<DetectionReport> >&);
-
-private:
-  estimation::EstimationFilter<>::vector_t DRToVector(std::shared_ptr<Track>,
-                                                      const DetectionReport&);
 };
 
 #endif // FUSIONEXECUTOR_H

@@ -1,3 +1,5 @@
+#include "detectionreport.h"
+
 #include "track.h"
 
 Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
@@ -9,6 +11,8 @@ Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
     mos_(metersOverSea),
     refreshTime_(creationTime)
 {
+  // initialize estimation filter
+  applyMeasurement(longitude,latitude,metersOverSea);
 }
 
 void Track::refresh(time_types::ptime_t refreshTime)
@@ -46,9 +50,23 @@ double Track::getMetersOverSea() const
   return mos_;
 }
 
-estimation::EstimationFilter<>& Track::getEstimationFilter() const
+void Track::applyMeasurement(const DetectionReport& dr)
 {
-  return *estimationFilter_;
+  return applyMeasurement(dr.getLongitude(),
+                          dr.getLatitude(),
+                          dr.getMetersOverSea());
+}
+
+void Track::applyMeasurement(double longitude, double latitude, double /*mos*/)
+{
+
+  estimation::EstimationFilter<>::vector_t vec;
+  vec[0] = longitude;
+  vec[1] = latitude;
+  vec[2] = 0; // not using speed yet, TODO use speed according to current speed
+  vec[3] = 0; // obtained from Track
+
+  estimationFilter_->correct(vec);
 }
 
 bool Track::isTrackValid(time_types::ptime_t currentTime, time_types::duration_t TTL) const
