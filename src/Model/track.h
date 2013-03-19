@@ -38,7 +38,7 @@ public:
    * @brief Refreshes Track (sets it's last update time to given)
    * @param Time of refresh
    */
-  void refresh(time_types::ptime_t refreshTime);
+  void refresh(time_types::ptime_t refreshTime = time_types::clock_t::now());
 
   /**
    * @brief Sets estimation filter to be used when predicting next state of track.
