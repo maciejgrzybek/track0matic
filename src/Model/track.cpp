@@ -69,7 +69,11 @@ void Track::applyMeasurement(double longitude, double latitude, double /*mos*/)
   estimationFilter_->correct(vec);
 }
 
-bool Track::isTrackValid(time_types::ptime_t currentTime, time_types::duration_t TTL) const
+bool Track::isTrackValid(time_types::ptime_t currentTime,
+                         time_types::duration_t TTL) const
 {
-// TODO implement this
+  if (currentTime - refreshTime_ <= TTL)
+    return true;
+
+  return false;
 }
