@@ -19,12 +19,11 @@ namespace TrackManager_test
     Fixture()
       : featureExtractor(new FeatureExtractor())
     {
-      estimation::KalmanFilter<>::Matrix A(4,4);
-      estimation::KalmanFilter<>::Matrix B;
-      estimation::KalmanFilter<>::Matrix R(2,2);
-      estimation::KalmanFilter<>::Matrix Q(4,4);
-      estimation::KalmanFilter<>::Matrix H(2,4);
-      filter.reset(new estimation::KalmanFilter<>(A,B,R,Q,H));
+      { // FIXME: really UGLY solution! Only for testing purpose,
+        //  to allow fast tests
+        #include "common/FiltersSetups.h"
+        filter = std::move(kalmanFilter);
+      }
     }
 
     std::unique_ptr<FeatureExtractor> featureExtractor;

@@ -27,12 +27,11 @@ namespace Helpers
     Fixture()
       : tm_(new TrackManager(1))
     {
-      estimation::KalmanFilter<>::Matrix A(4,4);
-      estimation::KalmanFilter<>::Matrix B;
-      estimation::KalmanFilter<>::Matrix R(2,2);
-      estimation::KalmanFilter<>::Matrix Q(4,4);
-      estimation::KalmanFilter<>::Matrix H(2,4);
-      filter_.reset(new estimation::KalmanFilter<>(A,B,R,Q,H));
+      { // FIXME: really UGLY solution! Only for testing purpose,
+        //  to allow fast tests
+        #include "common/FiltersSetups.h"
+        filter_ = std::move(kalmanFilter);
+      }
 
       std::set<DetectionReport> group = {
         DetectionReport(1,1,0,0,0,100,95),
