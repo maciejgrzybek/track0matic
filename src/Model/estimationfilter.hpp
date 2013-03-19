@@ -33,7 +33,7 @@ public:
    * @param u - input (control) signal
    * @return pair of predicted state and prediction variance, as vectors
    */
-  virtual std::pair<vector_t,vector_t> predict(const vector_t& u = vector_t()) = 0;
+  virtual std::pair<vector_t,vector_t> predict(const vector_t* u = nullptr) = 0;
 
   /**
    * @brief corrects prediction of modeled phenomenon state,
@@ -95,7 +95,7 @@ public:
   virtual ~KalmanFilter()
   {}
 
-  virtual std::pair<vector_t,vector_t> predict(const vector_t& u = vector_t())
+  virtual std::pair<vector_t,vector_t> predict(const vector_t* u = nullptr)
   {
     assert(initialized);
     // predictedState (x')
@@ -107,8 +107,9 @@ public:
     Matrix transposedTrModel = ublas::trans(transitionModel);
     Matrix mult = ublas::prod(correctedCovarianceError,transposedTrModel);
     predictedCovarianceError = ublas::prod(transitionModel,mult) + processNoise;
-    if (!u.empty())
-      predictedState += ublas::prod(controlModel,arrayToUblas(u));
+
+    if (u != nullptr)
+      predictedState += ublas::prod(controlModel,arrayToUblas(*u,controlModel.size2()));
 
     return std::pair<vector_t,vector_t>(
             ublasToArray(predictedState),
@@ -118,6 +119,7 @@ public:
 
   virtual std::pair<vector_t,vector_t> correct(const vector_t& z)
   {
+    assert(initialized);
     // Kalman gain = P' * transposed(H) / (H * P' * transposed(H) + R)
 
     Matrix transposedMeasurement = ublas::trans(measurementModel);
@@ -132,7 +134,7 @@ public:
     Matrix K = ublas::prod(top,bottom); // Kalman gain
 
     Vector residual
-        = arrayToUblas(z) - ublas::prod(measurementModel,predictedState);
+        = arrayToUblas(z,measurementModel.size1()) - ublas::prod(measurementModel,predictedState);
 
     // correctedState = predictedState + kalmanGain*(z - H*x')
     correctedState = predictedState + ublas::prod(K,residual);
@@ -143,19 +145,19 @@ public:
        = ublas::identity_matrix<typename Vector::value_type>(KH.size1(),KH.size2()) - KH;
     correctedCovarianceError = ublas::prod(Iminus,predictedCovarianceError);
 
-    initialized = true;
-
     return std::pair<vector_t,vector_t>(
             ublasToArray(correctedState),
             getDiagonal(correctedCovarianceError)
           );
   }
 
+  // only after successful end of this method execution, filter is properly initialized
   virtual void initializeState(Vector state, Matrix covarianceError)
   {
     correctedState = state;
     correctedCovarianceError = covarianceError;
     initialized = true;
+    predict(); // needed to setup predictedCovarianceError
   }
 
   virtual void setTransitionModel(Matrix m)
@@ -225,15 +227,14 @@ private:
     return result;
   }
 
-  // copies elements from vector_t (array) to Vector (ublas vector)
-  Vector arrayToUblas(const vector_t& vec)
+  // copies no first elements from vector_t (array) to Vector (ublas vector)
+  Vector arrayToUblas(const vector_t& vec, std::size_t no)
   {
-    Vector result;
-    std::size_t i = 0;
-    for (typename vector_t::value_type item : vec)
+    no = std::min(no,vec.size()); // to ensure not steping over the range
+    Vector result(no);
+    for (std::size_t i = 0; i<no; ++i)
     {
-      result(i) = item;
-      ++i;
+      result(i) = vec[i];
     }
     return result;
   }
@@ -241,7 +242,8 @@ private:
   // returns diagonal (as a vector) of a given matrix
   vector_t getDiagonal(const Matrix& m)
   {
-    assert(m.size1() == m.size2() == std::tuple_size<vector_t>::value);
+    assert(m.size1() == m.size2() &&
+           m.size1() == std::tuple_size<vector_t>::value);
     vector_t result;
     for (unsigned i = 0; i < m.size1(); ++i)
     {

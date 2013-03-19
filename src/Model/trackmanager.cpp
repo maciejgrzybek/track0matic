@@ -23,9 +23,7 @@ std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
     for (auto group : groups)
     {
       std::shared_ptr<Track> track
-          = initializeTrack(group,
-                            std::unique_ptr<estimation::EstimationFilter<> >(
-                              filter->clone()));
+          = initializeTrack(group,filter->clone());
 
       tracks_.insert(track);
       result[track] = group;
