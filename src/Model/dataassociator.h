@@ -125,10 +125,11 @@ private:
    *  DR groups are disjunctive, so we can use rateListForTrack (which removes DRs from set), for them.
    *
    * @param Track for which we are looking associations for.
-   * @return set of matching DRs
+   * @return pair of two values: set of matching DRs and highest sensor time from DRs from this set
    * @see rateListForTrack
    */
-  std::set<DetectionReport> getListForTrack(const Track&);
+  std::pair<std::set<DetectionReport>,time_types::ptime_t>
+    getListForTrack(const Track&);
 
   /**
    * @brief Chooses these DRs from neighborhood, which are good enough, to match given track.
@@ -137,9 +138,10 @@ private:
    *  DRs with rate above threshold, are returned as winning DRs, with rate. Rest are returned also, as "lost"
    * @param Set of DRs to choose from - is modified: each chosen DR is removed from this collection (it reduces complexity of computation, by so called sweeping)
    * @param Track to match DRs to
-   * @return pair of two values: rate and collection of matching DRs
+   * @return pair of two items; first is a pair of two values: rate and collection of matching DRs,
+   *          the second is highest sensor time from choosen DRs.
    */
-  std::pair<double,std::set<DetectionReport> >
+  std::pair<std::pair<double,std::set<DetectionReport> >, time_types::ptime_t>
     rateListForTrack(std::set<DetectionReport>&,const Track&) const;
 
   /**

@@ -27,8 +27,10 @@ void DataAssociator::compute()
       = trackManager_->getTracksRef();
   for (std::shared_ptr<Track> track : tracks)
   {
-    std::set<DetectionReport> DRs = getListForTrack(*track);
-    associatedDRs_[track] = DRs;
+    std::pair<std::set<DetectionReport>,time_types::ptime_t> DRs
+        = getListForTrack(*track);
+    associatedDRs_[track] = DRs.first;
+    track->refresh(DRs.second); // refresh track with the highest sensor time of associated to him DRs
   }
   // not associated DRs are stored now in DRGroups
   computed_ = true;
@@ -79,13 +81,20 @@ void DataAssociator::setDRRateThreshold(double threshold)
   DRRateThreshold_ = threshold;
 }
 
-std::set<DetectionReport> DataAssociator::getListForTrack(const Track& track)
+std::pair<std::set<DetectionReport>,time_types::ptime_t>
+  DataAssociator::getListForTrack(const Track& track)
 {
   std::tuple<
       double,
       std::set<DetectionReport>, // choosen group
-      std::set<DetectionReport> // rest group (not choosen)
-      > choosen(-1,std::set<DetectionReport>(),std::set<DetectionReport>());
+      std::set<DetectionReport>, // rest group (not choosen)
+      time_types::ptime_t // highest sensor time from DRs from choosen group
+      > choosen(
+                  -1,
+                  std::set<DetectionReport>(),
+                  std::set<DetectionReport>(),
+                  time_types::ptime_t() // initialized with epoch+0s
+                );
 
   std::vector<std::set<DetectionReport> >::iterator it = DRGroups_.begin();
   std::vector<std::set<DetectionReport> >::const_iterator endIt
@@ -98,14 +107,18 @@ std::set<DetectionReport> DataAssociator::getListForTrack(const Track& track)
   {
     std::set<DetectionReport> group = *it; // copy current group,
                                         // because rateListForTrack modifies it
-    std::pair<double,std::set<DetectionReport> >
-        current = rateListForTrack(group,track);
+    std::pair<std::pair<double,std::set<DetectionReport> >,
+              time_types::ptime_t> current = rateListForTrack(group,track);
 
-    if (current.first > std::get<0>(choosen)) // if rate is better
+    std::pair<double,std::set<DetectionReport> >& listPair = current.first;
+    double listRate = listPair.first;
+    std::set<DetectionReport>& choosenList = listPair.second;
+
+    if (listRate > std::get<0>(choosen)) // if rate is better
     {
       // current is choosen
       choosenIt = it;
-      choosen = std::make_tuple(current.first,current.second,group);
+      choosen = std::make_tuple(listRate,choosenList,group,current.second);
     }
   }
 
@@ -117,14 +130,18 @@ std::set<DetectionReport> DataAssociator::getListForTrack(const Track& track)
     *choosenIt = std::get<2>(choosen); // overwrite choosen group, to have there only not picked DRs
   }
 
-  return std::get<1>(choosen);
+  return std::pair<std::set<DetectionReport>,time_types::ptime_t>(
+            std::get<1>(choosen),
+            std::get<3>(choosen)
+          );
 }
 
-std::pair<double,std::set<DetectionReport> >
+std::pair<std::pair<double,std::set<DetectionReport> >, time_types::ptime_t>
 DataAssociator::rateListForTrack(std::set<DetectionReport>& DRs,const Track& track) const
 {
   std::vector<double> rates;
   std::set<DetectionReport> result;
+  time_types::ptime_t highestSensorTime; // initialized by epoch time
   auto it = DRs.begin();
   auto endIt = DRs.end();
   while (it != endIt)
@@ -136,6 +153,10 @@ DataAssociator::rateListForTrack(std::set<DetectionReport>& DRs,const Track& tra
       result.insert(*it);
       rates.push_back(DRRate);
 
+      time_types::ptime_t sensorTime = it->getSensorTime();
+      if (sensorTime > highestSensorTime)
+        highestSensorTime = sensorTime;
+
       it = DRs.erase(it);
     }
     else
@@ -144,7 +165,11 @@ DataAssociator::rateListForTrack(std::set<DetectionReport>& DRs,const Track& tra
   // here, all choosen detection reports were taken out of DRs collection
   // there are only not matching left.
   double overallRate = listResultComparator_->operator()(rates);
-  return std::pair<double,std::set<DetectionReport> >(overallRate,result);
+  std::pair<double,std::set<DetectionReport> > listPair(overallRate,result);
+  return std::pair<
+            std::pair<double,std::set<DetectionReport> >,
+            time_types::ptime_t
+          >(listPair,highestSensorTime);
 }
 
 double DataAssociator::rateDRForTrack(const DetectionReport& dr, const Track& track) const
