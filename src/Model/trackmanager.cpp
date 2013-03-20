@@ -48,6 +48,28 @@ void TrackManager::setFeatureExtractor(std::unique_ptr<FeatureExtractor> extract
   featureExtractor_ = std::move(extractor);
 }
 
+std::size_t TrackManager::removeExpiredTracks(time_types::ptime_t currentTime,
+                                              time_types::duration_t TTL)
+{
+  std::size_t count = 0;
+
+  std::set<std::shared_ptr<Track> >::const_iterator iter = tracks_.begin();
+  std::set<std::shared_ptr<Track> >::const_iterator endIter = tracks_.end();
+  for (; iter != endIter; ++iter)
+  {
+    const std::shared_ptr<Track>& currentTrack = *iter; // reference,
+          // because it only points to current element (from iterator);
+          // it's only shortcut, for fasten writing
+    if (!currentTrack->isTrackValid(currentTime,TTL))
+    {
+      iter = tracks_.erase(iter);
+      ++count;
+    }
+  }
+
+  return count;
+}
+
 std::shared_ptr<Track>
   TrackManager::initializeTrack(const std::set<DetectionReport>& DRs,
                                 std::unique_ptr<estimation::EstimationFilter<> > filter)

@@ -84,6 +84,18 @@ public:
    */
   void setFeatureExtractor(std::unique_ptr<FeatureExtractor> extractor);
 
+  /**
+   * @brief Removes track which were not confirmed (refreshed)
+   *  for time longer than given threshold
+   * @param time point indicating current date
+   * @param TTL - time to live;
+   *  threshold which indices how long after current time
+   *  tracks are considered expired
+   * @return number of removed (expired) tracks
+   */
+  std::size_t removeExpiredTracks(time_types::ptime_t currentTime,
+                                  time_types::duration_t TTL);
+
 private:
   // mapping two DRs on rate (grade which implices their quality (based on distance etc.))
   typedef std::set<

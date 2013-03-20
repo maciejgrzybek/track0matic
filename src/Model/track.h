@@ -53,6 +53,8 @@ public:
   double getLatitude() const;
   double getMetersOverSea() const;
 
+  time_types::ptime_t getRefreshTime() const;
+
   /**
    * @brief Puts model state of given DR to Track's estimation filter
    *  It's invoking correct() method on EstimationFilter assigned to Track,

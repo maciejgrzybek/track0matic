@@ -50,6 +50,11 @@ double Track::getMetersOverSea() const
   return mos_;
 }
 
+time_types::ptime_t Track::getRefreshTime() const
+{
+  return refreshTime_;
+}
+
 void Track::applyMeasurement(const DetectionReport& dr)
 {
   return applyMeasurement(dr.getLongitude(),

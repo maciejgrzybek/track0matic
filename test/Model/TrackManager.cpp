@@ -66,6 +66,24 @@ namespace TrackManager_test
       BOOST_CHECK(match); // each set from result, has to meet requirements (look above, inner loop)
     }
   }
+
+  time_types::ptime_t
+      getTimeOfLatestDR(const std::vector<std::set<DetectionReport> >& groups)
+  {
+    time_types::ptime_t latestTime; // 0s from epoch
+    for (const std::set<DetectionReport>& DRs : groups)
+    {
+      for (const DetectionReport& DR : DRs)
+      {
+        time_types::ptime_t sensorTime = DR.getSensorTime();
+        if (sensorTime > latestTime)
+          latestTime = sensorTime;
+      }
+    }
+
+    return latestTime;
+  }
+
 } // namespace TrackManager_test
 
 BOOST_FIXTURE_TEST_CASE( TrackInitialization_simple_groups, TrackManager_test::Fixture )
@@ -205,6 +223,40 @@ BOOST_FIXTURE_TEST_CASE( TrackInitialization_exclusive_merging, TrackManager_tes
       = tm->initializeTracks(groups,std::move(filter));
 
   TrackManager_test::checkConsistency(result,correctResult);
+
+  delete tm;
+}
+
+BOOST_FIXTURE_TEST_CASE( Expired_tracks_removing, TrackManager_test::Fixture )
+{
+  TrackManager* tm = new TrackManager(0.6);
+  tm->setFeatureExtractor(std::move(featureExtractor));
+
+  std::vector<std::set<DetectionReport> > groups;
+  {
+    std::set<DetectionReport> group = {
+      DetectionReport(1,1,0,0,0,100,95),
+      DetectionReport(2,2,2,0,0,100,92),
+      DetectionReport(2,3,1,1,0,91,90)
+    };
+    groups.push_back(group);
+  }
+
+  tm->initializeTracks(groups,std::move(filter)); // skip result, all tracks are already registered in TrackManager
+
+  // ensure properly initialized
+  BOOST_REQUIRE_EQUAL(tm->getTracksRef().size(),2);
+
+  tm->removeExpiredTracks(time_types::ptime_t(boost::chrono::seconds(96)),
+                          time_types::duration_t(boost::chrono::seconds(1)));
+  // should remove those DRs with sensor time < 95 (96 current time minus 1 TTL)
+
+  const std::set<std::shared_ptr<Track> >& tracks = tm->getTracksRef();
+  BOOST_REQUIRE_EQUAL(tracks.size(),1);
+  std::shared_ptr<Track> track = *(tracks.begin());
+
+  BOOST_CHECK_EQUAL(track->getRefreshTime(),
+                    TrackManager_test::getTimeOfLatestDR(groups));
 
   delete tm;
 }
