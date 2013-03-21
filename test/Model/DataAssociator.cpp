@@ -43,12 +43,20 @@ namespace Helpers
       groups_.push_back(group);
       // these DRs will produce two Tracks: {1,4} and {2,3}
       tm_->initializeTracks(groups_,std::move(filter_));
+
+      std::unique_ptr<DataAssociator> da(new DataAssociator(
+            std::move(tm_),
+            std::unique_ptr<ResultComparator>(new OrComparator(grade_map_)),
+            std::unique_ptr<ListResultComparator>(new OrListComparator())
+          ));
+      da_ = std::move(da);
     }
 
     std::vector<std::set<DetectionReport> > groups_;
     std::unique_ptr<TrackManager> tm_;
     std::unique_ptr<estimation::EstimationFilter<> > filter_;
     ResultComparator::feature_grade_map_t grade_map_;
+    std::unique_ptr<DataAssociator> da_;
   };
 
   bool compare(const std::set<DetectionReport>& l,
@@ -110,17 +118,10 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test, Helpers::Fixture )
     correct.push_back(correctSecond);
   }
 
-  DataAssociator* da
-      = new DataAssociator(
-          std::move(tm_),
-          std::unique_ptr<ResultComparator>(new OrComparator(grade_map_)),
-          std::unique_ptr<ListResultComparator>(new OrListComparator())
-        );
-
-  da->setInput(DRsGroups);
-  da->setDRRateThreshold(0.1);
+  da_->setInput(DRsGroups);
+  da_->setDRRateThreshold(0.1);
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
-      assigned = da->getDRsForTracks();
+      assigned = da_->getDRsForTracks();
 
   BOOST_REQUIRE_EQUAL(assigned.size(),2);
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> >::const_iterator
@@ -137,8 +138,6 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test, Helpers::Fixture )
   results.push_back(it->second);
 
   BOOST_CHECK(Helpers::checkConsistency(results,correct));
-
-  delete da;
 }
 
 BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test2, Helpers::Fixture )
@@ -169,17 +168,10 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test2, Helpers::Fixture )
     correct.push_back(correctSecond);
   }
 
-  DataAssociator* da
-      = new DataAssociator(
-          std::move(tm_),
-          std::unique_ptr<ResultComparator>(new OrComparator(grade_map_)),
-          std::unique_ptr<ListResultComparator>(new OrListComparator())
-        );
-
-  da->setInput(DRsGroups);
-  da->setDRRateThreshold(0.1);
+  da_->setInput(DRsGroups);
+  da_->setDRRateThreshold(0.1);
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
-      assigned = da->getDRsForTracks();
+      assigned = da_->getDRsForTracks();
 
   BOOST_REQUIRE_EQUAL(assigned.size(),2);
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> >::const_iterator
@@ -196,8 +188,6 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test2, Helpers::Fixture )
   results.push_back(it->second);
 
   BOOST_CHECK(Helpers::checkConsistency(results,correct));
-
-  delete da;
 }
 
 BOOST_AUTO_TEST_SUITE_END()
