@@ -6,16 +6,15 @@ estimation::KalmanFilter<>::Matrix R(2,2);
 estimation::KalmanFilter<>::Matrix Q(4,4);
 estimation::KalmanFilter<>::Matrix H(2,4);
   
-estimation::KalmanFilter<>::Vector X(4);
-estimation::KalmanFilter<>::Matrix P(4,4);
-  
-X.clear();
-  
-P.clear();
-P(0,0) = 0.1;
-P(1,1) = 0.1;
-P(2,2) = 0.1;
-P(3,3) = 0.1;
+estimation::KalmanFilter<>::vector_t X;
+estimation::KalmanFilter<>::vector_t P;
+
+X.fill(0);
+
+P[0] = 0.1;
+P[1] = 0.1;
+P[2] = 0.1;
+P[3] = 0.1;
 
 A.clear();
 A(0,0) = 1;
@@ -59,6 +58,6 @@ H(1,2) = 0;
 H(1,3) = 1;
 
 estimation::KalmanFilter<>* f = new estimation::KalmanFilter<>(A,B,R,Q,H);
-f->initializeState(X,P);
+f->initialize(X,P);
 kalmanFilter.reset(f); // f is no more valid!
 f = nullptr;

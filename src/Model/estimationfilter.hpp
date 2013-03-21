@@ -42,6 +42,19 @@ public:
    * @return pair of corrected state and it's variance, as vectors
    */
   virtual std::pair<vector_t,vector_t> correct(const vector_t& z) = 0;
+
+  /**
+   * @brief Initializes estimation filter with given vector of state
+   *  and given variance for this state
+   *
+   * It's not pure virtual,
+   *  because not every estimation filter would need initialization phase
+   * @param state of model
+   * @param parameter indicating how uncertain the state is
+   */
+  virtual void initialize(vector_t state, vector_t varianceError)
+  {}
+
   virtual std::unique_ptr<EstimationFilter<StateModel> > clone() const = 0;
 };
 
@@ -151,13 +164,13 @@ public:
           );
   }
 
-  // only after successful end of this method execution, filter is properly initialized
-  virtual void initializeState(Vector state, Matrix covarianceError)
+  virtual void initialize(vector_t state, vector_t varianceError)
   {
-    correctedState = state;
-    correctedCovarianceError = covarianceError;
-    initialized = true;
-    predict(); // needed to setup predictedCovarianceError
+    // translate whole vector_t to Vector
+    Vector vec = arrayToUblas(state,std::tuple_size<vector_t>::value);
+    Matrix m = diagonalVectorToMatrix(varianceError);
+
+    return initializeState(vec,m);
   }
 
   virtual void setTransitionModel(Matrix m)
@@ -213,6 +226,15 @@ public:
   }
 
 private:
+  // only after successful end of this method execution, filter is properly initialized
+  virtual void initializeState(Vector state, Matrix covarianceError)
+  {
+    correctedState = state;
+    correctedCovarianceError = covarianceError;
+    initialized = true;
+    predict(); // needed to setup predictedCovarianceError
+  }
+
   // copies elements from Vector to vector_t collection.
   vector_t ublasToArray(const Vector& vec)
   {
@@ -236,6 +258,7 @@ private:
     {
       result(i) = vec[i];
     }
+
     return result;
   }
 
@@ -249,6 +272,20 @@ private:
     {
       result[i] = m(i,i);
     }
+
+    return result;
+  }
+
+  // returns matrix with items from vector on it's diagonal
+  Matrix diagonalVectorToMatrix(const vector_t& v)
+  {
+    std::size_t size = std::tuple_size<vector_t>::value;
+    Matrix result(size,size);
+    for (unsigned int i = 0; i < size; ++i)
+    {
+      result(i,i) = v[i];
+    }
+
     return result;
   }
 
