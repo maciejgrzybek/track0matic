@@ -43,7 +43,7 @@ namespace Track_test
 
 BOOST_FIXTURE_TEST_CASE( Track_expiration_simple_test, Track_test::Fixture )
 {
-  Track* t = new Track(filter->clone(),0,1,2,p1);
+  Track* t = new Track(filter->clone(),0,1,2,0,0,0,p1);
 
   // track initialized already
 
@@ -68,7 +68,8 @@ BOOST_FIXTURE_TEST_CASE( Track_expiration_simple_test, Track_test::Fixture )
 
 BOOST_FIXTURE_TEST_CASE( Track_refreshing_simple_test, Track_test::Fixture )
 {
-  Track* t = new Track(filter->clone(),0,1,2,p1); // refresh time is epoch+1s
+  // refresh time of newly created Track is epoch+1s
+  Track* t = new Track(filter->clone(),0,1,2,0,0,0,p1);
 
   // track initialized already
 

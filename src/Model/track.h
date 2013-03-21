@@ -28,10 +28,14 @@ public:
    * @param longitude of Track
    * @param latitude of Track
    * @param meters over sea position of Track
+   * @param variance of longitude (measurement of certainty)
+   * @param variance of latitude (measurement of certainty)
+   * @param variance of meters over sea position of Track (measurement of certainty)
    * @param Time of track creation, needed to maintain track (remove after no-update time).
    */
   Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
         double longitude, double latitude, double metersOverSea,
+        double lonVar, double latVar, double mosVar,
         time_types::ptime_t = time_types::clock_t::now());
 
   /**
@@ -52,6 +56,8 @@ public:
   double getLongitude() const;
   double getLatitude() const;
   double getMetersOverSea() const;
+
+  std::tuple<double,double,double> getPredictedState() const;
 
   time_types::ptime_t getRefreshTime() const;
 
@@ -76,9 +82,25 @@ public:
                     time_types::duration_t TTL) const;
 
 private:
+  estimation::EstimationFilter<>::vector_t
+    coordsToStateVector(double longitude,
+                        double latitude,
+                        double metersoversea) const;
+
+  void initializeFilter(double longitude,
+                        double latitude,
+                        double metersoversea,
+                        double varLon,
+                        double varLat,
+                        double varMos);
+
   double lon_;
   double lat_;
   double mos_;
+
+  double predictedLon_;
+  double predictedLat_;
+  double predictedMos_; // not yet implemented
 
   features_set_t features_;
   std::unique_ptr<estimation::EstimationFilter<> > estimationFilter_;

@@ -1,7 +1,7 @@
 #ifndef TIME_H
 #define TIME_H
 
-#include <boost/chrono.hpp>
+#include <boost/chrono.hpp> // internally includes chrono_io
 
 // uses boost::chrono instead of std::chrono, because of IO lack in std
 namespace time_types

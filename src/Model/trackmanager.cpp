@@ -96,11 +96,16 @@ std::shared_ptr<Track>
   double lat = lats/cnt;
   double mos = moses/cnt;
 
+  // TODO evaluate proper values of variances (certainty) of coordinates
+  // now we assume coordinates to be 100% sure
+  double varLon = 0;
+  double varLat = 0;
+  double varMos = 0;
+
   std::shared_ptr<Track> track(
           new Track(filter->clone(),
-                    lon,
-                    lat,
-                    mos,
+                    lon,lat,mos,
+                    varLon,varLat,varMos,
                     maxTime)
         );
 
