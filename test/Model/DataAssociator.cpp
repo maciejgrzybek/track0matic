@@ -190,5 +190,82 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test2, Helpers::Fixture )
   BOOST_CHECK(Helpers::checkConsistency(results,correct));
 }
 
+BOOST_AUTO_TEST_CASE( DataAssociator_track_refresh_on_association_test )
+{
+/*****************************INITIALIZATION***********************************/
+
+  TrackManager* tm_ = new TrackManager(1);
+  std::unique_ptr<estimation::EstimationFilter<> > filter_;
+
+  { // FIXME: really UGLY solution! Only for testing purpose,
+    //  to allow fast tests
+    #include "common/FiltersSetups.h"
+    filter_ = std::move(kalmanFilter);
+  }
+
+  std::set<DetectionReport> group = {
+    DetectionReport(1,1,0,0,0,100,95),
+    DetectionReport(2,2,1,0,0,100,95),
+    DetectionReport(2,3,1,1,0,91,90),
+    DetectionReport(3,4,0,1,0,105,99)
+  };
+
+  std::vector<std::set<DetectionReport> > groups_;
+  groups_.push_back(group);
+  // these DRs will produce two Tracks: {1,4} and {2,3}
+  tm_->initializeTracks(groups_,std::move(filter_));
+
+  ResultComparator::feature_grade_map_t grade_map_;
+
+  DataAssociator* da_ = new DataAssociator(
+        std::unique_ptr<TrackManager>(tm_), // ugly, but needed for testing
+       // purpose (to allow reading data from already passed to DA TrackManager)
+        std::unique_ptr<ResultComparator>(new OrComparator(grade_map_)),
+        std::unique_ptr<ListResultComparator>(new OrListComparator())
+      );
+
+/**********************************Association*********************************/
+  std::vector<std::set<DetectionReport> > DRsGroups;
+  {
+    std::set<DetectionReport> group = {
+      DetectionReport(1,8,0,0.1,0,100,95), // should be assigned to Track with DRs {1,4}
+      DetectionReport(2,9,1.0,0,0,100,95), // should be assigned to Track with DRs {2,3}
+      DetectionReport(1,10,0,0.6,0,100,105), // should be assigned to Track with DRs {1,4}
+      DetectionReport(2,11,1.0,0.1,0,99,101), // should be assigned to Track with DRs {2,3}
+    };
+    DRsGroups.push_back(group);
+  }
+
+  da_->setInput(DRsGroups);
+  da_->setDRRateThreshold(0.1);
+  da_->compute();
+
+/******************************************************************************/
+
+  // remove tracks not refreshed since epoch+101s (105-1). Should remove nothing
+  std::size_t removedCnt
+    = tm_->removeExpiredTracks(time_types::ptime_t(boost::chrono::seconds(105)),
+                           time_types::duration_t(4));
+
+  BOOST_CHECK_EQUAL(removedCnt,0);
+  BOOST_CHECK_EQUAL(tm_->getTracksRef().size(),2);
+
+  // remove tracks not refreshed since epoch+105s (106-1). Should remove one Track
+  removedCnt
+    = tm_->removeExpiredTracks(time_types::ptime_t(boost::chrono::seconds(106)),
+                           time_types::duration_t(1));
+
+  // only one Track left
+  BOOST_CHECK_EQUAL(removedCnt,1);
+  const std::set<std::shared_ptr<Track> >& tracks = tm_->getTracksRef();
+  BOOST_REQUIRE_EQUAL(tracks.size(),1);
+
+  // getting first element from set is safe, because of above REQUIREd statement
+  std::shared_ptr<Track> track = *tracks.begin();
+
+  BOOST_CHECK_EQUAL(track->getRefreshTime(),
+                    time_types::ptime_t(boost::chrono::seconds(105)));
+}
+
 BOOST_AUTO_TEST_SUITE_END()
 
