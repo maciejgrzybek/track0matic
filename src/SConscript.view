@@ -4,13 +4,17 @@ Import('env')
 
 viewDir = 'View'
 
+envCopy = env.Clone()
+envCopy.Append(
+                CPPPATH = '.'
+              )
+
 sourceTargets = [ 'gnuplot.cpp' ]
 
 targets = []
 for source in sourceTargets:
   targets.append(viewDir + '/' + source)
 
-program = env.Program(target = '../bin/gnuplot',
-                      source = targets,
-                      LIBS = [ 'Controller', 'Model' ],
-                      LIBPATH = '.')
+library = envCopy.Library('GNUPlot',targets)
+
+Return( 'library' )

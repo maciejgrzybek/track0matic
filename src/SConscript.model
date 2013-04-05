@@ -4,9 +4,15 @@ Import('env')
 
 modelDir = 'Model'
 
+envCopy = env.Clone()
+envCopy.Append(
+                CPPPATH = '.'
+              )
+
 sourceTargets = [ 'alignmentprocessor.cpp',
                   'candidateselector.cpp',
                   'dataassociator.cpp',
+                  'datamanager.cpp',
                   'detectionreport.cpp',
                   'dyndbdriver.cpp',
                   'feature.cpp',
@@ -23,4 +29,6 @@ targets = []
 for source in sourceTargets:
   targets.append(modelDir + '/' + source)
 
-env.Library('Model',targets)
+library = envCopy.Library('Model',targets)
+
+Return( 'library' )

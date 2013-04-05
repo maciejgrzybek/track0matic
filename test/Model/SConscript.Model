@@ -11,29 +11,20 @@ envCopy.Append(
               )
 
 
-modelSourceTargets = [ 'modelTest.cpp',
-                       'AlignmentProcessor.cpp',
-                       'DataAssociator.cpp',
-                       'Track.cpp',
-                       'TrackManager.cpp', ]
-#                     'CandidateSelector.cpp' ]
+sourceTargets = [ 'modelTest.cpp',
+                  'AlignmentProcessor.cpp',
+                  'DataAssociator.cpp',
+                  'Track.cpp',
+                  'TrackManager.cpp', ]
+#                  'CandidateSelector.cpp' ]
 
 targets = []
-for source in modelSourceTargets:
+for source in sourceTargets:
   targets.append(modelDir + '/' + source)
-
-# C
-
-commonDir = 'Common'
-
-commonSourceTargets = [ ] # no targets yet
-
-for source in commonSourceTargets:
-  targets.append(commonDir + '/' + source)
 
 # Build one or more test runners.
 program = envCopy.Program('test', targets, LIBS=['boost_unit_test_framework','Model'],LIBPATH='../build')
 # Depend on the runner to ensure that it's built before running it - Note: using abspath.
 test_alias = Alias('test', [program], program[0].abspath)
 # Simply required.  Without it, 'test' is never considered out of date.
-envCopy.AlwaysBuild(test_alias)
+env.AlwaysBuild(test_alias)

@@ -1,0 +1,16 @@
+# vim: ft=python
+
+Import('env')
+
+envCopy = env.Clone()
+
+envCopy.Append(
+                CPPPATH = '../src/',
+              )
+
+targets = [ 'main.cpp' ]
+
+program = envCopy.Program(target = '../bin/Tracker',
+                          source = targets,
+                          LIBS = [ 'Controller', 'Model' ],
+                          LIBPATH = '.')

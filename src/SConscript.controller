@@ -2,12 +2,20 @@
 
 Import('env')
 
+envCopy = env.Clone()
+
+envCopy.Append(
+                CPPPATH = '../src/',
+              )
+
 controllerDir = 'Controller'
 
-sourceTargets = [ 'datamanager.cpp' ]
+sourceTargets = [ 'maincontroller.cpp' ]
 
 targets = []
 for source in sourceTargets:
   targets.append(controllerDir + '/' + source)
 
-env.Library('Controller',targets)
+library = envCopy.Library('Controller',targets)
+
+Return( 'library' )

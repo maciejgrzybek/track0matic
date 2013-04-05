@@ -1,4 +1,4 @@
-#include "../Controller/datamanager.h"
+#include <Model/datamanager.h>
 
 int main(void)
 {
