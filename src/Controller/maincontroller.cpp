@@ -6,7 +6,7 @@ namespace Controller
 {
 
 MainController
-::MainController(std::shared_ptr<Common::BlockingQueue<View::Message*> > bq)
+::MainController(std::shared_ptr<Common::BlockingQueue<Controller::Message*> > bq)
   : blockingQueue_(bq)
 {}
 

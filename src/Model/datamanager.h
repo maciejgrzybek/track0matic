@@ -4,14 +4,14 @@
 #include <memory>
 #include <string>
 
-#include "../Model/dyndbdriver.h"
-#include "../Model/reportmanager.h"
-#include "../Model/alignmentprocessor.h"
-#include "../Model/candidateselector.h"
-#include "../Model/dataassociator.h"
-#include "../Model/trackmanager.h"
-#include "../Model/featureextractor.h"
-#include "../Model/fusionexecutor.h"
+#include <Model/dyndbdriver.h>
+#include <Model/reportmanager.h>
+#include <Model/alignmentprocessor.h>
+#include <Model/candidateselector.h>
+#include <Model/dataassociator.h>
+#include <Model/trackmanager.h>
+#include <Model/featureextractor.h>
+#include <Model/fusionexecutor.h>
 
 class DataManager
 {

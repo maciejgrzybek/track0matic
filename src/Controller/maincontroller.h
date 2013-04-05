@@ -3,8 +3,7 @@
 #include <memory>
 
 #include <Common/blockingqueue.hpp>
-
-#include <View/common/message.h>
+#include <Controller/common/message.h>
 
 namespace Controller
 {
@@ -12,10 +11,10 @@ namespace Controller
 class MainController
 {
 public:
-  MainController(std::shared_ptr<Common::BlockingQueue<View::Message*> >);
+  MainController(std::shared_ptr<Common::BlockingQueue<Controller::Message*> >);
 
 private:
-  std::shared_ptr<Common::BlockingQueue<View::Message*> > blockingQueue_;
+  std::shared_ptr<Common::BlockingQueue<Controller::Message*> > blockingQueue_;
 };
 
 } // namespace Controller
