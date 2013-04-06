@@ -3,6 +3,9 @@
 
 #include "datamanager.h"
 
+namespace Model
+{
+
 DataManager::DataManager(const std::string& paramsPath,
                          std::shared_ptr<DB::DynDBDriver> dynDbDriver,
                          std::unique_ptr<ReportManager> reportManager,
@@ -99,6 +102,18 @@ DataManager::DataManager(const std::string& paramsPath,
   }
 }
 
+Snapshot DataManager::computeState()
+{
+  Snapshot s = computeTracks();
+  snapshot_.put(s);
+  return s;
+}
+
+Snapshot DataManager::getSnapshot() const
+{
+  return snapshot_.get();
+}
+
 std::shared_ptr<
       std::set<std::shared_ptr<Track> >
     >
@@ -157,3 +172,5 @@ void DataManager::compute()
     DRs = reportManager_->getDRs(); // get next group
   }
 }
+
+} // namespace Model

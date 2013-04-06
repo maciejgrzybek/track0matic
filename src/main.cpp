@@ -5,23 +5,22 @@
 #include <Model/datamanager.h>
 
 #include <Controller/maincontroller.h>
+#include <Controller/common/message.h>
 
-#include <View/view.h>
-#include <View/common/message.h>
+#include <View/qtview.h>
 
 int main(void)
 {
   std::shared_ptr<Common::BlockingQueue<Controller::Message*> >
     blockingQueue(new Common::BlockingQueue<Controller::Message*>());
 
-  DataManager dataManager;
-
+  std::unique_ptr<Model::Model> m(new Model::DataManager());
   std::unique_ptr<View::View> v(new View::QtView());
   std::unique_ptr<Controller::Controller> c(
-        new Controller::MainController(blockingQueue)
+        new Controller::MainController(blockingQueue,std::move(m),std::move(v))
         );
 
-  c->go();
+  c->operator()();
 
   return 0;
 }

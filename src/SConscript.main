@@ -12,5 +12,5 @@ targets = [ 'main.cpp' ]
 
 program = envCopy.Program(target = '../bin/Tracker',
                           source = targets,
-                          LIBS = [ 'Controller', 'Model' ],
+                          LIBS = [ 'Controller', 'Model', 'QtView' ],
                           LIBPATH = '.')
