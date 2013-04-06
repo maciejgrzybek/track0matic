@@ -99,26 +99,24 @@ DataManager::DataManager(const std::string& paramsPath,
   }
 }
 
-void DataManager::startSynchronousTracking()
+std::shared_ptr<
+      std::set<std::shared_ptr<Track> >
+    >
+  DataManager::computeTracks()
 {
-  // TODO change this to return proper information to View
-  while (true)
-  {
-    compute(); // loops through data flow, to maintain tracking process
+  compute(); // loops through data flow, to maintain tracking process
 
-    // print result of processing
-    const std::set<std::shared_ptr<Track> >& tracks
-        = trackManager_->getTracksRef();
+  // create new set of Tracks on heap
+  //  and initialize it with tracks from TrackManager
+  std::shared_ptr<
+        std::set<std::shared_ptr<Track> >
+      > tracks(
+        new std::set<std::shared_ptr<Track> >(
+          trackManager_->getTracks()
+          )
+        );
 
-    std::cout << "Tracks:" << std::endl;
-    for (auto t : tracks)
-    {
-      std::cout << "Track: " << t->getLongitude() <<","<<t->getLatitude() << std::endl;
-    }
-
-    std::chrono::milliseconds duration(1000);
-    std::this_thread::sleep_for(duration);
-  }
+  return tracks; // return tracks to Controller/View
 }
 
 void DataManager::compute()

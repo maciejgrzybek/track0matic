@@ -36,7 +36,15 @@ public:
               std::unique_ptr<estimation::EstimationFilter<> >
                 = std::unique_ptr<estimation::EstimationFilter<> >());
 
-  void startSynchronousTracking();
+  /**
+   * @brief Executes one full step of tracking process,
+   *  when computing finishes, returns one set of Tracks.
+   *
+   * @return Set of tracks after performed full Tracking process.
+   */
+  std::shared_ptr<
+        std::set<std::shared_ptr<Track> >
+      > computeTracks();
 
 private:
   void compute();

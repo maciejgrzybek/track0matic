@@ -11,16 +11,18 @@
 
 int main(void)
 {
-  std::shared_ptr<Common::BlockingQueue<View::Message*> >
-    blockingQueue(new Common::BlockingQueue<View::Message*>());
+  std::shared_ptr<Common::BlockingQueue<Controller::Message*> >
+    blockingQueue(new Common::BlockingQueue<Controller::Message*>());
 
-  DataManager dataManager();
+  DataManager dataManager;
 
-  std::unique_ptr<View::QtView> v(new View::QtView());
-  std::unique_ptr<Controller::MainController> c(
+  std::unique_ptr<View::View> v(new View::QtView());
+  std::unique_ptr<Controller::Controller> c(
         new Controller::MainController(blockingQueue)
         );
-  // TODO create view and connect with Controller
+
+  c->go();
+
   return 0;
 }
 

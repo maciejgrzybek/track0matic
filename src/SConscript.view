@@ -9,12 +9,12 @@ envCopy.Append(
                 CPPPATH = '.'
               )
 
-sourceTargets = [ 'gnuplot.cpp' ]
+sourceTargets = [ 'qtview.cpp' ]
 
 targets = []
 for source in sourceTargets:
   targets.append(viewDir + '/' + source)
 
-library = envCopy.Library('GNUPlot',targets)
+library = envCopy.Library('QtView',targets)
 
 Return( 'library' )
