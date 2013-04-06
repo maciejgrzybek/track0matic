@@ -47,8 +47,6 @@ BOOST_FIXTURE_TEST_CASE( Track_expiration_simple_test, Track_test::Fixture )
 
   // track initialized already
 
-  // test time points and durations preparation:
-
   // current time is epoch+1s
   BOOST_CHECK(t->isTrackValid(p1,duration0)); // Track refresh time is current time - track is always valid
   BOOST_CHECK(t->isTrackValid(p1,duration2)); // Track refresh time is current time - track is valid with TTL = 2s

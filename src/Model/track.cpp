@@ -103,6 +103,19 @@ bool Track::isTrackValid(time_types::ptime_t currentTime,
   return false;
 }
 
+std::unique_ptr<Track> Track::clone() const
+{
+  std::unique_ptr<Track> track(new Track(*this));
+}
+
+Track::Track(const Track& other)
+  : estimationFilter_(std::move(other.estimationFilter_->clone())),
+    lon_(other.lon_),
+    lat_(other.lat_),
+    mos_(other.mos_),
+    refreshTime_(other.refreshTime_)
+{}
+
 estimation::EstimationFilter<>::vector_t
   Track::coordsToStateVector(double longitude,
                              double latitude,

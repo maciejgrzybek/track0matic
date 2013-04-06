@@ -104,7 +104,9 @@ DataManager::DataManager(const std::string& paramsPath,
 
 Snapshot DataManager::computeState()
 {
-  Snapshot s = computeTracks();
+  auto tracks = computeTracks();
+  // clone Tracks, to ensure safety in multithreaded environment
+  Snapshot s = cloneTracksInSnapshot(tracks);
   snapshot_.put(s);
   return s;
 }
@@ -171,6 +173,21 @@ void DataManager::compute()
 
     DRs = reportManager_->getDRs(); // get next group
   }
+}
+
+Snapshot DataManager::cloneTracksInSnapshot(std::shared_ptr<
+                                             std::set<std::shared_ptr<Track> >
+                                            > tracks) const
+{
+  std::shared_ptr<
+      std::set<std::unique_ptr<Track> >
+      > result(new std::set<std::unique_ptr<Track> >());
+  std::set<std::shared_ptr<Track> > s = *tracks;
+  for (auto t : s)
+  { // for each track from set
+    result->insert(t->clone());
+  }
+  return result;
 }
 
 } // namespace Model

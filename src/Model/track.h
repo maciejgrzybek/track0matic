@@ -81,7 +81,11 @@ public:
   bool isTrackValid(time_types::ptime_t currentTime,
                     time_types::duration_t TTL) const;
 
+  std::unique_ptr<Track> clone() const;
+
 private:
+  Track(const Track&);
+
   estimation::EstimationFilter<>::vector_t
     coordsToStateVector(double longitude,
                         double latitude,

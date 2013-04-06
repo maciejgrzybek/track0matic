@@ -71,6 +71,10 @@ private:
 
   void compute();
 
+  Snapshot cloneTracksInSnapshot(std::shared_ptr<
+                                     std::set<std::shared_ptr<Track> >
+                                  > tracks) const;
+
   /* after C++11's std::atomic_load<std::shared_ptr> will be implemented
    * we will use lock-free implementation, based on it,
    * instead of mutexed buffer, to return Snapshot.
