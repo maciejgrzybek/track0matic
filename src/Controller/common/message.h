@@ -6,10 +6,16 @@
 namespace Controller
 {
 
+class MessageDispatcher;
+
 class Message
 {
+public:
+  virtual void accept(MessageDispatcher&) = 0;
+
 protected:
   Message() = default;
+  virtual ~Message();
 };
 
 class WorkingModeChangeMessage : public Message
@@ -19,6 +25,7 @@ public:
 
   WorkingModeChangeMessage(WorkingMode workingMode);
   WorkingMode getMode() const;
+  virtual void accept(MessageDispatcher&);
 
 private:
   WorkingMode workingMode_;
@@ -27,8 +34,11 @@ private:
 class TimerTickMessage : public Message
 {
 public:
-private:
+  TimerTickMessage(time_types::duration_t timeDuration);
+  virtual void accept(MessageDispatcher&);
 
+private:
+  time_types::duration_t timeDuration_;
 };
 
 } // namespace Controller

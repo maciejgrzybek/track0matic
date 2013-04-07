@@ -11,7 +11,10 @@ MainController
                  std::unique_ptr<View::View> view)
   : blockingQueue_(bq),
     model_(std::move(model)),
-    view_(std::move(view))
+    view_(std::move(view)),
+    messageDispatcher_(new MessageDispatcher(*model_,
+                                             *this,
+                                             *view_))
 {}
 
 MainController::~MainController()
@@ -21,11 +24,12 @@ void MainController::operator()()
 {
   while (true) // main loop
   {
-    // TODO get messages from View here
-    Model::Snapshot state = model_->computeState(); // get data from Model
-    view_->showState(state); // put snapshot to View
+    Message* msg = nullptr;
+    blockingQueue_->pop(msg); // get message from queue or hang on,
+                              // when no messages available
+    // perform action appropriate for received msg
+    msg->accept(*messageDispatcher_);
   }
 }
 
 } // namespace Controller
-

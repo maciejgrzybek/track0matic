@@ -65,9 +65,9 @@ public:
   {
     std::unique_lock<std::mutex> lock(mutex_);
     // wait until underlying container (queue) become non-empty
-    wait(condVar_,lock,[=]{ return !queue_.empty(); });
+    this->wait(condVar_,lock,[this]{ return !queue_.empty(); });
     result = std::move(queue_.front());
-    queue_.pop_back();
+    queue_.pop();
   }
 
 private:

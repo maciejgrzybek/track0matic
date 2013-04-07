@@ -10,7 +10,9 @@ envCopy.Append(
 
 controllerDir = 'Controller'
 
-sourceTargets = [ 'maincontroller.cpp' ]
+sourceTargets = [ 'common/message.cpp',
+                  'common/messagedispatcher.cpp',
+                  'maincontroller.cpp' ]
 
 targets = []
 for source in sourceTargets:

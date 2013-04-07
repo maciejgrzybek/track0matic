@@ -4,8 +4,10 @@
 #include <memory>
 
 #include <Common/blockingqueue.hpp>
+
 #include <Controller/controller.h>
 #include <Controller/common/message.h>
+#include <Controller/common/messagedispatcher.h>
 
 #include <Model/datamanager.h>
 
@@ -28,6 +30,7 @@ private:
   std::unique_ptr<Model::Model> model_;
   std::unique_ptr<View::View> view_;
   std::shared_ptr<Common::BlockingQueue<Message*> > blockingQueue_;
+  const std::unique_ptr<MessageDispatcher> messageDispatcher_;
 };
 
 } // namespace Controller
