@@ -182,7 +182,7 @@ Snapshot DataManager::cloneTracksInSnapshot(std::shared_ptr<
   std::shared_ptr<
       std::set<std::unique_ptr<Track> >
       > result(new std::set<std::unique_ptr<Track> >());
-  std::set<std::shared_ptr<Track> > s = *tracks;
+  const std::set<std::shared_ptr<Track> >& s = *tracks;
   for (auto t : s)
   { // for each track from set
     result->insert(t->clone());

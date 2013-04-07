@@ -19,7 +19,7 @@ namespace Controller
 class MainController : public Controller
 {
 public:
-  MainController(std::shared_ptr<Common::BlockingQueue<Message*> >,
+  MainController(std::shared_ptr<Common::BlockingQueue<MessagePtr> >,
                  std::unique_ptr<Model::Model>,
                  std::unique_ptr<View::View>);
   virtual ~MainController();
@@ -29,7 +29,7 @@ public:
 private:
   std::unique_ptr<Model::Model> model_;
   std::unique_ptr<View::View> view_;
-  std::shared_ptr<Common::BlockingQueue<Message*> > blockingQueue_;
+  std::shared_ptr<Common::BlockingQueue<MessagePtr> > blockingQueue_;
   const std::unique_ptr<MessageDispatcher> messageDispatcher_;
 };
 

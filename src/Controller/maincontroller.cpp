@@ -6,7 +6,7 @@ namespace Controller
 {
 
 MainController
-::MainController(std::shared_ptr<Common::BlockingQueue<Message*> > bq,
+::MainController(std::shared_ptr<Common::BlockingQueue<MessagePtr> > bq,
                  std::unique_ptr<Model::Model> model,
                  std::unique_ptr<View::View> view)
   : blockingQueue_(bq),
@@ -24,7 +24,7 @@ void MainController::operator()()
 {
   while (true) // main loop
   {
-    Message* msg = nullptr;
+    MessagePtr msg;
     blockingQueue_->pop(msg); // get message from queue or hang on,
                               // when no messages available
     // perform action appropriate for received msg

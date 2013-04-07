@@ -1,12 +1,16 @@
 #ifndef CONTROLLER_MESSAGE_H
 #define CONTROLLER_MESSAGE_H
 
+#include <memory>
+
 #include <Common/time.h>
 
 namespace Controller
 {
 
+class Message;
 class MessageDispatcher;
+typedef std::shared_ptr<Message> MessagePtr;
 
 class Message
 {

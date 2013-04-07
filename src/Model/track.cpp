@@ -106,6 +106,7 @@ bool Track::isTrackValid(time_types::ptime_t currentTime,
 std::unique_ptr<Track> Track::clone() const
 {
   std::unique_ptr<Track> track(new Track(*this));
+  return track;
 }
 
 Track::Track(const Track& other)
@@ -113,6 +114,9 @@ Track::Track(const Track& other)
     lon_(other.lon_),
     lat_(other.lat_),
     mos_(other.mos_),
+    predictedLon_(other.predictedLon_),
+    predictedLat_(other.predictedLat_),
+    predictedMos_(other.predictedMos_),
     refreshTime_(other.refreshTime_)
 {}
 
