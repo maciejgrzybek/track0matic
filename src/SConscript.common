@@ -1,0 +1,22 @@
+# vim: ft=python
+
+Import('env')
+
+envCopy = env.Clone()
+
+envCopy.Append(
+                CPPPATH = '../src/',
+              )
+
+commonDir = 'Common'
+
+sourceTargets = [ 'eventtimer.cpp',
+                  'timersmanager.cpp' ]
+
+targets = []
+for source in sourceTargets:
+  targets.append(commonDir + '/' + source)
+
+library = envCopy.Library('Common',targets)
+
+Return( 'library' )

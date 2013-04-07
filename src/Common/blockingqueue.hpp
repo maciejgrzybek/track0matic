@@ -46,7 +46,7 @@ public:
   {
     {
       std::unique_lock<std::mutex> lock(mutex_);
-      queue_.push_front(value);
+      queue_.push(value);
     }
     condVar_.notify_one();
   }
