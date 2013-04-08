@@ -1,5 +1,3 @@
-// TODO implement this
-
 #include "maincontroller.h"
 
 namespace Controller
@@ -14,8 +12,14 @@ MainController
     view_(std::move(view)),
     messageDispatcher_(new MessageDispatcher(*model_,
                                              *this,
-                                             *view_))
-{}
+                                             *view_)),
+    timersManager_(new Common::TimersManager())
+{
+  std::shared_ptr<Common::Callable> callable(
+          new RefreshEventProducer(blockingQueue_)
+        );
+  timersManager_->startTimer(1000,callable);
+}
 
 MainController::~MainController()
 {}
@@ -30,6 +34,20 @@ void MainController::operator()()
     // perform action appropriate for received msg
     msg->accept(*messageDispatcher_);
   }
+}
+
+RefreshEventProducer::RefreshEventProducer(std::shared_ptr<
+                                            Common::BlockingQueue<
+                                              MessagePtr>
+                                           > blockingQueue)
+  : blockingQueue_(blockingQueue)
+{}
+
+void RefreshEventProducer::operator()(Common::EventTimer* /*timer*/)
+{
+  MessagePtr msg(new TimerTickMessage(time_types::duration_t(1))); // 1 interval
+
+  blockingQueue_->push(msg);
 }
 
 } // namespace Controller
