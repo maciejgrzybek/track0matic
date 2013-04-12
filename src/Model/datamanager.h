@@ -26,6 +26,8 @@ public:
   DataManager(const std::string& paramsPath = "options.xml",
               std::shared_ptr<DB::DynDBDriver> dynDbDriver
                 = std::shared_ptr<DB::DynDBDriver>(),
+              std::unique_ptr<estimation::EstimationFilter<> >
+                = std::unique_ptr<estimation::EstimationFilter<> >(),
               std::unique_ptr<ReportManager> reportManager
                 = std::unique_ptr<ReportManager>(),
               std::unique_ptr<AlignmentProcessor> alignmentProcessor
@@ -39,9 +41,7 @@ public:
               std::unique_ptr<FeatureExtractor> featureExtractor
                 = std::unique_ptr<FeatureExtractor>(),
               std::unique_ptr<FusionExecutor> fusionExecutor
-                = std::unique_ptr<FusionExecutor>(),
-              std::unique_ptr<estimation::EstimationFilter<> >
-                = std::unique_ptr<estimation::EstimationFilter<> >());
+                = std::unique_ptr<FusionExecutor>());
 
   /**
    * In multithreaded environment,
@@ -74,6 +74,8 @@ private:
   Snapshot cloneTracksInSnapshot(std::shared_ptr<
                                      std::set<std::shared_ptr<Track> >
                                   > tracks) const;
+
+  void initializeKalmanFilter();
 
   /* after C++11's std::atomic_load<std::shared_ptr> will be implemented
    * we will use lock-free implementation, based on it,
