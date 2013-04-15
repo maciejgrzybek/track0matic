@@ -1,15 +1,17 @@
 # vim: ft=python
 
-Import('env')
+Import('qtEnv')
 
 viewDir = 'View'
 
-envCopy = env.Clone()
+envCopy = qtEnv.Clone()
+
 envCopy.Append(
                 CPPPATH = '.'
               )
 
-sourceTargets = [ 'qtview.cpp' ]
+sourceTargets = [ 'qtview.cpp',
+                  'Graphic/qtrenderer.cpp' ]
 
 targets = []
 for source in sourceTargets:

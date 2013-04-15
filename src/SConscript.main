@@ -1,8 +1,8 @@
 # vim: ft=python
 
-Import('env')
+Import('qtEnv')
 
-envCopy = env.Clone()
+envCopy = qtEnv.Clone()
 
 envCopy.Append(
                 CPPPATH = '../src/',
@@ -12,7 +12,7 @@ targets = [ 'main.cpp' ]
 
 program = envCopy.Program(target = '../bin/Tracker',
                           source = targets,
-                          LIBS = [ 'QtView', 'Controller', 'Common', 'Model', 'QtView' ],
-                          LIBPATH = '.')
+                          LIBS = [ 'QtView', 'Controller', 'Common', 'Model', 'QtCore', 'QtGui' ],
+                          LIBPATH = ['.','/usr/lib64/qt4'])
 
 Return( 'program' )
