@@ -1,3 +1,5 @@
+#include <boost/uuid/uuid_generators.hpp>
+
 #include "detectionreport.h"
 
 #include "track.h"
@@ -10,7 +12,8 @@ Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
     lon_(longitude),
     lat_(latitude),
     mos_(metersOverSea),
-    refreshTime_(creationTime)
+    refreshTime_(creationTime),
+    uuid_(boost::uuids::random_generator()()) // generate random uuid
 {
   initializeFilter(lon_,lat_,mos_,lonVar,latVar,mosVar);
 }
@@ -58,6 +61,11 @@ std::tuple<double,double,double> Track::getPredictedState() const
 time_types::ptime_t Track::getRefreshTime() const
 {
   return refreshTime_;
+}
+
+boost::uuids::uuid Track::getUuid() const
+{
+  return uuid_;
 }
 
 void Track::applyMeasurement(const DetectionReport& dr)
@@ -117,7 +125,8 @@ Track::Track(const Track& other)
     predictedLon_(other.predictedLon_),
     predictedLat_(other.predictedLat_),
     predictedMos_(other.predictedMos_),
-    refreshTime_(other.refreshTime_)
+    refreshTime_(other.refreshTime_),
+    uuid_(other.uuid_)
 {}
 
 estimation::EstimationFilter<>::vector_t

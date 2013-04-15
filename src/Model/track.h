@@ -4,6 +4,8 @@
 #include <memory>
 #include <unordered_set>
 
+#include <boost/uuid/uuid.hpp>
+
 #include <Common/time.h>
 
 #include "estimationfilter.hpp"
@@ -61,6 +63,8 @@ public:
 
   time_types::ptime_t getRefreshTime() const;
 
+  boost::uuids::uuid getUuid() const;
+
   /**
    * @brief Puts model state of given DR to Track's estimation filter
    *  It's invoking correct() method on EstimationFilter assigned to Track,
@@ -109,6 +113,8 @@ private:
   features_set_t features_;
   std::unique_ptr<estimation::EstimationFilter<> > estimationFilter_;
   time_types::ptime_t refreshTime_;
+
+  const boost::uuids::uuid uuid_;
 };
 
 class HumanTrack : public Track
