@@ -208,6 +208,12 @@ public:
           (packetSize_)
           (offset_).exec();
 
+      { // TODO rewrite this, when logger will be more sophisticated
+        std::stringstream msg;
+        msg << "Fetched " << result_.size() << " rows";
+        Common::GlobalLogger::getInstance().log("DynDBDriver",msg.str());
+      }
+
       resultIterator_ = result_.begin();
       if (resultIterator_ == result_.end()) // if after fetching, result is empty - tell interested ones.
         throw DB::exceptions::NoResultAvailable();

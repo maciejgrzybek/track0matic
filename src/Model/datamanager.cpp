@@ -119,6 +119,8 @@ std::shared_ptr<
 {
   compute(); // loops through data flow, to maintain tracking process
 
+  trackManager_->removeExpiredTracks(boost::chrono::seconds(3)); // TODO parametrize this!
+
   // create new set of Tracks on heap
   //  and initialize it with tracks from TrackManager
   std::shared_ptr<

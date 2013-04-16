@@ -1,5 +1,6 @@
 #include <algorithm>
 
+#include <Common/logger.h>
 #include <Common/time.h>
 #include "trackmanager.h"
 
@@ -51,11 +52,18 @@ void TrackManager::setFeatureExtractor(std::unique_ptr<FeatureExtractor> extract
 std::size_t TrackManager::removeExpiredTracks(time_types::ptime_t currentTime,
                                               time_types::duration_t TTL)
 {
+  { // TODO rewrite this, when logger will be more sophisticated
+    Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
+    std::stringstream msg;
+    msg << "Removing expired tracks; current time = " << currentTime
+        << " TTL = " << TTL;
+    logger.log("DataManager",msg.str());
+  }
+
   std::size_t count = 0;
 
   std::set<std::shared_ptr<Track> >::const_iterator iter = tracks_.begin();
-  std::set<std::shared_ptr<Track> >::const_iterator endIter = tracks_.end();
-  for (; iter != endIter; ++iter)
+  while (iter != tracks_.end())
   {
     const std::shared_ptr<Track>& currentTrack = *iter; // reference,
           // because it only points to current element (from iterator);
@@ -65,9 +73,17 @@ std::size_t TrackManager::removeExpiredTracks(time_types::ptime_t currentTime,
       iter = tracks_.erase(iter);
       ++count;
     }
+    else
+      ++iter;
   }
 
   return count;
+}
+
+std::size_t TrackManager::removeExpiredTracks(time_types::duration_t TTL)
+{
+  time_types::ptime_t latestTrackRefreshTime = getLatestTrackRefreshTime();
+  return removeExpiredTracks(latestTrackRefreshTime,TTL);
 }
 
 std::shared_ptr<Track>
@@ -308,4 +324,18 @@ TrackManager::compare(const DetectionReport& l, const DetectionReport& r) const
   double lat_dist = l.getLatitude() - r.getLatitude();
 
   return 1/sqrt(pow(lon_dist,2) + pow(lat_dist,2)); // higher distance, lower rating -> closer DRs, better rating
+}
+
+time_types::ptime_t TrackManager::getLatestTrackRefreshTime() const
+{
+  time_types::ptime_t highestTime; // initialized with 0s after epoch
+  for (std::shared_ptr<Track> track : tracks_)
+  {
+    time_types::ptime_t tracksRefreshTime = track->getRefreshTime();
+    if (tracksRefreshTime > highestTime)
+      highestTime = tracksRefreshTime; // TODO move semantics here,
+    // if sure, there never won't be returning by reference track's refresh time
+  }
+
+  return highestTime;
 }

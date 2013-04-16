@@ -70,6 +70,7 @@ boost::uuids::uuid Track::getUuid() const
 
 void Track::applyMeasurement(const DetectionReport& dr)
 {
+  refreshTime_ = dr.getSensorTime(); // refresh track
   return applyMeasurement(dr.getLongitude(),
                           dr.getLatitude(),
                           dr.getMetersOverSea());

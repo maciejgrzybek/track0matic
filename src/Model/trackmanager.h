@@ -85,7 +85,7 @@ public:
   void setFeatureExtractor(std::unique_ptr<FeatureExtractor> extractor);
 
   /**
-   * @brief Removes track which were not confirmed (refreshed)
+   * @brief Removes tracks which were not confirmed (refreshed)
    *  for time longer than given threshold
    * @param time point indicating current date
    * @param TTL - time to live;
@@ -95,6 +95,17 @@ public:
    */
   std::size_t removeExpiredTracks(time_types::ptime_t currentTime,
                                   time_types::duration_t TTL);
+
+  /**
+   * @brief Removes tracks which were not confirmed (refreshed)
+   *  for time longer than given treshold (TTL),
+   *  assuming latest Track's refreshTime as current time.
+   * @param TTL - time to live;
+   *  threshold which indices how long after current time
+   *  tracks are considered expired
+   * @overload removeExpiredTracks
+   */
+  std::size_t removeExpiredTracks(time_types::duration_t TTL);
 
 private:
   // mapping two DRs on rate (grade which implices their quality (based on distance etc.))
@@ -156,6 +167,13 @@ private:
    * @return rating of two DRs; higher - better
    */
   double compare(const DetectionReport&, const DetectionReport&) const;
+
+  /**
+   * @brief Returns refresh time of the latest (the youngest) Track.
+   * @return time_types::ptime_t - time point when last refresh occurred on latest Track
+   * @note greedy, naive linear search; can be optimized when needed
+   */
+  time_types::ptime_t getLatestTrackRefreshTime() const;
 
   std::set<std::shared_ptr<Track> > tracks_;
   std::unique_ptr<FeatureExtractor> featureExtractor_;

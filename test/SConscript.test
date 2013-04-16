@@ -32,7 +32,7 @@ for source in commonSourceTargets:
   targets.append(commonDir + '/' + source)
 
 # Build one or more test runners.
-program = envCopy.Program('test', targets, LIBS=['boost_unit_test_framework','Model'],LIBPATH='../build')
+program = envCopy.Program('test', targets, LIBS=['boost_unit_test_framework','Model','Common'],LIBPATH='../build')
 # Depend on the runner to ensure that it's built before running it - Note: using abspath.
 test_alias = Alias('test', [program], program[0].abspath)
 # Simply required.  Without it, 'test' is never considered out of date.
