@@ -1,6 +1,8 @@
 #include <chrono>
 #include <thread>
 
+#include <Common/logger.h>
+
 #include "datamanager.h"
 
 namespace Model
@@ -96,6 +98,8 @@ DataManager::DataManager(const std::string& paramsPath,
 
 Snapshot DataManager::computeState()
 {
+  Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
+  logger.log("DataManager","Computing state.");
   auto tracks = computeTracks();
   // clone Tracks, to ensure safety in multithreaded environment
   Snapshot s = cloneTracksInSnapshot(tracks);
@@ -130,14 +134,30 @@ std::shared_ptr<
 
 void DataManager::compute()
 {
+  Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
   std::set<DetectionReport> DRs = reportManager_->getDRs();
+
+  { // TODO rewrite this, when logger will be more sophisticated
+    std::stringstream msg;
+    msg << "Retrieved " << DRs.size() << " detection reports.";
+    logger.log("DataManager",msg.str());
+  }
+
   while (!DRs.empty())
   {
     alignmentProcessor_->setDRsCollection(DRs);
     std::set<DetectionReport> alignedGroup
         = alignmentProcessor_->getNextAlignedGroup();
+
     while (!alignedGroup.empty())
     {
+      { // TODO rewrite this, when logger will be more sophisticated
+        std::stringstream msg;
+        msg << "Generated aligned group of " << alignedGroup.size()
+            << " detection reports.";
+        logger.log("DataManager",msg.str());
+      }
+
       std::vector<std::set<DetectionReport> > DRsGroups
           = candidateSelector_->getMeasurementGroups(alignedGroup);
 

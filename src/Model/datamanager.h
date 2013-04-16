@@ -4,6 +4,7 @@
 #include <memory>
 #include <string>
 
+#include <Common/logger.h>
 #include <Common/threadbuffer.hpp>
 
 #include <Model/model.h>

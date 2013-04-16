@@ -14,6 +14,8 @@
 #include <pqxx/transaction>
 #include <pqxx/prepared_statement>
 
+#include <Common/logger.h>
+
 class Sensor;
 
 namespace DB
@@ -103,7 +105,8 @@ public:
           "extract(epoch from upload_time) as upl_ts,"
           "extract(epoch from sensor_time) as sns_ts "
           "FROM detection_reports WHERE "
-          "sensor_time >= to_timestamp($1) LIMIT $2 OFFSET $3";
+          "sensor_time >= to_timestamp($1) LIMIT $2 OFFSET $3 "
+          "ORDER BY sensor_time ASC, upload_time ASC";
 
       // prepare statement (query) for connection
       dbdriver.db_connection_->prepare("DR_select_statement",sql);
@@ -165,6 +168,14 @@ public:
     void fetchRows()
     {
       pqxx::work t(*dbdriver_.db_connection_,"DRs fetcher");
+      { // TODO rewrite this, when logger will be more sophisticated
+        std::stringstream msg;
+        msg << "Fetching rows with starting time = "
+            << timeToInt64(startingTime_)
+            << " packet size = " << packetSize_
+            << " offset = " << offset_;
+        Common::GlobalLogger::getInstance().log("DynDBDriver",msg.str());
+      }
       result_
           = t.prepared("DR_select_statement")
           (pqxx::to_string(timeToInt64(startingTime_)))

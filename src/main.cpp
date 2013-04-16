@@ -5,6 +5,7 @@
 #include <QApplication>
 
 #include <Common/blockingqueue.hpp>
+#include <Common/logger.h>
 
 #include <Model/datamanager.h>
 
@@ -15,6 +16,10 @@
 
 int main(int argc, char* argv[])
 {
+  Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
+  logger.setAgent(std::unique_ptr<Common::LoggerAgent>(
+                    new Common::ConsoleLoggerAgent()));
+  logger.log("main","Logger setup complete");
   QApplication app(argc,argv);
 
   std::shared_ptr<Common::BlockingQueue<Controller::MessagePtr> >
