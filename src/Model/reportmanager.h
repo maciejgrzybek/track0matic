@@ -21,9 +21,13 @@ public:
   std::set<DetectionReport> getDRs();
 
 private:
+  void setupNextCursor();
+
   std::shared_ptr<DB::DynDBDriver> dbdriver_;
   DB::DynDBDriver::DRCursor drCursor_;
   std::size_t packetSize_; // how many DRs to obtain at once
+
+  DetectionReport lastDR_;
 };
 
 #endif // REPORTMANAGER_H

@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include <string>
+#include <sstream>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/serialization/access.hpp>
@@ -71,8 +72,7 @@ public:
           mos(mos),
           upload_time(upload_time),
           sensor_time(sensor_time)
-      {
-      }
+      {}
 
       int sensor_id;
       int dr_id;
@@ -89,10 +89,15 @@ public:
      * @param dbdriver reference to DB driver, to be used for fetching rows
      * @param timestamp number of seconds from epoch start (01.01.1970) from where DRs are fetched
      * @param packetSize how many DRs are selected at once
+     * @param ID of last retrieved DR - Cursor will obtain DRs with ID higher than given
+     *  if -1 value given - option is disabled.
+     *  This option is used to actively poll DB for new DRs,
+     *  when no more result are yet available.
      */
-    DRCursor(DynDBDriver& dbdriver,
+    DRCursor(DynDBDriver* dbdriver,
              time_t timestamp = 0,
-             unsigned packetSize = 20)
+             unsigned packetSize = 20,
+             int beforeFirstDRId = -1)
       : dbdriver_(dbdriver),
         packetSize_(packetSize),
         offset_(0),
@@ -100,16 +105,32 @@ public:
     {
       startingTime_ = boost::posix_time::from_time_t(timestamp);
 
-      const std::string sql
-          = "SELECT *,"
-          "extract(epoch from upload_time) as upl_ts,"
-          "extract(epoch from sensor_time) as sns_ts "
-          "FROM detection_reports WHERE "
-          "sensor_time >= to_timestamp($1) LIMIT $2 OFFSET $3 "
-          "ORDER BY sensor_time ASC, upload_time ASC";
+      std::stringstream sql;
+      if (beforeFirstDRId > -1)
+      {
+        sql << "SELECT *,"
+              "extract(epoch from upload_time) as upl_ts,"
+              "extract(epoch from sensor_time) as sns_ts "
+              "FROM detection_reports WHERE "
+              "sensor_time >= to_timestamp($1) AND dr_id > "
+              << beforeFirstDRId
+              << "ORDER BY sensor_time ASC, upload_time ASC "
+                 "LIMIT $2 OFFSET $3";
+      }
+      else
+      {
+        sql << "SELECT *,"
+              "extract(epoch from upload_time) as upl_ts,"
+              "extract(epoch from sensor_time) as sns_ts "
+              "FROM detection_reports WHERE "
+              "sensor_time >= to_timestamp($1) "
+              "ORDER BY sensor_time ASC, upload_time ASC "
+              "LIMIT $2 OFFSET $3";
+      }
 
       // prepare statement (query) for connection
-      dbdriver.db_connection_->prepare("DR_select_statement",sql);
+      dbdriver->db_connection_->unprepare("DR_select_statement");
+      dbdriver->db_connection_->prepare("DR_select_statement",sql.str());
     }
 
     /**
@@ -133,6 +154,11 @@ public:
                     row[4].as<double>(),
                     row[7].as<double>(), // read as double, because of microseconds
                     row[8].as<double>()); // like above
+    }
+
+    unsigned getPacketSize() const
+    {
+      return packetSize_;
     }
 
   private:
@@ -167,7 +193,7 @@ public:
      */
     void fetchRows()
     {
-      pqxx::work t(*dbdriver_.db_connection_,"DRs fetcher");
+      pqxx::work t(*dbdriver_->db_connection_,"DRs fetcher");
       { // TODO rewrite this, when logger will be more sophisticated
         std::stringstream msg;
         msg << "Fetching rows with starting time = "
@@ -189,7 +215,7 @@ public:
       resultInitialized_ = true;
     }
 
-    DynDBDriver& dbdriver_;
+    DynDBDriver* dbdriver_;
     boost::posix_time::ptime startingTime_;
     unsigned packetSize_;
     unsigned offset_;
@@ -228,7 +254,8 @@ public:
   ~DynDBDriver();
 
   DRCursor getDRCursor(time_t timestamp = 0,
-                       unsigned packetSize = 20);
+                       unsigned packetSize = 20,
+                       int beforeFirstDRId = -1);
 
   std::set<class Sensor*> getSensors();
 

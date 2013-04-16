@@ -67,6 +67,11 @@ time_types::ptime_t DetectionReport::getSensorTime() const
   return time_types::clock_t::from_time_t(sensorTime);
 }
 
+time_t DetectionReport::getRawSensorTime() const
+{
+  return sensorTime;
+}
+
 Sensor* DetectionReport::getSensor() const
 {
   return sensor;

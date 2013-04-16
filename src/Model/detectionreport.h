@@ -29,6 +29,7 @@ public:
   double getMetersOverSea() const;
   time_types::ptime_t getUploadTime() const;
   time_types::ptime_t getSensorTime() const;
+  time_t getRawSensorTime() const;
   Sensor* getSensor() const;
 
   features_set_t getFeatures() const;

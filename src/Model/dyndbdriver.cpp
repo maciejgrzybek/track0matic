@@ -39,9 +39,10 @@ DynDBDriver::~DynDBDriver()
 }
 
 DynDBDriver::DRCursor DynDBDriver::getDRCursor(time_t timestamp,
-                                               unsigned packetSize)
+                                               unsigned packetSize,
+                                               int beforeFirstDRId)
 {
-  return DRCursor(*this,timestamp,packetSize);
+  return DRCursor(this,timestamp,packetSize,beforeFirstDRId);
 }
 
 std::set<Sensor*> DynDBDriver::getSensors()
