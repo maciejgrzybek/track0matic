@@ -22,6 +22,11 @@ void WorkingModeChangeMessage::accept(MessageDispatcher& md)
   md.visit(*this);
 }
 
+void QuitRequestedMessage::accept(MessageDispatcher& md)
+{
+  md.visit(*this);
+}
+
 TimerTickMessage::TimerTickMessage(time_types::duration_t timeDuration)
   : timeDuration_(timeDuration)
 {}

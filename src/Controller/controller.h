@@ -16,6 +16,11 @@ public:
    *  based on these messages.
    */
   virtual void operator()() = 0;
+
+  /**
+   * @brief Quits whole application.
+   */
+  virtual void quit() = 0;
 };
 
 } // namespace Controller

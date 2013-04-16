@@ -1,6 +1,7 @@
 #ifndef MAINCONTROLLER_H
 #define MAINCONTROLLER_H
 
+#include <atomic>
 #include <memory>
 
 #include <Common/blockingqueue.hpp>
@@ -27,6 +28,8 @@ public:
   virtual ~MainController();
 
   virtual void operator()();
+  virtual void quit();
+  bool isWorking() const;
 
 private:
   std::unique_ptr<Model::Model> model_;
@@ -34,6 +37,8 @@ private:
   std::shared_ptr<Common::BlockingQueue<MessagePtr> > blockingQueue_;
   const std::unique_ptr<MessageDispatcher> messageDispatcher_;
   const std::unique_ptr<Common::TimersManager> timersManager_;
+
+  std::atomic_bool working_;
 };
 
 class RefreshEventProducer : public Common::Callable

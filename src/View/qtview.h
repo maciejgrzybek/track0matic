@@ -26,6 +26,12 @@ public:
   virtual ~QtView();
   virtual void showState(Model::Snapshot);
 
+  // invoked by renderer
+  virtual void quitRequested();
+
+  // invoked by Controller
+  virtual void quit();
+
 private:
   std::shared_ptr<Common::BlockingQueue<Controller::MessagePtr> > blockingQueue_;
   QtRenderer* renderer_;

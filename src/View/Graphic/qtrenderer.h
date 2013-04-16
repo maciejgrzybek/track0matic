@@ -19,6 +19,8 @@ namespace View
 namespace Graphic
 {
 
+class QtView;
+
 class GraphicalTrack : public QGraphicsEllipseItem
 {
 public:
@@ -34,26 +36,33 @@ class QtRenderer : public QObject
 {
   Q_OBJECT
 public:
-  QtRenderer(std::size_t width, std::size_t height, QObject* parent = nullptr);
+  QtRenderer(std::size_t width, std::size_t height, QtView* parent);
   virtual ~QtRenderer();
 
   void show();
   void addTrack(const Track*);
   void clearScene();
+  void requestExit();
+  void close();
 
 signals:
   void addTrackSignal(GraphicalTrack*);
   void clearSceneSignal();
+  void exitRequestedSignal();
+  void showSignal();
+  void quitSignal();
 
 protected slots:
   void performAddTrack(GraphicalTrack*);
-  void quit();
+  void quitRequested();
 
 private:
   static GraphicalTrack* transformTrackFromSnapshot(const Track*);
   void drawStaticGraphics();
   void drawBackground();
   void setupMenu();
+
+  QtView* parent_;
 
   QMainWindow* mainWindow_;
   QGraphicsScene* scene_;

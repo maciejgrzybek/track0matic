@@ -1,5 +1,7 @@
 #include "qtrenderer.h"
 
+#include <cassert>
+
 #include <QMainWindow>
 #include <QMenuBar>
 
@@ -9,6 +11,8 @@
 
 #include <QColor>
 #include <QPen>
+
+#include <View/qtview.h>
 
 #include <Model/track.h>
 
@@ -27,16 +31,22 @@ GraphicalTrack::GraphicalTrack(boost::uuids::uuid uuid,
 
 /******************************************************************************/
 
-QtRenderer::QtRenderer(std::size_t width, std::size_t height, QObject* parent)
-  : QObject(parent),
+QtRenderer::QtRenderer(std::size_t width, std::size_t height, QtView* parent)
+  : parent_(parent),
     mainWindow_(new QMainWindow()),
     scene_(new QGraphicsScene(-qreal(width/2.0),-qreal(height/2.0),width,height)),
     view_(new QGraphicsView(scene_))
 {
+  mainWindow_->setAttribute(Qt::WA_QuitOnClose,false);
   connect(this,SIGNAL(addTrackSignal(GraphicalTrack*)),
           SLOT(performAddTrack(GraphicalTrack*)));
 
   connect(this,SIGNAL(clearSceneSignal()),scene_,SLOT(clear()));
+
+  connect(this,SIGNAL(exitRequestedSignal()),SLOT(quitRequested()));
+
+  connect(this,SIGNAL(showSignal()),mainWindow_,SLOT(show()));
+  connect(this,SIGNAL(quitSignal()),mainWindow_,SLOT(close()));
 
   drawStaticGraphics();
   setupMenu();
@@ -53,7 +63,7 @@ QtRenderer::~QtRenderer()
 
 void QtRenderer::show()
 {
-  mainWindow_->show();
+  emit showSignal();
 }
 
 void QtRenderer::addTrack(const Track* track)
@@ -67,14 +77,25 @@ void QtRenderer::clearScene()
   emit clearSceneSignal(); // invokeLater
 }
 
+void QtRenderer::requestExit()
+{
+  emit exitRequestedSignal(); // invokeLater
+}
+
+void QtRenderer::close()
+{
+  emit quitSignal();
+}
+
 void QtRenderer::performAddTrack(GraphicalTrack* graphicalTrack)
 {
   scene_->addItem(graphicalTrack);
 }
 
-void QtRenderer::quit()
+void QtRenderer::quitRequested()
 {
-  mainWindow_->close();
+  assert(parent_);
+  parent_->quitRequested();
 }
 
 GraphicalTrack* QtRenderer::transformTrackFromSnapshot(const Track* track)
@@ -104,7 +125,7 @@ void QtRenderer::drawBackground()
 
 void QtRenderer::setupMenu()
 {
-  mainWindow_->menuBar()->addAction(tr("Quit"), this, SLOT(quit()));
+  mainWindow_->menuBar()->addAction(tr("Quit"), this, SLOT(quitRequested()));
 }
 
 } // namespace Graphic

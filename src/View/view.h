@@ -9,10 +9,13 @@ namespace View
 class View
 {
 public:
-  ~View()
+  virtual ~View()
   {}
 
   virtual void showState(Model::Snapshot) = 0;
+
+  // closes visualization part of application
+  virtual void quit() = 0;
 };
 
 } // namespace View

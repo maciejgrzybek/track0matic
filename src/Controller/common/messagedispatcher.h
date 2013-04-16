@@ -32,6 +32,7 @@ public:
                     View::View&);
 
   void visit(class WorkingModeChangeMessage&);
+  void visit(class QuitRequestedMessage&);
   void visit(class TimerTickMessage&);
 
 private:

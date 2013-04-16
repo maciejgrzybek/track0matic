@@ -35,6 +35,12 @@ private:
   WorkingMode workingMode_;
 };
 
+class QuitRequestedMessage : public Message
+{
+public:
+  virtual void accept(MessageDispatcher&);
+};
+
 class TimerTickMessage : public Message
 {
 public:

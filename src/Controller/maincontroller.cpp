@@ -13,7 +13,8 @@ MainController
     messageDispatcher_(new MessageDispatcher(*model_,
                                              *this,
                                              *view_)),
-    timersManager_(new Common::TimersManager())
+    timersManager_(new Common::TimersManager()),
+    working_(true)
 {
   std::shared_ptr<Common::Callable> callable(
           new RefreshEventProducer(blockingQueue_)
@@ -26,7 +27,7 @@ MainController::~MainController()
 
 void MainController::operator()()
 {
-  while (true) // main loop
+  while (working_) // main loop
   {
     MessagePtr msg;
     blockingQueue_->pop(msg); // get message from queue or hang on,
@@ -34,6 +35,18 @@ void MainController::operator()()
     // perform action appropriate for received msg
     msg->accept(*messageDispatcher_);
   }
+  Common::GlobalLogger::getInstance().log("MainController","Left main loop");
+  view_->quit(); // before stopping work, close View
+}
+
+void MainController::quit()
+{
+  working_ = false;
+}
+
+bool MainController::isWorking() const
+{
+  return working_;
 }
 
 RefreshEventProducer::RefreshEventProducer(std::shared_ptr<

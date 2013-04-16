@@ -26,6 +26,11 @@ void MessageDispatcher::visit(WorkingModeChangeMessage& /*m*/)
   // perform an action appropriate for WorkingModeChange message
 }
 
+void MessageDispatcher::visit(QuitRequestedMessage& /*m*/)
+{
+  controller_.quit();
+}
+
 void MessageDispatcher::visit(TimerTickMessage& /*m*/)
 {
   Model::Snapshot state = model_.computeState(); // get data from Model
