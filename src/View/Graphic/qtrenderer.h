@@ -5,6 +5,7 @@
 
 #include <boost/uuid/uuid.hpp>
 
+#include <QObject>
 #include <QGraphicsEllipseItem>
 
 class QGraphicsScene;
@@ -28,14 +29,21 @@ private:
   const boost::uuids::uuid uuid_;
 };
 
-class QtRenderer
+class QtRenderer : public QObject
 {
+  Q_OBJECT
 public:
-  QtRenderer(std::size_t width, std::size_t height);
-  ~QtRenderer();
+  QtRenderer(std::size_t width, std::size_t height, QObject* parent = nullptr);
+  virtual ~QtRenderer();
 
   void show();
   void addTrack(const Track*);
+
+signals:
+  void addTrack(GraphicalTrack*);
+
+protected slots:
+  void performAddTrack(GraphicalTrack*);
 
 private:
   static GraphicalTrack* transformTrackFromSnapshot(const Track*);

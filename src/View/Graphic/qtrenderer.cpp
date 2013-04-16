@@ -21,10 +21,14 @@ GraphicalTrack::GraphicalTrack(boost::uuids::uuid uuid,
 
 /******************************************************************************/
 
-QtRenderer::QtRenderer(std::size_t width, std::size_t height)
-  : scene_(new QGraphicsScene(0.0,0.0,width,height)),
+QtRenderer::QtRenderer(std::size_t width, std::size_t height, QObject* parent)
+  : QObject(parent),
+    scene_(new QGraphicsScene(0.0,0.0,width,height)),
     view_(new QGraphicsView(scene_))
-{}
+{
+  connect(this,SIGNAL(addTrack(GraphicalTrack*)),
+          SLOT(performAddTrack(GraphicalTrack*)));
+}
 
 QtRenderer::~QtRenderer()
 {
@@ -40,6 +44,11 @@ void QtRenderer::show()
 void QtRenderer::addTrack(const Track* track)
 {
   GraphicalTrack* graphicalTrack = transformTrackFromSnapshot(track);
+  emit addTrack(graphicalTrack); // invokeLater (put into Qt msg queue)
+}
+
+void QtRenderer::performAddTrack(GraphicalTrack* graphicalTrack)
+{
   scene_->addItem(graphicalTrack);
 }
 
