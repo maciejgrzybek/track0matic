@@ -10,6 +10,7 @@
 
 class QGraphicsScene;
 class QGraphicsView;
+class QMainWindow;
 class Track;
 
 namespace View
@@ -38,16 +39,23 @@ public:
 
   void show();
   void addTrack(const Track*);
+  void clearScene();
 
 signals:
-  void addTrack(GraphicalTrack*);
+  void addTrackSignal(GraphicalTrack*);
+  void clearSceneSignal();
 
 protected slots:
   void performAddTrack(GraphicalTrack*);
+  void quit();
 
 private:
   static GraphicalTrack* transformTrackFromSnapshot(const Track*);
+  void drawStaticGraphics();
+  void drawBackground();
+  void setupMenu();
 
+  QMainWindow* mainWindow_;
   QGraphicsScene* scene_;
   QGraphicsView* view_;
 };

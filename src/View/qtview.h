@@ -23,6 +23,7 @@ class QtView : public View
 {
 public:
   QtView(std::shared_ptr<Common::BlockingQueue<Controller::MessagePtr> >);
+  virtual ~QtView();
   virtual void showState(Model::Snapshot);
 
 private:
