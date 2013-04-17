@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include <boost/random/uniform_int_distribution.hpp>
+
 #include <QMainWindow>
 #include <QMenuBar>
 
@@ -28,6 +30,16 @@ GraphicalTrack::GraphicalTrack(boost::uuids::uuid uuid,
   : QGraphicsEllipseItem(x,y,width,height),
     uuid_(uuid)
 {}
+
+boost::uuids::uuid GraphicalTrack::getUuid() const
+{
+  return uuid_;
+}
+
+void GraphicalTrack::moveBasedOnOther(const GraphicalTrack* track)
+{
+  update(track->boundingRect());
+}
 
 /******************************************************************************/
 
@@ -89,7 +101,24 @@ void QtRenderer::close()
 
 void QtRenderer::performAddTrack(GraphicalTrack* graphicalTrack)
 {
-  scene_->addItem(graphicalTrack);
+  // rewrite it to be done in cleaner way
+  boost::uuids::uuid uuid = graphicalTrack->getUuid();
+  QMap<boost::uuids::uuid,GraphicalTrack*>::const_iterator iter
+      = tracks_.find(uuid);
+  GraphicalTrack* current = nullptr;
+  if (iter == tracks_.end())
+  { // track didn't exist in Scene
+    scene_->addItem(graphicalTrack);
+    tracks_[uuid] = graphicalTrack;
+    current = graphicalTrack;
+  }
+  else
+  { // track already existed in Scene
+    iter.value()->moveBasedOnOther(graphicalTrack);
+    current = iter.value();
+  }
+
+  chooseColorForTrack(current);
 }
 
 void QtRenderer::quitRequested()
@@ -126,6 +155,25 @@ void QtRenderer::drawBackground()
 void QtRenderer::setupMenu()
 {
   mainWindow_->menuBar()->addAction(tr("Quit"), this, SLOT(quitRequested()));
+}
+
+void QtRenderer::chooseColorForTrack(GraphicalTrack* track)
+{
+  if (track->brush() != QBrush()) // brush already set
+    return; // do not change
+
+  QPen pen(Qt::yellow); // yellow pen (border)
+  std::vector<QColor> colors = {
+                                 Qt::red,
+                                 Qt::green,
+                                 Qt::blue
+                               };
+  boost::random::uniform_int_distribution<> dist(0, colors.size()-1);
+  std::size_t num = dist(randomGenerator_);
+  QColor color = colors.at(num);
+  QBrush brush(color);
+  track->setPen(pen);
+  track->setBrush(brush);
 }
 
 } // namespace Graphic

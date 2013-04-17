@@ -3,8 +3,10 @@
 
 #include <memory>
 
+#include <boost/random/mersenne_twister.hpp>
 #include <boost/uuid/uuid.hpp>
 
+#include <QMap>
 #include <QObject>
 #include <QGraphicsEllipseItem>
 
@@ -27,6 +29,9 @@ public:
   GraphicalTrack(boost::uuids::uuid uuid,
                  qreal x, qreal y,
                  qreal width = 5, qreal height = 5);
+
+  boost::uuids::uuid getUuid() const;
+  void moveBasedOnOther(const GraphicalTrack*);
 
 private:
   const boost::uuids::uuid uuid_;
@@ -62,11 +67,21 @@ private:
   void drawBackground();
   void setupMenu();
 
+  // TODO rewrite it to be done in cleaner way and to wiser choose colors
+  //  (e.g. based on distance between tracks
+  //    - to avoid situation when two Tracks which are close to each other,
+  //      have the same color assigned)
+  void chooseColorForTrack(GraphicalTrack*);
+
+  boost::random::mt19937 randomGenerator_;
+
   QtView* parent_;
 
   QMainWindow* mainWindow_;
   QGraphicsScene* scene_;
   QGraphicsView* view_;
+
+  QMap<boost::uuids::uuid,GraphicalTrack*> tracks_;
 };
 
 } // namespace Graphic
