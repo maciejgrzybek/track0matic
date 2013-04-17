@@ -27,9 +27,13 @@ namespace Graphic
 GraphicalTrack::GraphicalTrack(boost::uuids::uuid uuid,
                                qreal x, qreal y,
                                qreal predictionX, qreal predictionY,
+                               qreal widthFactor, qreal heightFactor,
                                qreal width, qreal height)
-  : QGraphicsEllipseItem(x,y,width,height),
-    prediction_(new QGraphicsEllipseItem(predictionX,predictionY,2*width,2*height)),
+  : QGraphicsEllipseItem(x-width/2.0,y-height/2.0,width,height),
+    prediction_(new QGraphicsEllipseItem(predictionX-widthFactor*width/2.0,
+                                         predictionY-heightFactor*height/2.0,
+                                         widthFactor*width,
+                                         heightFactor*height)),
     uuid_(uuid)
 {
   prediction_->setParentItem(this);
@@ -41,6 +45,8 @@ boost::uuids::uuid GraphicalTrack::getUuid() const
 }
 
 /******************************************************************************/
+
+const double QtRenderer::varianceFactor_ = 10;
 
 QtRenderer::QtRenderer(std::size_t width, std::size_t height, QtView* parent)
   : parent_(parent),
@@ -122,10 +128,14 @@ GraphicalTrack* QtRenderer::transformTrackFromSnapshot(const Track* track)
   qreal y = track->getLatitude();
   qreal predictedX = track->getPredictedLongitude();
   qreal predictedY = track->getPredictedLatitude();
+  qreal varX = track->getLongitudePredictionVariance();
+  qreal varY = track->getLatitudePredictionVariance();
 
   GraphicalTrack* graphicalTrack = new GraphicalTrack(track->getUuid(),
                                                       x,y,
-                                                      predictedX,predictedY);
+                                                      predictedX,predictedY,
+                                                      varianceFactor_*varX,
+                                                      varianceFactor_*varY);
   return graphicalTrack;
 }
 

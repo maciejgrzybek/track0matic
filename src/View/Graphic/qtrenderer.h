@@ -29,7 +29,8 @@ public:
   GraphicalTrack(boost::uuids::uuid uuid,
                  qreal x, qreal y,
                  qreal predictionX, qreal predictionY,
-                 qreal width = 5, qreal height = 5);
+                 qreal widthFactor = 2, qreal heightFactor = 2,
+                 qreal width = 3, qreal height = 3);
 
   boost::uuids::uuid getUuid() const;
 
@@ -88,6 +89,7 @@ private:
   };
 
   static GraphicalTrack* transformTrackFromSnapshot(const Track*);
+  static const double varianceFactor_;
   void drawStaticGraphics();
   void drawBackground();
   void setupMenu();
