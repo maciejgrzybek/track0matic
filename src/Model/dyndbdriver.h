@@ -113,7 +113,7 @@ public:
               "extract(epoch from sensor_time) as sns_ts "
               "FROM detection_reports WHERE "
               "sensor_time >= to_timestamp($1) AND dr_id > "
-              << beforeFirstDRId
+              << beforeFirstDRId << " "
               << "ORDER BY sensor_time ASC, upload_time ASC "
                  "LIMIT $2 OFFSET $3";
       }
