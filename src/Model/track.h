@@ -59,6 +59,14 @@ public:
   double getLatitude() const;
   double getMetersOverSea() const;
 
+  double getPredictedLongitude() const;
+  double getPredictedLatitude() const;
+  double getPredictedMetersOverSea() const;
+
+  double getLongitudePredictionVariance() const;
+  double getLatitudePredictionVariance() const;
+  double getMetersOverSeaPredictionVariance() const;
+
   std::tuple<double,double,double> getPredictedState() const;
 
   time_types::ptime_t getRefreshTime() const;
@@ -95,12 +103,20 @@ private:
                         double latitude,
                         double metersoversea) const;
 
-  void initializeFilter(double longitude,
-                        double latitude,
-                        double metersoversea,
-                        double varLon,
-                        double varLat,
-                        double varMos);
+  std::pair<
+              estimation::EstimationFilter<>::vector_t,
+              estimation::EstimationFilter<>::vector_t
+           > initializeFilter(double longitude,
+                              double latitude,
+                              double metersoversea,
+                              double varLon,
+                              double varLat,
+                              double varMos);
+
+  void storePredictions(std::pair<
+                          estimation::EstimationFilter<>::vector_t,
+                          estimation::EstimationFilter<>::vector_t
+                        > prediction);
 
   double lon_;
   double lat_;
@@ -109,6 +125,10 @@ private:
   double predictedLon_;
   double predictedLat_;
   double predictedMos_; // not yet implemented
+
+  double lonPredictionVar_;
+  double latPredictionVar_;
+  double mosPredictionVar_; // not yet implemented
 
   features_set_t features_;
   std::unique_ptr<estimation::EstimationFilter<> > estimationFilter_;

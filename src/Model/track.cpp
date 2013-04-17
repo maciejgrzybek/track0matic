@@ -15,7 +15,12 @@ Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
     refreshTime_(creationTime),
     uuid_(boost::uuids::random_generator()()) // generate random uuid
 {
-  initializeFilter(lon_,lat_,mos_,lonVar,latVar,mosVar);
+  std::pair<
+              estimation::EstimationFilter<>::vector_t,
+              estimation::EstimationFilter<>::vector_t
+           > prediction = initializeFilter(lon_,lat_,mos_,lonVar,latVar,mosVar);
+
+  storePredictions(prediction);
 }
 
 void Track::refresh(time_types::ptime_t refreshTime)
@@ -51,6 +56,36 @@ double Track::getLatitude() const
 double Track::getMetersOverSea() const
 {
   return mos_;
+}
+
+double Track::getPredictedLongitude() const
+{
+  return predictedLon_;
+}
+
+double Track::getPredictedLatitude() const
+{
+  return predictedLat_;
+}
+
+double Track::getPredictedMetersOverSea() const
+{
+  return predictedMos_;
+}
+
+double Track::getLongitudePredictionVariance() const
+{
+  return lonPredictionVar_;
+}
+
+double Track::getLatitudePredictionVariance() const
+{
+  return latPredictionVar_;
+}
+
+double Track::getMetersOverSeaPredictionVariance() const
+{
+  return mosPredictionVar_;
 }
 
 std::tuple<double,double,double> Track::getPredictedState() const
@@ -96,11 +131,8 @@ void Track::applyMeasurement(double longitude, double latitude, double mos)
         estimation::EstimationFilter<>::vector_t,
         estimation::EstimationFilter<>::vector_t
       > predictedState = estimationFilter_->predict();
-  estimation::EstimationFilter<>::vector_t trackPredictedState
-      = predictedState.first;
 
-  predictedLon_ = trackPredictedState[0];
-  predictedLat_ = trackPredictedState[1];
+  storePredictions(predictedState);
 }
 
 bool Track::isTrackValid(time_types::ptime_t currentTime,
@@ -126,6 +158,9 @@ Track::Track(const Track& other)
     predictedLon_(other.predictedLon_),
     predictedLat_(other.predictedLat_),
     predictedMos_(other.predictedMos_),
+    lonPredictionVar_(other.lonPredictionVar_),
+    latPredictionVar_(other.latPredictionVar_),
+    mosPredictionVar_(other.mosPredictionVar_),
     refreshTime_(other.refreshTime_),
     uuid_(other.uuid_)
 {}
@@ -147,12 +182,15 @@ estimation::EstimationFilter<>::vector_t
   return state;
 }
 
-void Track::initializeFilter(double longitude,
-                             double latitude,
-                             double metersoversea,
-                             double varLon,
-                             double varLat,
-                             double varMos)
+std::pair<
+          estimation::EstimationFilter<>::vector_t,
+          estimation::EstimationFilter<>::vector_t
+         > Track::initializeFilter(double longitude,
+                                   double latitude,
+                                   double metersoversea,
+                                   double varLon,
+                                   double varLat,
+                                   double varMos)
 {
   estimation::EstimationFilter<>::vector_t state
       = coordsToStateVector(longitude,
@@ -165,4 +203,22 @@ void Track::initializeFilter(double longitude,
                             varMos);
 
   return estimationFilter_->initialize(state,covErr);
+}
+
+void Track::storePredictions(std::pair<
+                              estimation::EstimationFilter<>::vector_t,
+                              estimation::EstimationFilter<>::vector_t
+                             > prediction)
+{
+  estimation::EstimationFilter<>::vector_t trackPredictedState
+      = prediction.first;
+
+  predictedLon_ = trackPredictedState[0];
+  predictedLat_ = trackPredictedState[1];
+
+  estimation::EstimationFilter<>::vector_t trackPredictionVariance
+      = prediction.second;
+
+  lonPredictionVar_ = trackPredictionVariance[0];
+  latPredictionVar_ = trackPredictionVariance[1];
 }

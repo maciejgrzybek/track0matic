@@ -52,7 +52,8 @@ public:
    * @param state of model
    * @param parameter indicating how uncertain the state is
    */
-  virtual void initialize(vector_t state, vector_t varianceError)
+  virtual std::pair<vector_t,vector_t>
+    initialize(vector_t /*state*/, vector_t /*varianceError*/)
   {}
 
   virtual std::unique_ptr<EstimationFilter<StateModel> > clone() const = 0;
@@ -164,7 +165,8 @@ public:
           );
   }
 
-  virtual void initialize(vector_t state, vector_t varianceError)
+  virtual std::pair<vector_t,vector_t>
+    initialize(vector_t state, vector_t varianceError)
   {
     // translate whole vector_t to Vector
     Vector vec = arrayToUblas(state,std::tuple_size<vector_t>::value);
@@ -227,12 +229,13 @@ public:
 
 private:
   // only after successful end of this method execution, filter is properly initialized
-  virtual void initializeState(Vector state, Matrix covarianceError)
+  virtual std::pair<vector_t,vector_t>
+    initializeState(Vector state, Matrix covarianceError)
   {
     correctedState = state;
     correctedCovarianceError = covarianceError;
     initialized = true;
-    predict(); // needed to setup predictedCovarianceError
+    return predict(); // needed to setup predictedCovarianceError
   }
 
   // copies elements from Vector to vector_t collection.
@@ -281,6 +284,7 @@ private:
   {
     std::size_t size = std::tuple_size<vector_t>::value;
     Matrix result(size,size);
+    result.clear();
     for (unsigned int i = 0; i < size; ++i)
     {
       result(i,i) = v[i];
