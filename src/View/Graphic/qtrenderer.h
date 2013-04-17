@@ -28,12 +28,13 @@ class GraphicalTrack : public QGraphicsEllipseItem
 public:
   GraphicalTrack(boost::uuids::uuid uuid,
                  qreal x, qreal y,
+                 qreal predictionX, qreal predictionY,
                  qreal width = 5, qreal height = 5);
 
   boost::uuids::uuid getUuid() const;
-  void moveBasedOnOther(const GraphicalTrack*);
 
 private:
+  QGraphicsEllipseItem* prediction_;
   const boost::uuids::uuid uuid_;
 };
 
@@ -59,29 +60,45 @@ signals:
 
 protected slots:
   void performAddTrack(GraphicalTrack*);
+  void performClearScene();
   void quitRequested();
 
 private:
+  class ColorManager
+  {
+  public:
+    ColorManager();
+
+    std::pair<QColor,QColor> setColorForTrack(GraphicalTrack*);
+
+    // TODO rewrite it to be done in cleaner way and to wiser choose colors
+    //  (e.g. based on distance between tracks
+    //    - to avoid situation when two Tracks which are close to each other,
+    //      have the same color assigned)
+    std::pair<QColor,QColor> chooseColorForTrack(const GraphicalTrack*);
+
+  private:
+    std::pair<QColor,QColor>
+      generateNewColorForTrack(const GraphicalTrack*) const;
+
+    QMap<boost::uuids::uuid,std::pair<QColor,QColor> > trackColors_;
+    const QVector<QColor> availableColors;
+
+    mutable boost::random::mt19937 randomGenerator_;
+  };
+
   static GraphicalTrack* transformTrackFromSnapshot(const Track*);
   void drawStaticGraphics();
   void drawBackground();
   void setupMenu();
 
-  // TODO rewrite it to be done in cleaner way and to wiser choose colors
-  //  (e.g. based on distance between tracks
-  //    - to avoid situation when two Tracks which are close to each other,
-  //      have the same color assigned)
-  void chooseColorForTrack(GraphicalTrack*);
-
-  boost::random::mt19937 randomGenerator_;
+  ColorManager colorManager_;
 
   QtView* parent_;
 
   QMainWindow* mainWindow_;
   QGraphicsScene* scene_;
   QGraphicsView* view_;
-
-  QMap<boost::uuids::uuid,GraphicalTrack*> tracks_;
 };
 
 } // namespace Graphic

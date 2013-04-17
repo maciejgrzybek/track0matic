@@ -30,6 +30,13 @@ void QtView::showState(Model::Snapshot snapshot)
   std::shared_ptr<std::set<std::unique_ptr<Track> > > tracks
       = snapshot.getData();
 
+  {
+    std::stringstream msg;
+    msg << "Received snapshot, containing " << tracks->size() << " track(s).";
+    Common::GlobalLogger::getInstance().log("QtView",msg.str());
+  }
+  renderer_->clearScene();
+
   for (const std::unique_ptr<Track>& track : *tracks)
   {
     renderer_->addTrack(&*track); // ugly &*,

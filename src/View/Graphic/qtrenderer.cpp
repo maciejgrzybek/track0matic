@@ -26,19 +26,18 @@ namespace Graphic
 
 GraphicalTrack::GraphicalTrack(boost::uuids::uuid uuid,
                                qreal x, qreal y,
+                               qreal predictionX, qreal predictionY,
                                qreal width, qreal height)
   : QGraphicsEllipseItem(x,y,width,height),
+    prediction_(new QGraphicsEllipseItem(predictionX,predictionY,2*width,2*height)),
     uuid_(uuid)
-{}
+{
+  prediction_->setParentItem(this);
+}
 
 boost::uuids::uuid GraphicalTrack::getUuid() const
 {
   return uuid_;
-}
-
-void GraphicalTrack::moveBasedOnOther(const GraphicalTrack* track)
-{
-  update(track->boundingRect());
 }
 
 /******************************************************************************/
@@ -53,7 +52,7 @@ QtRenderer::QtRenderer(std::size_t width, std::size_t height, QtView* parent)
   connect(this,SIGNAL(addTrackSignal(GraphicalTrack*)),
           SLOT(performAddTrack(GraphicalTrack*)));
 
-  connect(this,SIGNAL(clearSceneSignal()),scene_,SLOT(clear()));
+  connect(this,SIGNAL(clearSceneSignal()),SLOT(performClearScene()));
 
   connect(this,SIGNAL(exitRequestedSignal()),SLOT(quitRequested()));
 
@@ -96,29 +95,19 @@ void QtRenderer::requestExit()
 
 void QtRenderer::close()
 {
-  emit quitSignal();
+  emit quitSignal(); // invokeLater
 }
 
 void QtRenderer::performAddTrack(GraphicalTrack* graphicalTrack)
 {
-  // rewrite it to be done in cleaner way
-  boost::uuids::uuid uuid = graphicalTrack->getUuid();
-  QMap<boost::uuids::uuid,GraphicalTrack*>::const_iterator iter
-      = tracks_.find(uuid);
-  GraphicalTrack* current = nullptr;
-  if (iter == tracks_.end())
-  { // track didn't exist in Scene
-    scene_->addItem(graphicalTrack);
-    tracks_[uuid] = graphicalTrack;
-    current = graphicalTrack;
-  }
-  else
-  { // track already existed in Scene
-    iter.value()->moveBasedOnOther(graphicalTrack);
-    current = iter.value();
-  }
+  colorManager_.setColorForTrack(graphicalTrack);
+  scene_->addItem(graphicalTrack);
+}
 
-  chooseColorForTrack(current);
+void QtRenderer::performClearScene()
+{
+  scene_->clear();
+  drawStaticGraphics();
 }
 
 void QtRenderer::quitRequested()
@@ -131,8 +120,12 @@ GraphicalTrack* QtRenderer::transformTrackFromSnapshot(const Track* track)
 {
   qreal x = track->getLongitude();
   qreal y = track->getLatitude();
+  qreal predictedX = track->getPredictedLongitude();
+  qreal predictedY = track->getPredictedLatitude();
 
-  GraphicalTrack* graphicalTrack = new GraphicalTrack(track->getUuid(),x,y);
+  GraphicalTrack* graphicalTrack = new GraphicalTrack(track->getUuid(),
+                                                      x,y,
+                                                      predictedX,predictedY);
   return graphicalTrack;
 }
 
@@ -157,23 +150,56 @@ void QtRenderer::setupMenu()
   mainWindow_->menuBar()->addAction(tr("Quit"), this, SLOT(quitRequested()));
 }
 
-void QtRenderer::chooseColorForTrack(GraphicalTrack* track)
-{
-  if (track->brush() != QBrush()) // brush already set
-    return; // do not change
+QtRenderer::ColorManager::ColorManager()
+  : availableColors({
+                      Qt::red,
+                      Qt::green,
+                      Qt::blue,
+                      Qt::yellow
+                      })
+{}
 
-  QPen pen(Qt::yellow); // yellow pen (border)
-  std::vector<QColor> colors = {
-                                 Qt::red,
-                                 Qt::green,
-                                 Qt::blue
-                               };
-  boost::random::uniform_int_distribution<> dist(0, colors.size()-1);
-  std::size_t num = dist(randomGenerator_);
-  QColor color = colors.at(num);
-  QBrush brush(color);
+
+std::pair<QColor,QColor>
+QtRenderer::ColorManager::setColorForTrack(GraphicalTrack* track)
+{
+  std::pair<QColor,QColor> colors = chooseColorForTrack(track);
+  QPen pen(colors.first);
+  QBrush brush(colors.second);
+
   track->setPen(pen);
   track->setBrush(brush);
+
+  return colors;
+}
+
+std::pair<QColor,QColor>
+QtRenderer::ColorManager::chooseColorForTrack(const GraphicalTrack* track)
+{
+  boost::uuids::uuid uuid = track->getUuid();
+  QMap<boost::uuids::uuid,std::pair<QColor,QColor> >::const_iterator iter
+      = trackColors_.find(uuid);
+  if (iter == trackColors_.end())
+  { // There is no color for given track
+    std::pair<QColor,QColor> colors = generateNewColorForTrack(track);
+    trackColors_[uuid] = colors;
+    return colors;
+  }
+  else
+  {
+    return *iter;
+  }
+}
+
+std::pair<QColor,QColor> QtRenderer::ColorManager
+  ::generateNewColorForTrack(const GraphicalTrack* /*track*/) const
+{
+  QColor penColor(Qt::yellow);
+
+  boost::random::uniform_int_distribution<> dist(0, availableColors.size()-1);
+  std::size_t num = dist(randomGenerator_);
+  QColor brushColor = availableColors.at(num);
+  return std::make_pair(penColor,brushColor);
 }
 
 } // namespace Graphic
