@@ -1,4 +1,5 @@
 #include <chrono>
+#include <sstream> // used for logging purpose
 #include <thread>
 
 #include <Common/logger.h>
@@ -17,7 +18,9 @@ DataManager::DataManager(const std::string& paramsPath,
                          std::unique_ptr<DataAssociator> dataAssociator,
                          std::unique_ptr<TrackManager> trackManager,
                          std::unique_ptr<FeatureExtractor> featureExtractor,
-                         std::unique_ptr<FusionExecutor> fusionExecutor)
+                         std::unique_ptr<FusionExecutor> fusionExecutor,
+                         time_types::duration_t TTL)
+  : TTL_(TTL)
 {
   if (dynDbDriver)
     dynDbDriver_ = dynDbDriver;
@@ -96,11 +99,13 @@ DataManager::DataManager(const std::string& paramsPath,
           );
 }
 
-Snapshot DataManager::computeState()
+Snapshot DataManager::computeState(time_types::ptime_t currentTime)
 {
   Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
-  logger.log("DataManager","Computing state.");
-  auto tracks = computeTracks();
+  std::stringstream m;
+  m << "Computing state with current time = " << currentTime;
+  logger.log("DataManager",m.str());
+  auto tracks = computeTracks(TTL_,currentTime);
   // clone Tracks, to ensure safety in multithreaded environment
   Snapshot s = cloneTracksInSnapshot(tracks);
   snapshot_.put(s);
@@ -115,11 +120,15 @@ Snapshot DataManager::getSnapshot() const
 std::shared_ptr<
       std::set<std::shared_ptr<Track> >
     >
-  DataManager::computeTracks()
+  DataManager::computeTracks(time_types::duration_t TTL,
+                             time_types::ptime_t currentTime)
 {
   compute(); // loops through data flow, to maintain tracking process
 
-  trackManager_->removeExpiredTracks(boost::chrono::seconds(3)); // TODO parametrize this!
+  if (currentTime != time_types::ptime_t())
+    trackManager_->removeExpiredTracks(currentTime,TTL);
+  else
+    trackManager_->removeExpiredTracks(TTL);
 
   // create new set of Tracks on heap
   //  and initialize it with tracks from TrackManager

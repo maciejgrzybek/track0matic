@@ -14,9 +14,12 @@ public:
 
   /**
    * @brief Computes next state of Model.
+   * @param Current time - time passing indicator in Model.
+   *  When default value is used, refresh time of the latest Track is used.
    * @return Snapshot of Model after computation.
    */
-  virtual Snapshot computeState() = 0;
+  virtual Snapshot computeState(time_types::ptime_t currentTime
+                                  = time_types::ptime_t()) = 0;
 
   /**
    * @brief Returns Model's snapshot after last computation.

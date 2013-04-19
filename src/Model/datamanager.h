@@ -42,9 +42,12 @@ public:
               std::unique_ptr<FeatureExtractor> featureExtractor
                 = std::unique_ptr<FeatureExtractor>(),
               std::unique_ptr<FusionExecutor> fusionExecutor
-                = std::unique_ptr<FusionExecutor>());
+                = std::unique_ptr<FusionExecutor>(),
+              time_types::duration_t TTL = boost::chrono::seconds(3));
 
   /**
+   * @brief Computes next state of Model.
+   *
    * In multithreaded environment,
    * there is no guarantee the value returned from computeState()
    * will be the same as this from getSnapshot().
@@ -55,20 +58,30 @@ public:
    *  to store snapshot in buffer! But if computeState() finished work,
    *  there is a certainty the computed value (state),
    *  at least WAS (or maybe is still there) for a while in buffer.
+   *
+   * @param Current time - indicates what time is it in Model right now.
+   *  When default value is used, refresh time of the latest Track is used.
+   * @return Snapshot - collection of Tracks after computation.
    */
-  virtual Snapshot computeState();
+  virtual Snapshot computeState(time_types::ptime_t currentTime
+                                  = time_types::ptime_t());
   virtual Snapshot getSnapshot() const;
 
 private:
   /**
    * @brief Executes one full step of tracking process,
    *  when computing finishes, returns one set of Tracks.
-   *
+   * @param time after which, tracks without refreshing will be removed.
+   * @param time used to remove expired tracks. Indicates current time.
+   *  Tracks older than currentTime-TTL will be removed.
+   *  If default value given,
+   *  refresh time of the latest track will be assumed current.
    * @return Set of tracks after performed full Tracking process.
    */
   std::shared_ptr<
         std::set<std::shared_ptr<Track> >
-      > computeTracks();
+      > computeTracks(time_types::duration_t TTL,
+                      time_types::ptime_t currentTime = time_types::ptime_t());
 
   void compute();
 
@@ -93,6 +106,9 @@ private:
   std::unique_ptr<FeatureExtractor> featureExtractor_;
   std::unique_ptr<FusionExecutor> fusionExecutor_;
   std::unique_ptr<estimation::EstimationFilter<> > filter_;
+
+  const time_types::duration_t TTL_; // for now it's not mutable, but in future,
+                                     // can be, when tracker could be adaptive
 };
 
 } // namespace Model
