@@ -24,7 +24,8 @@ class MainController : public Controller
 public:
   MainController(std::shared_ptr<Common::BlockingQueue<MessagePtr> >,
                  std::unique_ptr<Model::Model>,
-                 std::unique_ptr<View::View>);
+                 std::unique_ptr<View::View>,
+                 WorkMode = Batch);
   virtual ~MainController();
 
   virtual void operator()();
@@ -32,9 +33,10 @@ public:
   bool isWorking() const;
 
 private:
+  std::shared_ptr<Common::BlockingQueue<MessagePtr> > blockingQueue_;
   std::unique_ptr<Model::Model> model_;
   std::unique_ptr<View::View> view_;
-  std::shared_ptr<Common::BlockingQueue<MessagePtr> > blockingQueue_;
+  WorkMode workMode_;
   const std::unique_ptr<MessageDispatcher> messageDispatcher_;
   const std::unique_ptr<Common::TimersManager> timersManager_;
 

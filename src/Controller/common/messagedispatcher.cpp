@@ -1,5 +1,7 @@
 #include "messagedispatcher.h"
 
+#include <cassert>
+
 #include <Model/model.h>
 #include <Model/modelsnapshot.h>
 
@@ -14,10 +16,12 @@ namespace Controller
 
 MessageDispatcher::MessageDispatcher(Model::Model& model,
                                      Controller& controller,
-                                     View::View& view)
+                                     View::View& view,
+                                     WorkMode workMode)
   : model_(model),
     controller_(controller),
-    view_(view)
+    view_(view),
+    workMode_(workMode)
 {}
 
 void MessageDispatcher::visit(WorkingModeChangeMessage& /*m*/)
@@ -33,7 +37,20 @@ void MessageDispatcher::visit(QuitRequestedMessage& /*m*/)
 
 void MessageDispatcher::visit(TimerTickMessage& /*m*/)
 {
-  Model::Snapshot state = model_.computeState(); // get data from Model
+  Model::Snapshot state;
+
+  switch (workMode_)
+  {
+    case Online:
+      state = model_.computeState(time_types::clock_t::now());
+      break;
+    case Batch:
+      state = model_.computeState();
+      break;
+    default:
+      assert(false && "Not implemented WorkMode!");
+      break;
+  }
   view_.showState(state); // put snapshot to View
 }
 

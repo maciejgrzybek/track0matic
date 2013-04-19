@@ -4,6 +4,8 @@
 namespace Controller
 {
 
+enum WorkMode { Online, Batch };
+
 class Controller
 {
 public:

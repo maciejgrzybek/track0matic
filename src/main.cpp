@@ -26,10 +26,13 @@ int main(int argc, char* argv[])
     blockingQueue(new Common::BlockingQueue<Controller::MessagePtr>());
 
   std::unique_ptr<Model::Model> m(new Model::DataManager());
+  logger.log("main","Model instantiated.");
   std::unique_ptr<View::View> v(new View::Graphic::QtView(blockingQueue));
+  logger.log("main","View instantiated.");
   std::unique_ptr<Controller::Controller> c(
          new Controller::MainController(blockingQueue,std::move(m),std::move(v))
         );
+  logger.log("main","Controller instantiated.");
 
   /* <ugly hack> */
   // thread is needed to prevent main thread from blocking,

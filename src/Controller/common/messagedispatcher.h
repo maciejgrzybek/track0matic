@@ -3,6 +3,8 @@
 
 #include <memory>
 
+#include <Controller/controller.h> // for enum WorkMode;
+
 namespace Model
 {
 class Model;
@@ -16,8 +18,6 @@ class View;
 namespace Controller
 {
 
-class Controller;
-
 /**
  * @brief The MessageDispatcher class is responsible for doing actions,
  *  based on messaged arrived from message queue.
@@ -29,7 +29,8 @@ public:
   //  until MessageDispatcher is valid
   MessageDispatcher(Model::Model&,
                     Controller&,
-                    View::View&);
+                    View::View&,
+                    WorkMode);
 
   void visit(class WorkingModeChangeMessage&);
   void visit(class QuitRequestedMessage&);
@@ -39,6 +40,8 @@ private:
   Model::Model& model_;
   Controller& controller_;
   View::View& view_;
+
+  WorkMode workMode_;
 };
 
 } // namespace Controller

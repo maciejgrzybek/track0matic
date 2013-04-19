@@ -1,18 +1,22 @@
 #include "maincontroller.h"
 
+#include <Common/logger.h>
+
 namespace Controller
 {
 
 MainController
 ::MainController(std::shared_ptr<Common::BlockingQueue<MessagePtr> > bq,
                  std::unique_ptr<Model::Model> model,
-                 std::unique_ptr<View::View> view)
+                 std::unique_ptr<View::View> view,
+                 WorkMode workMode)
   : blockingQueue_(bq),
     model_(std::move(model)),
     view_(std::move(view)),
     messageDispatcher_(new MessageDispatcher(*model_,
                                              *this,
-                                             *view_)),
+                                             *view_,
+                                             workMode)),
     timersManager_(new Common::TimersManager()),
     working_(true)
 {
@@ -27,6 +31,8 @@ MainController::~MainController()
 
 void MainController::operator()()
 {
+  Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
+  logger.log("MainController","Entering main loop.");
   while (working_) // main loop
   {
     MessagePtr msg;
@@ -35,7 +41,7 @@ void MainController::operator()()
     // perform action appropriate for received msg
     msg->accept(*messageDispatcher_);
   }
-  Common::GlobalLogger::getInstance().log("MainController","Left main loop");
+  logger.log("MainController","Left main loop.");
   view_->quit(); // before stopping work, close View
 }
 
