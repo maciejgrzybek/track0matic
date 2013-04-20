@@ -15,9 +15,24 @@ std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
 {
   // for each set from DRsGroups, invoke initializeTrack() and add returned Track to tracks_ set.
   // All initialized Tracks are collected and returned as map Track->DRs.  
+
+  Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
+
+  { // TODO rewrite this, when logger will be more sophisticated
+    std::stringstream msg;
+    msg << "Initialization of " << DRsGroups.size() << " DR groups.";
+    logger.log("TrackManager",msg.str());
+  }
+
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> > result;
   for (auto DRs : DRsGroups) // copies group, to allow modification
   { // for each DR set
+    { // TODO rewrite this, when logger will be more sophisticated
+      std::stringstream msg;
+      msg << "Computing group of " << DRs.size() << " DRs.";
+      logger.log("TrackManager",msg.str());
+    }
+
     auto rated = getRatedPairs(DRs);
     std::vector<std::set<DetectionReport> > groups = chooseFromRated(rated);
 
@@ -323,7 +338,8 @@ TrackManager::compare(const DetectionReport& l, const DetectionReport& r) const
   double lon_dist = l.getLongitude() - r.getLongitude();
   double lat_dist = l.getLatitude() - r.getLatitude();
 
-  return 1/sqrt(pow(lon_dist,2) + pow(lat_dist,2)); // higher distance, lower rating -> closer DRs, better rating
+  return 1/sqrt(pow(lon_dist,2) + pow(lat_dist,2)); // higher distance -> lower rating,
+                                                    // closer DRs -> better rating
 }
 
 time_types::ptime_t TrackManager::getLatestTrackRefreshTime() const
