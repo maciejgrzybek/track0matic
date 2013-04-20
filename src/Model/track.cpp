@@ -12,6 +12,12 @@ Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
     lon_(longitude),
     lat_(latitude),
     mos_(metersOverSea),
+    lonVel_(0), // because sensors don't provide information about velocity
+    latVel_(0), // we assume that starting velocity is 0
+    mosVel_(0), // TODO conside changing it,
+    lonPredictionVar_(0), // while Tracker's efficiency is not good enough
+    latPredictionVar_(0),
+    mosPredictionVar_(0),
     refreshTime_(creationTime),
     uuid_(boost::uuids::random_generator()()) // generate random uuid
 {
@@ -105,17 +111,32 @@ boost::uuids::uuid Track::getUuid() const
 
 void Track::applyMeasurement(const DetectionReport& dr)
 {
-  refreshTime_ = dr.getSensorTime(); // refresh track
+  Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
+  {
+    std::stringstream msg;
+    msg << "Applying measurement from DR: " << dr;
+    logger.log("Track",msg.str());
+  }
+  time_types::ptime_t newRefreshTime = dr.getSensorTime();
+  {
+    std::stringstream msg;
+    msg << "Current refresh time = " << refreshTime_;
+    logger.log("Track",msg.str());
+  }
+  time_types::duration_t timePassed = newRefreshTime - refreshTime_;
+  refreshTime_ = newRefreshTime; // refresh track
   return applyMeasurement(dr.getLongitude(),
                           dr.getLatitude(),
-                          dr.getMetersOverSea());
+                          dr.getMetersOverSea(),
+                          timePassed);
 }
 
-void Track::applyMeasurement(double longitude, double latitude, double mos)
+void Track::applyMeasurement(double longitude, double latitude, double mos,
+                             time_types::duration_t timePassed)
 {
-
   estimation::EstimationFilter<>::vector_t vec
-      = coordsToStateVector(longitude,latitude,mos);
+      = coordsToStateVector(longitude,latitude,mos, // DRs don't provide information about velocity
+                            lonVel_,latVel_,mosVel_); // so we take last calculated velocity
 
   std::pair<
         estimation::EstimationFilter<>::vector_t,
@@ -124,8 +145,17 @@ void Track::applyMeasurement(double longitude, double latitude, double mos)
   estimation::EstimationFilter<>::vector_t trackCorrectedState
       = correctedState.first;
 
-  lon_ = trackCorrectedState[0];
-  lat_ = trackCorrectedState[1];
+  double newLon = trackCorrectedState[0];
+  double newLat = trackCorrectedState[1];
+
+  if (timePassed != time_types::duration_t::zero())
+  {
+    lonVel_ = (newLon-lon_)/timePassed.count();
+    latVel_ = (newLat-lat_)/timePassed.count();
+  } // don't change velocity, when received next measurement with the same time as last one
+
+  lon_ = newLon;
+  lat_ = newLat;
 
   std::pair<
         estimation::EstimationFilter<>::vector_t,
@@ -155,6 +185,9 @@ Track::Track(const Track& other)
     lon_(other.lon_),
     lat_(other.lat_),
     mos_(other.mos_),
+    lonVel_(other.lonVel_),
+    latVel_(other.latVel_),
+    mosVel_(other.mosVel_),
     predictedLon_(other.predictedLon_),
     predictedLat_(other.predictedLat_),
     predictedMos_(other.predictedMos_),
@@ -168,7 +201,10 @@ Track::Track(const Track& other)
 estimation::EstimationFilter<>::vector_t
   Track::coordsToStateVector(double longitude,
                              double latitude,
-                             double /*metersoversea*/) const
+                             double /*metersoversea*/,
+                             double longitudeVelocity,
+                             double latitudeVelocity,
+                             double /*metersoverseaVelocity*/)
 {
   // Metersoversea not yet implemented, because of too narrow state model
   // Expand model to include meters over sea value.
@@ -176,8 +212,8 @@ estimation::EstimationFilter<>::vector_t
   estimation::EstimationFilter<>::vector_t state;
   state[0] = longitude;
   state[1] = latitude;
-  state[2] = 0; //not using speed yet, TODO use speed according to current speed
-  state[3] = 0; // obtained from Track
+  state[2] = longitudeVelocity;
+  state[3] = latitudeVelocity;
 
   return state;
 }
@@ -193,14 +229,14 @@ std::pair<
                                    double varMos)
 {
   estimation::EstimationFilter<>::vector_t state
-      = coordsToStateVector(longitude,
-                            latitude,
-                            metersoversea);
+      = coordsToStateVector(longitude,latitude,metersoversea,
+                            lonVel_,latVel_,mosVel_);
 
   estimation::EstimationFilter<>::vector_t covErr // uses the same method,
       = coordsToStateVector(varLon, // because output vector has the same layout
                             varLat,
-                            varMos);
+                            varMos,
+                            0,0,0); // we don't want putting anything in 3rd and 4th row
 
   return estimationFilter_->initialize(state,covErr);
 }

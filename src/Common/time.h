@@ -9,7 +9,8 @@ namespace time_types
 
 typedef boost::chrono::system_clock clock_t;
 typedef boost::chrono::time_point<clock_t> ptime_t;
-typedef boost::chrono::seconds duration_t;
+typedef boost::chrono::duration<double> duration_t;
+typedef boost::chrono::seconds seconds_t;
 
 } // namespace time
 

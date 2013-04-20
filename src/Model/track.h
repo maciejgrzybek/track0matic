@@ -59,6 +59,10 @@ public:
   double getLatitude() const;
   double getMetersOverSea() const;
 
+  double getLongitudeVelocity() const;
+  double getLatitudeVelocity() const;
+  double getMetersOverSeaVelocity() const;
+
   double getPredictedLongitude() const;
   double getPredictedLatitude() const;
   double getPredictedMetersOverSea() const;
@@ -86,9 +90,11 @@ public:
    * @param longitude
    * @param latitude
    * @param meters over sea
+   * @param how much time passed from last measurement
    * @overload applyMeasurement(const DetectionReport&);
    */
-  void applyMeasurement(double longitude, double latitude, double mos);
+  void applyMeasurement(double longitude, double latitude, double mos,
+                        time_types::duration_t timePassed);
 
   bool isTrackValid(time_types::ptime_t currentTime,
                     time_types::duration_t TTL) const;
@@ -98,10 +104,13 @@ public:
 private:
   Track(const Track&);
 
-  estimation::EstimationFilter<>::vector_t
+  static estimation::EstimationFilter<>::vector_t
     coordsToStateVector(double longitude,
                         double latitude,
-                        double metersoversea) const;
+                        double metersoversea,
+                        double longitudeVelocity,
+                        double latitudeVelocity,
+                        double metersoverseaVelocity);
 
   std::pair<
               estimation::EstimationFilter<>::vector_t,
@@ -121,6 +130,10 @@ private:
   double lon_;
   double lat_;
   double mos_;
+
+  double lonVel_;
+  double latVel_;
+  double mosVel_;
 
   double predictedLon_;
   double predictedLat_;
