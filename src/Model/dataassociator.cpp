@@ -3,7 +3,7 @@
 
 #include "dataassociator.h"
 
-DataAssociator::DataAssociator(std::unique_ptr<TrackManager>
+DataAssociator::DataAssociator(std::shared_ptr<TrackManager>
                                 trackManager,
                                std::unique_ptr<ResultComparator>
                                 resultComparator,
@@ -12,7 +12,7 @@ DataAssociator::DataAssociator(std::unique_ptr<TrackManager>
                                double threshold)
   : resultComparator_(std::move(resultComparator)),
     listResultComparator_(std::move(listResultComparator)),
-    trackManager_(std::move(trackManager)),
+    trackManager_(trackManager),
     DRRateThreshold_(threshold),
     computed_(false)
 {

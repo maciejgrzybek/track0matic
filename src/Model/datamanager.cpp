@@ -15,8 +15,8 @@ DataManager::DataManager(const std::string& paramsPath,
                          std::unique_ptr<ReportManager> reportManager,
                          std::unique_ptr<AlignmentProcessor> alignmentProcessor,
                          std::unique_ptr<CandidateSelector> candidateSelector,
+                         std::shared_ptr<TrackManager> trackManager,
                          std::unique_ptr<DataAssociator> dataAssociator,
-                         std::unique_ptr<TrackManager> trackManager,
                          std::unique_ptr<FeatureExtractor> featureExtractor,
                          std::unique_ptr<FusionExecutor> fusionExecutor,
                          time_types::duration_t TTL)
@@ -55,34 +55,26 @@ DataManager::DataManager(const std::string& paramsPath,
           new CandidateSelector(dynDbDriver_)
           );
 
-  {
-    std::unique_ptr<TrackManager> tm;
-    if (trackManager)
-        tm = std::move(trackManager);
-      else
-        tm = std::unique_ptr<TrackManager>(new TrackManager(1));
-
-    if (dataAssociator)
-      dataAssociator_ = std::move(dataAssociator);
-    else
-    {
-      std::unique_ptr<ResultComparator> resultComparator(
-            new OrComparator(ResultComparator::feature_grade_map_t()));
-      std::unique_ptr<ListResultComparator> listComparator(
-            new OrListComparator());
-      DataAssociator* da = new DataAssociator(std::move(tm),
-                                              std::move(resultComparator),
-                                              std::move(listComparator));
-      dataAssociator_ = std::unique_ptr<DataAssociator>(da);
-    }
-  }
-
   if (trackManager)
-    trackManager_ = std::move(trackManager);
+    trackManager_ = trackManager;
   else
     trackManager_ = std::unique_ptr<TrackManager>(
           new TrackManager(0.1)
           );
+
+  if (dataAssociator)
+    dataAssociator_ = std::move(dataAssociator);
+  else
+  {
+    std::unique_ptr<ResultComparator> resultComparator(
+          new OrComparator(ResultComparator::feature_grade_map_t()));
+    std::unique_ptr<ListResultComparator> listComparator(
+          new OrListComparator());
+    DataAssociator* da = new DataAssociator(trackManager_,
+                                            std::move(resultComparator),
+                                            std::move(listComparator));
+    dataAssociator_ = std::unique_ptr<DataAssociator>(da);
+  }
 
   if (featureExtractor)
     featureExtractor_ = std::move(featureExtractor);
@@ -175,8 +167,19 @@ void DataManager::compute()
       dataAssociator_->setInput(DRsGroups);
       std::map<std::shared_ptr<Track>,std::set<DetectionReport> > associated
           = dataAssociator_->getDRsForTracks();
+      { // TODO rewrite this, when logger will be more sophisticated
+        std::stringstream msg;
+        msg << "Associated tracks: " << associated.size();
+        logger.log("DataManager",msg.str());
+      }
+
       std::vector<std::set<DetectionReport> > notAssociated
           = dataAssociator_->getNotAssociated();
+      { // TODO rewrite this, when logger will be more sophisticated
+        std::stringstream msg;
+        msg << "Not associated groups of DRs: " << notAssociated.size();
+        logger.log("DataManager",msg.str());
+      }
 
       std::unique_ptr<estimation::EstimationFilter<> > filter(
             filter_->clone());

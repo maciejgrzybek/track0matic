@@ -35,10 +35,10 @@ public:
                 = std::unique_ptr<AlignmentProcessor>(),
               std::unique_ptr<CandidateSelector> candidateSelector
                 = std::unique_ptr<CandidateSelector>(),
+              std::shared_ptr<TrackManager> trackManager
+                = std::unique_ptr<TrackManager>(),
               std::unique_ptr<DataAssociator> dataAssociator
                 = std::unique_ptr<DataAssociator>(),
-              std::unique_ptr<TrackManager> trackManager
-                = std::unique_ptr<TrackManager>(),
               std::unique_ptr<FeatureExtractor> featureExtractor
                 = std::unique_ptr<FeatureExtractor>(),
               std::unique_ptr<FusionExecutor> fusionExecutor
@@ -102,7 +102,7 @@ private:
   std::unique_ptr<AlignmentProcessor> alignmentProcessor_;
   std::unique_ptr<CandidateSelector> candidateSelector_;
   std::unique_ptr<DataAssociator> dataAssociator_;
-  std::unique_ptr<TrackManager> trackManager_;
+  std::shared_ptr<TrackManager> trackManager_;
   std::unique_ptr<FeatureExtractor> featureExtractor_;
   std::unique_ptr<FusionExecutor> fusionExecutor_;
   std::unique_ptr<estimation::EstimationFilter<> > filter_;

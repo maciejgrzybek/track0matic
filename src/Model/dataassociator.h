@@ -20,14 +20,14 @@ public:
    * @brief c-tor. Initializes necessary internal variables.
    *  Like computed flag (which indicates whether association was already done.
    *
-   * @param track manager - takes ownership
+   * @param track manager - can be shared with others, interested in tracks state
    * @param resultcomparator - takes ownership
    * @param listResultComparator - takes ownership
    * @param threshold for DR->Track similarity. If compare(DR,Track) gives result
    *  above given threshold, DR is associated to Track.
    *  Allowed values: 0.0 - 1.0
    */
-  DataAssociator(std::unique_ptr<TrackManager> trackManager,
+  DataAssociator(std::shared_ptr<TrackManager> trackManager,
                  std::unique_ptr<ResultComparator> resultComparator,
                  std::unique_ptr<ListResultComparator> listResultComparator,
                  double threshold = 1.0);
@@ -156,7 +156,7 @@ private:
   std::unique_ptr<ResultComparator> resultComparator_;
   std::unique_ptr<ListResultComparator> listResultComparator_;
   std::unique_ptr<FeatureExtractor> featureExtractor_;
-  std::unique_ptr<TrackManager> trackManager_;
+  std::shared_ptr<TrackManager> trackManager_;
 
   double DRRateThreshold_;
   bool computed_;
