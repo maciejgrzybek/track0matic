@@ -4,7 +4,7 @@ env=DefaultEnvironment()
 
 env = Environment(
                     CCFLAGS = '-std=c++11 -g -O0',
-                    LINKFLAGS = '-std=c++11 -lpqxx -lpthread -lboost_chrono -lboost_serialization -lboost_system -lboost_thread'
+                    LINKFLAGS = '-std=c++11 -lpqxx -lpthread -lboost_chrono -lboost_program_options -lboost_serialization -lboost_system -lboost_thread'
                  )
 
 Qt4Dir = '/usr/include/qt4'
