@@ -102,10 +102,13 @@ double OrComparator::evaluateGrades(const feature_grade_map_t& featureGrades,
 
   double featuresNormalized = 0; // rate normalized to number of features
   if (i > 0)
+  {
     featuresNormalized = featuresResult/i;
-
-  return (featuresNormalized
-          + positionResult/10)/2; // take into consideration difference in position
+    return (featuresNormalized
+            + positionResult/10)/2; // take into consideration difference in position
+  }
+  else // if no features given
+    return positionResult/10; // only position is included
 }
 
 double AndListComparator::operator()(const rates_collection_t& c)
