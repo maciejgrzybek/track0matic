@@ -28,8 +28,8 @@ CREATE TABLE DETECTION_REPORTS(
   LON longitude not null,
   LAT latitude not null,
   METERS_OVER_SEA metersOverSea not null,
-  UPLOAD_TIME timestamp with timezone not null default current_timestamp,
-  SENSOR_TIME timestamp with timezone not null,
+  UPLOAD_TIME timestamp with time zone not null default current_timestamp,
+  SENSOR_TIME timestamp with time zone not null,
 
   CONSTRAINT PK_DETECTION_REPORTS PRIMARY KEY(SENSOR_ID,DR_ID),
   CONSTRAINT FK_DETECTION_REPORTS_SENSOR FOREIGN KEY(SENSOR_ID) REFERENCES Sensors(sensorId)
