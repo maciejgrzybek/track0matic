@@ -47,17 +47,32 @@ DynDBDriver::DRCursor DynDBDriver::getDRCursor(time_t timestamp,
 
 void DynDBDriver::insertDR(const DR_row& dr)
 {
-  const std::string sql
-      = "INSERT INTO detection_reports "
-        "(sensor_id,dr_id,lon,lat,meters_over_sea,upload_time,sensor_time) "
+  std::string sql;
+  if (dr.dr_id == -1) // TODO change this magic constant
+  { // get dr_id from DB's sequence
+      sql = "INSERT INTO detection_reports "
+        "(sensor_id,lon,lat,meters_over_sea,upload_time,sensor_time) "
         "VALUES("
           + pqxx::to_string(dr.sensor_id) + ","
-          + pqxx::to_string(dr.dr_id) + ","
           + pqxx::to_string(dr.lon) + ","
           + pqxx::to_string(dr.lat) + ","
           + pqxx::to_string(dr.mos) + ","
         + "to_timestamp(" + pqxx::to_string(dr.upload_time) + "),"
         + "to_timestamp(" + pqxx::to_string(dr.sensor_time) + "))";
+  }
+  else
+  { // dr_id given
+    sql = "INSERT INTO detection_reports "
+      "(sensor_id,dr_id,lon,lat,meters_over_sea,upload_time,sensor_time) "
+      "VALUES("
+        + pqxx::to_string(dr.sensor_id) + ","
+        + pqxx::to_string(dr.dr_id) + ","
+        + pqxx::to_string(dr.lon) + ","
+        + pqxx::to_string(dr.lat) + ","
+        + pqxx::to_string(dr.mos) + ","
+      + "to_timestamp(" + pqxx::to_string(dr.upload_time) + "),"
+      + "to_timestamp(" + pqxx::to_string(dr.sensor_time) + "))";
+  }
 
   pqxx::work t(*db_connection_,"DR inserter");
   t.exec(sql);
