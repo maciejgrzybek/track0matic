@@ -9,8 +9,7 @@ ReportManager::ReportManager(std::shared_ptr<DB::DynDBDriver> dbdriver,
     drCursor_(dbdriver_->getDRCursor()), // TODO add parametrization for this
     packetSize_(packetSize),
     lastDR_(-1,-1,-1,-1,-1,0,0) // dummy DR
-{
-}
+{}
 
 std::set<DetectionReport> ReportManager::getDRs()
 {
@@ -19,7 +18,7 @@ std::set<DetectionReport> ReportManager::getDRs()
   {
     try
     {
-      DB::DynDBDriver::DRCursor::DR_row row = drCursor_.fetchRow();
+      DB::DynDBDriver::DR_row row = drCursor_.fetchRow();
       // TODO get features for DR
       DetectionReport dr(row);
       lastDR_ = dr;

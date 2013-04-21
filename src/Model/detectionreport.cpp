@@ -5,7 +5,7 @@
 
 #include "detectionreport.h"
 
-DetectionReport::DetectionReport(const DB::DynDBDriver::DRCursor::DR_row& dr_row, const features_set_t& features)
+DetectionReport::DetectionReport(const DB::DynDBDriver::DR_row& dr_row, const features_set_t& features)
   : features(features),
     sensor_id(dr_row.sensor_id),
     dr_id(dr_row.dr_id),
@@ -15,8 +15,7 @@ DetectionReport::DetectionReport(const DB::DynDBDriver::DRCursor::DR_row& dr_row
     uploadTime(dr_row.upload_time),
     sensorTime(dr_row.sensor_time),
     sensor(dr_row.sensor)
-{
-}
+{}
 
 DetectionReport::DetectionReport(int sensor_id, int dr_id, double lon, double lat, double mos,
                                  time_t upload_time, time_t sensor_time, Sensor* sensor, const features_set_t& features)
@@ -29,8 +28,7 @@ DetectionReport::DetectionReport(int sensor_id, int dr_id, double lon, double la
     uploadTime(upload_time),
     sensorTime(sensor_time),
     sensor(sensor)
-{
-}
+{}
 
 int DetectionReport::getSensorId() const
 {

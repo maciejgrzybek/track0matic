@@ -45,11 +45,31 @@ DynDBDriver::DRCursor DynDBDriver::getDRCursor(time_t timestamp,
   return DRCursor(this,timestamp,packetSize,beforeFirstDRId);
 }
 
+void DynDBDriver::insertDR(const DR_row& dr)
+{
+  const std::string sql
+      = "INSERT INTO detection_reports "
+        "(sensor_id,dr_id,lon,lat,meters_over_sea,upload_time,sensor_time) "
+        "VALUES("
+          + pqxx::to_string(dr.sensor_id) + ","
+          + pqxx::to_string(dr.dr_id) + ","
+          + pqxx::to_string(dr.lon) + ","
+          + pqxx::to_string(dr.lat) + ","
+          + pqxx::to_string(dr.mos) + ","
+        + "to_timestamp(" + pqxx::to_string(dr.upload_time) + "),"
+        + "to_timestamp(" + pqxx::to_string(dr.sensor_time) + "))";
+
+  pqxx::work t(*db_connection_,"DR inserter");
+  t.exec(sql);
+  t.commit();
+}
+
 std::set<Sensor*> DynDBDriver::getSensors()
 {
   const std::string sql
-      = "SELECT s.sensorid,s.lon,s.lat,s.mos,s.range,st.sensortype FROM sensors as s, sensortypes as st "
-      "WHERE s.typeid = st.typeid";
+      = "SELECT s.sensorid,s.lon,s.lat,s.mos,s.range,st.sensortype "
+        "FROM sensors as s, sensortypes as st "
+        "WHERE s.typeid = st.typeid";
 
   pqxx::work t(*db_connection_,"Sensors fetcher");
   pqxx::result result = t.exec(sql);
@@ -96,8 +116,7 @@ DynDBDriver::DBDriverOptions::DBDriverOptions(const std::string& host,
     additional_options(additional_options),
     ssl_mode(ssl_mode),
     service(service)
-{
-}
+{}
 
 std::string DynDBDriver::DBDriverOptions::toString() const
 {
@@ -147,42 +166,3 @@ std::string DynDBDriver::DBDriverOptions::sslModeToString() const
 }
 
 } // namespace DB
-
-// FIXME remove this, only for testing purpose
-/*#include <iostream>
-int main(void)
-{
-  DB::DynDBDriver dbdrv("options.xml");
-  DB::DynDBDriver::DRCursor cursor(dbdrv);
-
-  std::cout << "DRs:" << std::endl;
-  try
-  {
-    while (1)
-    {
-      DB::DynDBDriver::DRCursor::DR_row row = cursor.fetchRow();
-      std::cout << row.sensor_id << " " << row.dr_id << " "
-                << row.lon << " " << row.lat << " "
-                << row.mos << " " << row.sensor_time << " "
-                << row.upload_time << std::endl;
-    }
-  }
-  catch (const DB::exceptions::NoResultAvailable& ex)
-  {
-    std::cout << ex.what() << std::endl;
-  }
-  try
-  {
-    std::cout << "Sensors:" << std::endl;
-    std::vector<DB::DynDBDriver::Sensor_row> sensors = dbdrv.getSensors();
-    for (auto it : sensors)
-    {
-      std::cout << it.sensor_id << " " << it.lon << " " << it.lat << " " << it.mos << " " << it.range << " " << it.type << std::endl;
-    }
-  }
-  catch (const DB::exceptions::NoResultAvailable& ex)
-  {
-    std::cout << ex.what() << std::endl;
-  }
-}
-*/

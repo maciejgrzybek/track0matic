@@ -53,37 +53,37 @@ namespace exceptions
 class DynDBDriver
 {
 public:
+  struct DR_row
+  {
+    DR_row(int sensor_id,
+           int dr_id,
+           double lon,
+           double lat,
+           double mos,
+           time_t upload_time,
+           time_t sensor_time)
+      : sensor_id(sensor_id),
+        dr_id(dr_id),
+        lon(lon),
+        lat(lat),
+        mos(mos),
+        upload_time(upload_time),
+        sensor_time(sensor_time)
+    {}
+
+    int sensor_id;
+    int dr_id;
+    double lon;
+    double lat;
+    double mos;
+    time_t upload_time;
+    time_t sensor_time;
+    Sensor* sensor; // TODO implement this, when needed: should fetch Sensor data from DB and produce it with SensorFactory
+  };
+
   class DRCursor
   {
   public:
-    struct DR_row
-    {
-      DR_row(int sensor_id,
-             int dr_id,
-             double lon,
-             double lat,
-             double mos,
-             time_t upload_time,
-             time_t sensor_time)
-        : sensor_id(sensor_id),
-          dr_id(dr_id),
-          lon(lon),
-          lat(lat),
-          mos(mos),
-          upload_time(upload_time),
-          sensor_time(sensor_time)
-      {}
-
-      int sensor_id;
-      int dr_id;
-      double lon;
-      double lat;
-      double mos;
-      time_t upload_time;
-      time_t sensor_time;
-      Sensor* sensor; // TODO implement this, when needed: should fetch Sensor data from DB and produce it with SensorFactory
-    };
-
     /**
      * @brief DRCursor
      * @param dbdriver reference to DB driver, to be used for fetching rows
@@ -147,13 +147,13 @@ public:
         fetchRows();
       }
       pqxx::result::const_iterator row = resultIterator_++;
-      return DR_row(row[0].as<int>(),
-                    row[1].as<int>(),
-                    row[2].as<double>(),
-                    row[3].as<double>(),
-                    row[4].as<double>(),
-                    row[7].as<double>(), // read as double, because of microseconds
-                    row[8].as<double>()); // like above
+      return DR_row(row[0].as<int>(), // sensor_id
+                    row[1].as<int>(), // dr_id
+                    row[2].as<double>(), // lon
+                    row[3].as<double>(), // lat
+                    row[4].as<double>(), // meters_over_sea
+                    row[7].as<double>(), // upload_time - read as double, because of microseconds
+                    row[8].as<double>()); // sensor_time - like above
     }
 
     unsigned getPacketSize() const
@@ -245,8 +245,7 @@ public:
         mos(mos),
         range(range),
         type(type)
-    {
-    }
+    {}
 
     int sensor_id;
     double lon;
@@ -262,6 +261,8 @@ public:
   DRCursor getDRCursor(time_t timestamp = 0,
                        unsigned packetSize = 20,
                        int beforeFirstDRId = -1);
+
+  void insertDR(const DR_row& dr);
 
   std::set<class Sensor*> getSensors();
 
@@ -284,7 +285,7 @@ private:
                     const std::string& password = "",
                     unsigned int connection_timeout = 0,
                     const std::string& additional_options = "",
-                    enum SSLMode ssl_mode = PreferSSL,
+                    SSLMode ssl_mode = PreferSSL,
                     const std::string& service = "");
 
     std::string toString() const;

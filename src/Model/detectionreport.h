@@ -16,7 +16,7 @@ class DetectionReport
 public:
   typedef std::unordered_set<Feature*> features_set_t;
 
-  DetectionReport(const DB::DynDBDriver::DRCursor::DR_row&,
+  DetectionReport(const DB::DynDBDriver::DR_row&,
                   const features_set_t& features = features_set_t());
   DetectionReport(int sensor_id, int dr_id, double lon, double lat, double mos,
                   time_t upload_time, time_t sensor_time, Sensor* sensor = nullptr,
