@@ -17,19 +17,13 @@ namespace DB
 
 DynDBDriver::DynDBDriver(const std::string& options_path)
 {
-  { // read configuration from file
-    std::ifstream ifs(options_path.c_str());
-    boost::archive::xml_iarchive ia(ifs);
-    try
-    {
-      ia >> boost::serialization::make_nvp("DB_options",options_);
-    }
-    catch (const boost::archive::xml_archive_exception& ex)
-    {
-      std::cerr << "Configuration file is corrupted: " << ex.what() << std::endl;
-      throw;
-    }
-  }
+  loadOptions(options_path);
+  db_connection_ = new pqxx::connection(options_.toString());
+}
+
+DynDBDriver::DynDBDriver(const DBDriverOptions& options)
+  : options_(options)
+{
   db_connection_ = new pqxx::connection(options_.toString());
 }
 
@@ -113,15 +107,15 @@ std::set<Sensor*> DynDBDriver::getSensors()
   return resultSet;
 }
 
-DynDBDriver::DBDriverOptions::DBDriverOptions(const std::string& host,
-                                              const std::string& port,
-                                              const std::string& dbname,
-                                              const std::string& user,
-                                              const std::string& password,
-                                              unsigned int connection_timeout,
-                                              const std::string& additional_options,
-                                              SSLMode ssl_mode,
-                                              const std::string& service)
+DBDriverOptions::DBDriverOptions(const std::string& host,
+                                 const std::string& port,
+                                 const std::string& dbname,
+                                 const std::string& user,
+                                 const std::string& password,
+                                 unsigned int connection_timeout,
+                                 const std::string& additional_options,
+                                 SSLMode ssl_mode,
+                                 const std::string& service)
   : host(host),
     port(port),
     dbname(dbname),
@@ -133,7 +127,7 @@ DynDBDriver::DBDriverOptions::DBDriverOptions(const std::string& host,
     service(service)
 {}
 
-std::string DynDBDriver::DBDriverOptions::toString() const
+std::string DBDriverOptions::toString() const
 {
   std::string conn_timeout = boost::lexical_cast<std::string>(connection_timeout);
   std::string sslMode = sslModeToString();
@@ -160,7 +154,7 @@ std::string DynDBDriver::DBDriverOptions::toString() const
   return result;
 }
 
-std::string DynDBDriver::DBDriverOptions::sslModeToString() const
+std::string DBDriverOptions::sslModeToString() const
 {
   switch (ssl_mode)
   {
@@ -177,6 +171,22 @@ std::string DynDBDriver::DBDriverOptions::sslModeToString() const
     case PreferSSL:
       return "prefer";
       break;
+  }
+}
+
+void DynDBDriver::loadOptions(const std::string& options_path)
+{
+  // read configuration from file
+  std::ifstream ifs(options_path.c_str());
+  boost::archive::xml_iarchive ia(ifs);
+  try
+  {
+    ia >> boost::serialization::make_nvp("DB_options",options_);
+  }
+  catch (const boost::archive::xml_archive_exception& ex)
+  {
+    std::cerr << "Configuration file is corrupted: " << ex.what() << std::endl;
+    throw;
   }
 }
 
