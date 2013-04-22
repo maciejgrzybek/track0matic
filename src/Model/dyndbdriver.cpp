@@ -76,7 +76,7 @@ void DynDBDriver::insertDR(const DR_row& dr)
 std::set<Sensor*> DynDBDriver::getSensors()
 {
   const std::string sql
-      = "SELECT s.sensorid,s.lon,s.lat,s.mos,s.range,st.sensortype "
+      = "SELECT s.sensorid,s.lon,s.lat,s.mos,s.range,st.typename "
         "FROM sensors as s, sensortypes as st "
         "WHERE s.typeid = st.typeid";
 
