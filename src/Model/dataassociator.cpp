@@ -15,8 +15,7 @@ DataAssociator::DataAssociator(std::shared_ptr<TrackManager>
     trackManager_(trackManager),
     DRRateThreshold_(threshold),
     computed_(false)
-{
-}
+{}
 
 void DataAssociator::compute()
 {
@@ -27,10 +26,10 @@ void DataAssociator::compute()
       = trackManager_->getTracksRef();
   for (std::shared_ptr<Track> track : tracks)
   {
-    std::pair<std::set<DetectionReport>,time_types::ptime_t> DRs
+    std::pair<std::set<DetectionReport>,time_types::ptime_t> result
         = getListForTrack(*track);
-    associatedDRs_[track] = DRs.first;
-    track->refresh(DRs.second); // refresh track with the highest sensor time of associated to him DRs
+    associatedDRs_[track] = result.first; // may be empty!
+    track->refresh(result.second); // refresh track with the highest sensor time of associated to him DRs
   }
   // not associated DRs are stored now in DRGroups
   computed_ = true;

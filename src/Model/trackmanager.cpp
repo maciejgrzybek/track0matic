@@ -32,6 +32,8 @@ std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
       msg << "Computing group of " << DRs.size() << " DRs.";
       logger.log("TrackManager",msg.str());
     }
+    if (DRs.size() == 0) // skip to next group,
+      continue; // when no DRs available in this group (optimization)
 
     auto rated = getRatedPairs(DRs);
     std::vector<std::set<DetectionReport> > groups = chooseFromRated(rated);
@@ -72,7 +74,7 @@ std::size_t TrackManager::removeExpiredTracks(time_types::ptime_t currentTime,
     std::stringstream msg;
     msg << "Removing expired tracks; current time = " << currentTime
         << " TTL = " << TTL;
-    logger.log("DataManager",msg.str());
+    logger.log("TrackManager",msg.str());
   }
 
   std::size_t count = 0;
@@ -90,6 +92,13 @@ std::size_t TrackManager::removeExpiredTracks(time_types::ptime_t currentTime,
     }
     else
       ++iter;
+  }
+
+  { // TODO rewrite this, when logger will be more sophisticated
+    Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
+    std::stringstream msg;
+    msg << "Removed: " << count;
+    logger.log("TrackManager",msg.str());
   }
 
   return count;

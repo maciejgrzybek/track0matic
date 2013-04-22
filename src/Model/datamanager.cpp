@@ -58,8 +58,8 @@ DataManager::DataManager(const std::string& paramsPath,
   if (trackManager)
     trackManager_ = trackManager;
   else
-    trackManager_ = std::unique_ptr<TrackManager>(
-          new TrackManager(0.1)
+    trackManager_ = std::shared_ptr<TrackManager>(
+          new TrackManager(500000)
           );
 
   if (dataAssociator)
@@ -72,7 +72,8 @@ DataManager::DataManager(const std::string& paramsPath,
           new OrListComparator());
     DataAssociator* da = new DataAssociator(trackManager_,
                                             std::move(resultComparator),
-                                            std::move(listComparator));
+                                            std::move(listComparator),
+                                            0.3);
     dataAssociator_ = std::unique_ptr<DataAssociator>(da);
   }
 
@@ -255,8 +256,8 @@ void DataManager::initializeKalmanFilter()
    * 0.00000 100
    */
   R.clear();
-  R(0,0) = 100;
-  R(1,1) = 100;
+  R(0,0) = 0.001;
+  R(1,1) = 0.001;
 
   estimation::KalmanFilter<>::Matrix Q(4,4);
   /*
@@ -266,10 +267,10 @@ void DataManager::initializeKalmanFilter()
    * 0.00 0.00 0.00 0.01
    */
   Q.clear();
-  Q(0,0) = 0.01;
-  Q(1,1) = 0.01;
-  Q(2,2) = 0.01;
-  Q(3,3) = 0.01;
+  Q(0,0) = 0.001;
+  Q(1,1) = 0.001;
+  Q(2,2) = 0.001;
+  Q(3,3) = 0.001;
 
   estimation::KalmanFilter<>::Matrix H(2,4);
   /*
