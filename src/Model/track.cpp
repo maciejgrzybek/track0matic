@@ -1,4 +1,5 @@
 #include <boost/uuid/uuid_generators.hpp>
+#include <boost/uuid/uuid_io.hpp> // for logging purpose
 
 #include "detectionreport.h"
 
@@ -31,6 +32,17 @@ Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
 
 void Track::refresh(time_types::ptime_t refreshTime)
 {
+  {
+    std::stringstream msg;
+    msg << "[" << uuid_ << "] Refreshing track; time = " << refreshTime;
+    Common::GlobalLogger::getInstance().log("Track",msg.str());
+  }
+  if (refreshTime <= refreshTime_)
+  {
+    Common::GlobalLogger::getInstance()
+        .log("Track","Refresh time earlier than already set, skipping.");
+    return;
+  }
   refreshTime_ = refreshTime;
 }
 
@@ -114,7 +126,7 @@ void Track::applyMeasurement(const DetectionReport& dr)
   Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
   {
     std::stringstream msg;
-    msg << "Applying measurement from DR: " << dr;
+    msg << "[" << uuid_ << "] Applying measurement from DR: " << dr;
     logger.log("Track",msg.str());
   }
   time_types::ptime_t newRefreshTime = dr.getSensorTime();
@@ -124,7 +136,7 @@ void Track::applyMeasurement(const DetectionReport& dr)
     logger.log("Track",msg.str());
   }
   time_types::duration_t timePassed = newRefreshTime - refreshTime_;
-  refreshTime_ = newRefreshTime; // refresh track
+  refresh(newRefreshTime); // refresh track
   return applyMeasurement(dr.getLongitude(),
                           dr.getLatitude(),
                           dr.getMetersOverSea(),
