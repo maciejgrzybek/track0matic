@@ -24,30 +24,21 @@ namespace DB
 
 namespace exceptions
 {
-  class DBException : public std::exception
-  {
-  public:
-    virtual ~DBException() throw()
-    {}
 
-    virtual const char* what() const throw()
-    {
-      return "Unknown DB driver exception.";
-    }
-  };
+class DBException : public std::exception
+{
+public:
+  virtual ~DBException() throw();
+  virtual const char* what() const throw();
+};
 
-  class NoResultAvailable : public DBException
-  {
-  public:
-    virtual ~NoResultAvailable() throw()
-    {}
+class NoResultAvailable : public DBException
+{
+public:
+  virtual ~NoResultAvailable() throw();
+  virtual const char* what() const throw();
+};
 
-    virtual const char* what() const throw()
-    {
-      return "No result available - maybe empty result.";
-    }
-
-  };
 } // namespace exceptions
 
 class DBDriverOptions
@@ -110,21 +101,9 @@ class DynDBDriver
 public:
   struct DR_row
   {
-    DR_row(int sensor_id,
-           int dr_id,
-           double lon,
-           double lat,
-           double mos,
-           time_t upload_time,
-           time_t sensor_time)
-      : sensor_id(sensor_id),
-        dr_id(dr_id),
-        lon(lon),
-        lat(lat),
-        mos(mos),
-        upload_time(upload_time),
-        sensor_time(sensor_time)
-    {}
+    DR_row(int sensor_id, int dr_id,
+           double lon, double lat, double mos,
+           time_t upload_time, time_t sensor_time);
 
     int sensor_id;
     int dr_id;
@@ -152,69 +131,14 @@ public:
     DRCursor(DynDBDriver* dbdriver,
              time_t timestamp = 0,
              unsigned packetSize = 20,
-             int beforeFirstDRId = -1)
-      : dbdriver_(dbdriver),
-        packetSize_(packetSize),
-        offset_(0),
-        resultInitialized_(false)
-    {
-      startingTime_ = boost::posix_time::from_time_t(timestamp);
-
-      std::stringstream sql;
-      if (beforeFirstDRId > -1)
-      {
-        sql << "SELECT *,"
-              "extract(epoch from upload_time) as upl_ts,"
-              "extract(epoch from sensor_time) as sns_ts "
-              "FROM detection_reports WHERE "
-              "sensor_time >= to_timestamp($1) AND dr_id > "
-              << beforeFirstDRId << " "
-              << "ORDER BY sensor_time ASC, upload_time ASC "
-                 "LIMIT $2 OFFSET $3";
-      }
-      else
-      {
-        sql << "SELECT *,"
-              "extract(epoch from upload_time) as upl_ts,"
-              "extract(epoch from sensor_time) as sns_ts "
-              "FROM detection_reports WHERE "
-              "sensor_time >= to_timestamp($1) "
-              "ORDER BY sensor_time ASC, upload_time ASC "
-              "LIMIT $2 OFFSET $3";
-      }
-
-      // prepare statement (query) for connection
-      dbdriver->db_connection_->unprepare("DR_select_statement");
-      dbdriver->db_connection_->prepare("DR_select_statement",sql.str());
-    }
+             int beforeFirstDRId = -1);
 
     /**
      * @brief fetchRow - return one row from iterator and advances.
      * @return DR_row from db, selected according startingTime_ and packetSize_
      */
-    DR_row fetchRow()
-    {
-      if (!resultInitialized_)
-        fetchRows();
-      else if (resultIterator_ == result_.end()) // no more rows to fetch
-      {
-        advancePacket();
-        fetchRows();
-      }
-      pqxx::result::const_iterator row = resultIterator_++;
-      return DR_row(row[0].as<int>(), // sensor_id
-                    row[1].as<int>(), // dr_id
-                    row[2].as<double>(), // lon
-                    row[3].as<double>(), // lat
-                    row[4].as<double>(), // meters_over_sea
-                    row[7].as<double>(), // upload_time - read as double, because of microseconds
-                    row[8].as<double>()); // sensor_time - like above
-    }
-
-    unsigned getPacketSize() const
-    {
-      return packetSize_;
-    }
+    DR_row fetchRow();
+    unsigned getPacketSize() const;
 
   private:
     /**
@@ -223,13 +147,7 @@ public:
      * @param pt ptime to convert
      * @return int64 containing timestamp.
      */
-    static boost::int64_t timeToInt64(const boost::posix_time::ptime& pt)
-    {
-      using namespace boost::posix_time;
-      static ptime epoch(boost::gregorian::date(1970, 1, 1));
-      time_duration diff(pt - epoch);
-      return (diff.ticks() / diff.ticks_per_second());
-    }
+    static boost::int64_t timeToInt64(const boost::posix_time::ptime& pt);
 
     /**
      * @brief advancePacket method moves window for another packet of data
@@ -237,44 +155,13 @@ public:
      *  If you would like to fetch data from next pack,
      *  use advancePacket() and fetchRow() later
      */
-    void advancePacket()
-    {
-      offset_ += packetSize_;
-    }
+    void advancePacket();
 
     /**
      * @brief fetchRows executes prepared select with given parameters
      *  which are startingTime_ and packetSize_ (limit)
      */
-    void fetchRows()
-    {
-      pqxx::work t(*dbdriver_->db_connection_,"DRs fetcher");
-      { // TODO rewrite this, when logger will be more sophisticated
-        std::stringstream msg;
-        msg << "Fetching rows with starting time = "
-            << timeToInt64(startingTime_)
-            << " packet size = " << packetSize_
-            << " offset = " << offset_;
-        Common::GlobalLogger::getInstance().log("DynDBDriver",msg.str());
-      }
-      result_
-          = t.prepared("DR_select_statement")
-          (pqxx::to_string(timeToInt64(startingTime_)))
-          (packetSize_)
-          (offset_).exec();
-
-      { // TODO rewrite this, when logger will be more sophisticated
-        std::stringstream msg;
-        msg << "Fetched " << result_.size() << " rows";
-        Common::GlobalLogger::getInstance().log("DynDBDriver",msg.str());
-      }
-
-      resultIterator_ = result_.begin();
-      if (resultIterator_ == result_.end()) // if after fetching, result is empty - tell interested ones.
-        throw DB::exceptions::NoResultAvailable();
-
-      resultInitialized_ = true;
-    }
+    void fetchRows();
 
     DynDBDriver* dbdriver_;
     boost::posix_time::ptime startingTime_;
@@ -289,18 +176,9 @@ public:
   struct Sensor_row
   {
     Sensor_row(int sensor_id,
-               double lon,
-               double lat,
-               double mos,
+               double lon, double lat, double mos,
                double range,
-               std::string type)
-      : sensor_id(sensor_id),
-        lon(lon),
-        lat(lat),
-        mos(mos),
-        range(range),
-        type(type)
-    {}
+               const std::string& type);
 
     int sensor_id;
     double lon;
