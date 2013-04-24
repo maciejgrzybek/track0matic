@@ -116,6 +116,33 @@ public:
     Sensor* sensor; // TODO implement this, when needed: should fetch Sensor data from DB and produce it with SensorFactory
   };
 
+  struct Track_row
+  {
+    Track_row(const boost::uuids::uuid& uuid,
+              double lon, double lat, double mos,
+              double lonVelocity, double latVelocity, double mosVelocity,
+              double predictedLon, double predictedLat, double predictedMos,
+              time_t refreshTime);
+
+    static std::string uuidToString(const boost::uuids::uuid& uuid);
+
+    boost::uuids::uuid uuid;
+
+    double lon;
+    double lat;
+    double mos;
+
+    double lonVelocity;
+    double latVelocity;
+    double mosVelocity;
+
+    double predictedLon;
+    double predictedLat;
+    double predictedMos;
+
+    time_t refreshTime;
+  };
+
   class DRCursor
   {
   public:
@@ -209,6 +236,7 @@ public:
                        int beforeFirstDRId = -1);
 
   void insertDR(const DR_row& dr);
+  void insertTrack(const Track_row& track);
 
   std::set<class Sensor*> getSensors();
 

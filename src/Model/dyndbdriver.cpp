@@ -1,11 +1,13 @@
 #include "dyndbdriver.h"
 
-#include <memory>
 #include <fstream>
+#include <memory>
 #include <string>
 
+#include <boost/lexical_cast.hpp> // for Track_row::uuidToString method
 #include <boost/archive/xml_archive_exception.hpp>
 #include <boost/archive/xml_iarchive.hpp>
+#include <boost/uuid/uuid_io.hpp> // for Track_row::uuidToString method
 
 #include <pqxx/connection>
 #include <pqxx/transaction>
@@ -49,6 +51,41 @@ DynDBDriver::DR_row::DR_row(int sensor_id,
     lon(lon),lat(lat),mos(mos),
     upload_time(upload_time),sensor_time(sensor_time)
 {}
+
+/******************************************************************************/
+
+DynDBDriver::Track_row::Track_row(const boost::uuids::uuid& uuid,
+                                  double lon, double lat, double mos,
+                                  double lonVelocity,
+                                  double latVelocity,
+                                  double mosVelocity,
+                                  double predictedLon,
+                                  double predictedLat,
+                                  double predictedMos, time_t refreshTime)
+  : uuid(uuid),
+    lon(lon),lat(lat),mos(mos),
+    lonVelocity(lonVelocity),latVelocity(latVelocity),mosVelocity(mosVelocity),
+    predictedLon(predictedLon),
+    predictedLat(predictedLat),
+    predictedMos(predictedMos),
+    refreshTime(refreshTime)
+{}
+
+std::string DynDBDriver::Track_row::uuidToString(const boost::uuids::uuid& uuid)
+{
+  std::string result;
+  try
+  {
+    result = boost::lexical_cast<std::string>(uuid);
+  }
+  catch (const boost::bad_lexical_cast&)
+  {
+    Common::GlobalLogger::getInstance()
+        .log("DynDBDriver","Failed casting track's UUID to string");
+  }
+
+  return result; // if fails to cast, returns empty
+}
 
 /******************************************************************************/
 
@@ -233,6 +270,31 @@ void DynDBDriver::insertDR(const DR_row& dr)
   t.commit();
 }
 
+void DynDBDriver::insertTrack(const Track_row& track)
+{
+  const std::string sql = "INSERT INTO track_snapshots "
+      "(track_id,lon,lat,meters_over_sea,"
+      "lon_velocity,lat_velocity,meters_over_sea_velocity,"
+      "predicted_lon,predicted_lat,predicted_meters_over_sea,"
+      "refresh_time) "
+      "VALUES('"
+      + pqxx::to_string(Track_row::uuidToString(track.uuid)) + "',"
+      + pqxx::to_string(track.lon) + ","
+      + pqxx::to_string(track.lat) + ","
+      + pqxx::to_string(track.mos) + ","
+      + pqxx::to_string(track.lonVelocity) + ","
+      + pqxx::to_string(track.latVelocity) + ","
+      + pqxx::to_string(track.mosVelocity) + ","
+      + pqxx::to_string(track.predictedLon) + ","
+      + pqxx::to_string(track.predictedLat) + ","
+      + pqxx::to_string(track.predictedMos) + ","
+      + "to_timestamp(" + pqxx::to_string(track.refreshTime) + "))";
+
+  pqxx::work t(*db_connection_,"Track inserter");
+  t.exec(sql);
+  t.commit();
+}
+
 std::set<Sensor*> DynDBDriver::getSensors()
 {
   const std::string sql
@@ -303,6 +365,7 @@ std::string DBDriverOptions::toString() const
   if (!password.empty())
     result += "password='"+password+"' ";
   if (!conn_timeout.empty())
+
     result += "connect_timeout='"+conn_timeout+"' ";
   if (!additional_options.empty())
     result += "options='"+additional_options+"' ";
