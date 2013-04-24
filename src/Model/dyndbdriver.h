@@ -7,9 +7,10 @@
 #include <sstream>
 
 #include <boost/date_time/posix_time/posix_time.hpp>
+#include <boost/lexical_cast.hpp>
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/nvp.hpp>
-#include <boost/lexical_cast.hpp>
+#include <boost/uuid/uuid.hpp>
 
 #include <pqxx/connection>
 #include <pqxx/transaction>
@@ -103,7 +104,7 @@ public:
   {
     DR_row(int sensor_id, int dr_id,
            double lon, double lat, double mos,
-           time_t upload_time, time_t sensor_time);
+           time_t sensor_time, time_t upload_time = 0);
 
     int sensor_id;
     int dr_id;

@@ -43,8 +43,8 @@ DynDBDriver::DR_row::DR_row(int sensor_id,
                                 double lon,
                                 double lat,
                                 double mos,
-                                time_t upload_time,
-                                time_t sensor_time)
+                                time_t sensor_time,
+                                time_t upload_time)
   : sensor_id(sensor_id),dr_id(dr_id),
     lon(lon),lat(lat),mos(mos),
     upload_time(upload_time),sensor_time(sensor_time)
@@ -207,8 +207,10 @@ void DynDBDriver::insertDR(const DR_row& dr)
           + pqxx::to_string(dr.lon) + ","
           + pqxx::to_string(dr.lat) + ","
           + pqxx::to_string(dr.mos) + ","
-        + "to_timestamp(" + pqxx::to_string(dr.upload_time) + "),"
-        + "to_timestamp(" + pqxx::to_string(dr.sensor_time) + "))";
+          + ((dr.upload_time == 0)
+             ? "DEFAULT"
+             : ("to_timestamp(" + pqxx::to_string(dr.upload_time) + ")"))
+          + ",to_timestamp(" + pqxx::to_string(dr.sensor_time) + "))";
   }
   else
   { // dr_id given
@@ -220,8 +222,10 @@ void DynDBDriver::insertDR(const DR_row& dr)
         + pqxx::to_string(dr.lon) + ","
         + pqxx::to_string(dr.lat) + ","
         + pqxx::to_string(dr.mos) + ","
-      + "to_timestamp(" + pqxx::to_string(dr.upload_time) + "),"
-      + "to_timestamp(" + pqxx::to_string(dr.sensor_time) + "))";
+        + ((dr.upload_time == 0)
+           ? "DEFAULT"
+           : ("to_timestamp(" + pqxx::to_string(dr.upload_time) + ")"))
+        + ",to_timestamp(" + pqxx::to_string(dr.sensor_time) + "))";
   }
 
   pqxx::work t(*db_connection_,"DR inserter");
