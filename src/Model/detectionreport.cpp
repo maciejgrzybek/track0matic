@@ -1,9 +1,8 @@
+#include "detectionreport.h"
+
 #include <ctime>
 
-#include "dyndbdriver.h"
 #include "feature.h"
-
-#include "detectionreport.h"
 
 DetectionReport::DetectionReport(const DB::DynDBDriver::DR_row& dr_row, const features_set_t& features)
   : features(features),

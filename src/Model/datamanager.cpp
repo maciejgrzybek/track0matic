@@ -1,10 +1,13 @@
+#include "datamanager.h"
+
 #include <chrono>
+#include <memory>
 #include <sstream> // used for logging purpose
 #include <thread>
 
-#include <Common/logger.h>
+#include <Model/DB/common.h>
 
-#include "datamanager.h"
+#include <Common/logger.h>
 
 namespace Model
 {

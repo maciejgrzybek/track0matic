@@ -9,7 +9,7 @@
 
 #include <Model/model.h>
 
-#include <Model/dyndbdriver.h>
+#include <Model/DB/dyndbdriver.h>
 #include <Model/reportmanager.h>
 #include <Model/alignmentprocessor.h>
 #include <Model/candidateselector.h>
@@ -65,6 +65,7 @@ public:
    */
   virtual Snapshot computeState(time_types::ptime_t currentTime
                                   = time_types::ptime_t());
+
   virtual Snapshot getSnapshot() const;
 
 private:
