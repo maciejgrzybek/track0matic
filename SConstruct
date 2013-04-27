@@ -19,6 +19,7 @@ qtEnv.EnableQt4Modules([
                        ])
 
 
+thirdparty = env.SConscript('src/SConscript.3rdparty', variant_dir='build', duplicate=0, exports = ['env'])
 common = env.SConscript('src/SConscript.common', variant_dir='build', duplicate=0, exports = ['env'])
 model = env.SConscript('src/SConscript.model', variant_dir='build', duplicate=0, exports = ['env'])
 controller = env.SConscript('src/SConscript.controller', variant_dir='build', duplicate=0, exports = ['env'])
@@ -28,4 +29,5 @@ env.Depends(final,model)
 env.Depends(final,controller)
 env.Depends(view,common)
 env.Depends(final,view)
+env.Depends(view,thirdparty) # for static db driver (map drawing)
 env.SConscript('test/SConscript.test', variant_dir='build_test', duplicate=0, exports = ['env'])

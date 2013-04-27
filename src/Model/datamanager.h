@@ -18,6 +18,8 @@
 #include <Model/featureextractor.h>
 #include <Model/fusionexecutor.h>
 
+#include <3rdparty/StaticBaseDriver.h>
+
 namespace Model
 {
 
@@ -27,6 +29,8 @@ public:
   DataManager(const std::string& paramsPath = "options.xml",
               std::shared_ptr<DB::DynDBDriver> dynDbDriver
                 = std::shared_ptr<DB::DynDBDriver>(),
+              std::shared_ptr<StaticBaseDriver> staticDbDriver
+                = std::shared_ptr<StaticBaseDriver>(),
               std::unique_ptr<estimation::EstimationFilter<> >
                 = std::unique_ptr<estimation::EstimationFilter<> >(),
               std::unique_ptr<ReportManager> reportManager
@@ -68,6 +72,8 @@ public:
 
   virtual Snapshot getSnapshot() const;
 
+  virtual MapPtr getMap() const;
+
 private:
   /**
    * @brief Executes one full step of tracking process,
@@ -99,6 +105,7 @@ private:
   Common::ThreadBuffer<Snapshot> snapshot_;
 
   std::shared_ptr<DB::DynDBDriver> dynDbDriver_;
+  std::shared_ptr<StaticBaseDriver> staticDbDriver_;
   std::unique_ptr<ReportManager> reportManager_;
   std::unique_ptr<AlignmentProcessor> alignmentProcessor_;
   std::unique_ptr<CandidateSelector> candidateSelector_;

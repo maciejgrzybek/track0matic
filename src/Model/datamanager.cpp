@@ -14,6 +14,7 @@ namespace Model
 
 DataManager::DataManager(const std::string& paramsPath,
                          std::shared_ptr<DB::DynDBDriver> dynDbDriver,
+                         std::shared_ptr<StaticBaseDriver> staticDbDriver,
                          std::unique_ptr<estimation::EstimationFilter<> > filter,
                          std::unique_ptr<ReportManager> reportManager,
                          std::unique_ptr<AlignmentProcessor> alignmentProcessor,
@@ -29,6 +30,16 @@ DataManager::DataManager(const std::string& paramsPath,
     dynDbDriver_ = dynDbDriver;
   else
     dynDbDriver_ = std::make_shared<DB::DynDBDriver>(paramsPath);
+
+  if (staticDbDriver)
+    staticDbDriver_ = staticDbDriver;
+  else
+  {
+    std::unique_ptr<DB::Common::DBDriverOptions> options
+        = DB::Common::loadOptionsFromFile(paramsPath);
+    staticDbDriver_
+        = std::make_shared<StaticBaseDriver>(options->toString().c_str());
+  }
 
   if (filter)
     filter_ = std::move(filter);
@@ -111,6 +122,12 @@ Snapshot DataManager::computeState(time_types::ptime_t currentTime)
 Snapshot DataManager::getSnapshot() const
 {
   return snapshot_.get();
+}
+
+MapPtr DataManager::getMap() const
+{
+  // TODO maybe cache it?
+  return staticDbDriver_->getMap();
 }
 
 std::shared_ptr<

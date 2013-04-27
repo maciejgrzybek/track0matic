@@ -13,7 +13,7 @@ targets = [ 'main.cpp',
 
 program = envCopy.Program(target = '../bin/Tracker',
                           source = targets,
-                          LIBS = [ 'QtView', 'Controller', 'Model', 'Common', 'QtCore', 'QtGui' ],
+                          LIBS = [ 'QtView', 'Controller', 'Model', 'Common', '3rdparty', 'QtCore', 'QtGui' ],
                           LIBPATH = ['.','/usr/lib64/qt4'])
 
 Return( 'program' )

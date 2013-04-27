@@ -3,6 +3,8 @@
 
 #include <Model/modelsnapshot.h>
 
+#include <3rdparty/DBDataStructures.h>
+
 namespace Model
 {
 
@@ -26,6 +28,12 @@ public:
    * @return Snapshot of Model after last computation.
    */
   virtual Snapshot getSnapshot() const = 0;
+
+  /**
+   * @brief Returns world static map.
+   * @return MapPtr pointing to world Map.
+   */
+  virtual MapPtr getMap() const = 0;
 };
 
 } // namespace Model

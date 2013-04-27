@@ -1,0 +1,22 @@
+# vim: ft=python
+
+Import('env')
+
+dir = '3rdparty'
+
+envCopy = env.Clone()
+envCopy.Append(
+                CPPPATH = '.'
+              )
+
+sourceTargets = [ 'DBDataStructures.cpp',
+                  'Exceptions.cpp',
+                  'StaticBaseDriver.cpp' ]
+
+targets = []
+for source in sourceTargets:
+  targets.append(dir + '/' + source)
+
+library = envCopy.Library('3rdparty',targets)
+
+Return( 'library' )
