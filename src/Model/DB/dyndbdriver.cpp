@@ -141,8 +141,8 @@ DynDBDriver::DR_row DynDBDriver::DRCursor::fetchRow()
                 row[2].as<double>(), // lon
                 row[3].as<double>(), // lat
                 row[4].as<double>(), // meters_over_sea
-                row[7].as<double>(), // upload_time - read as double, because of microseconds
-                row[8].as<double>()); // sensor_time - like above
+                row[8].as<double>(), // sensor_time - like above
+                row[7].as<double>()); // upload_time - read as double, because of microseconds
 }
 
 unsigned DynDBDriver::DRCursor::getPacketSize() const
