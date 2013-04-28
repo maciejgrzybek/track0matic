@@ -35,6 +35,14 @@ void MessageDispatcher::visit(QuitRequestedMessage& /*m*/)
   controller_.quit();
 }
 
+void MessageDispatcher::visit(MapSnapshotRequestedMessage& /*m*/)
+{
+  std::unique_ptr<Model::WorldSnapshot> snapshot(
+        new Model::WorldSnapshot(model_.getMap())
+        );
+  view_.worldStateChange(std::move(snapshot));
+}
+
 void MessageDispatcher::visit(TimerTickMessage& /*m*/)
 {
   Model::Snapshot state;

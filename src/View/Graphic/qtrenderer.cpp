@@ -46,17 +46,27 @@ boost::uuids::uuid GraphicalTrack::getUuid() const
 
 /******************************************************************************/
 
-const double QtRenderer::varianceFactor_ = 10;
+GraphicalStreet::GraphicalStreet(
+    const std::shared_ptr<Model::WorldSnapshot::StreetSnapshot> snapshot)
+  : street(snapshot)
+{}
 
-QtRenderer::QtRenderer(std::size_t width, std::size_t height, QtView* parent)
+/******************************************************************************/
+
+const double QtRenderer::varianceFactor_ = 500;
+
+QtRenderer::QtRenderer(QtView* parent)
   : parent_(parent),
     mainWindow_(new QMainWindow()),
-    scene_(new QGraphicsScene(-qreal(width/2.0),-qreal(height/2.0),width,height)),
+    scene_(new QGraphicsScene()),
     view_(new QGraphicsView(scene_))
 {
   mainWindow_->setAttribute(Qt::WA_QuitOnClose,false);
   connect(this,SIGNAL(addTrackSignal(GraphicalTrack*)),
           SLOT(performAddTrack(GraphicalTrack*)));
+
+  connect(this,SIGNAL(addStreetSignal(GraphicalStreet*)),
+          SLOT(performAddStreet(GraphicalStreet*)));
 
   connect(this,SIGNAL(clearSceneSignal()),SLOT(performClearScene()));
 
@@ -67,7 +77,7 @@ QtRenderer::QtRenderer(std::size_t width, std::size_t height, QtView* parent)
 
   drawStaticGraphics();
   setupMenu();
-  view_->scale(2.0,2.0);
+  view_->scale(80000.0,80000.0);
   mainWindow_->setCentralWidget(view_);
 }
 
@@ -89,6 +99,13 @@ void QtRenderer::addTrack(const Track* track)
   emit addTrackSignal(graphicalTrack); // invokeLater (put into Qt msg queue)
 }
 
+void QtRenderer::addStreet(
+    const std::shared_ptr<Model::WorldSnapshot::StreetSnapshot> street)
+{
+  GraphicalStreet* graphicalStreet = new GraphicalStreet(street);
+  emit addStreetSignal(graphicalStreet); // invokeLater
+}
+
 void QtRenderer::clearScene()
 {
   emit clearSceneSignal(); // invokeLater
@@ -108,6 +125,17 @@ void QtRenderer::performAddTrack(GraphicalTrack* graphicalTrack)
 {
   colorManager_.setColorForTrack(graphicalTrack);
   scene_->addItem(graphicalTrack);
+}
+
+void QtRenderer::performAddStreet(GraphicalStreet* graphicalStreet)
+{
+  const std::shared_ptr<Model::WorldSnapshot::StreetSnapshot> street
+      = graphicalStreet->street;
+
+  scene_->addLine(street->first->lon,street->first->lat,
+                  street->second->lon,street->second->lat);
+
+  delete graphicalStreet;
 }
 
 void QtRenderer::performClearScene()
@@ -146,13 +174,7 @@ void QtRenderer::drawStaticGraphics()
 
 void QtRenderer::drawBackground()
 {
-  QPen pen(QColor(0,0,0));
-  pen.setWidth(1);
-  QRectF rect = scene_->sceneRect();
-  qreal midWidth = rect.left() + rect.width()/2;
-  qreal midHeight = rect.top() + rect.height()/2;
-  scene_->addLine(midWidth,rect.top(),midWidth,rect.bottom(),pen); // horizontal line
-  scene_->addLine(rect.left(),midHeight,rect.right(),midHeight,pen); // vertical line
+  parent_->requestMapData();
 }
 
 void QtRenderer::setupMenu()
@@ -165,7 +187,11 @@ QtRenderer::ColorManager::ColorManager()
                       Qt::red,
                       Qt::green,
                       Qt::blue,
-                      Qt::yellow
+                      Qt::yellow,
+                      Qt::black,
+                      Qt::magenta,
+                      Qt::cyan,
+                      Qt::gray
                       })
 {}
 

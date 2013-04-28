@@ -72,7 +72,7 @@ public:
 
   virtual Snapshot getSnapshot() const;
 
-  virtual MapPtr getMap() const;
+  virtual MapPtr getMap();
 
 private:
   /**
@@ -117,6 +117,8 @@ private:
 
   const time_types::duration_t TTL_; // for now it's not mutable, but in future,
                                      // can be, when tracker could be adaptive
+
+  MapPtr staticMap_;
 };
 
 } // namespace Model

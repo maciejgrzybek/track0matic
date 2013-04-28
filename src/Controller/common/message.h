@@ -41,6 +41,12 @@ public:
   virtual void accept(MessageDispatcher&);
 };
 
+class MapSnapshotRequestedMessage : public Message
+{
+public:
+  virtual void accept(MessageDispatcher&);
+};
+
 class TimerTickMessage : public Message
 {
 public:

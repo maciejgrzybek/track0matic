@@ -33,7 +33,7 @@ public:
    * @brief Returns world static map.
    * @return MapPtr pointing to world Map.
    */
-  virtual MapPtr getMap() const = 0;
+  virtual MapPtr getMap() = 0;
 };
 
 } // namespace Model

@@ -124,10 +124,13 @@ Snapshot DataManager::getSnapshot() const
   return snapshot_.get();
 }
 
-MapPtr DataManager::getMap() const
+MapPtr DataManager::getMap()
 {
-  // TODO maybe cache it?
-  return staticDbDriver_->getMap();
+  // simple caching, without refreshing.
+  if (!staticMap_)
+    staticMap_ = staticDbDriver_->getMap();
+
+  return staticMap_;
 }
 
 std::shared_ptr<

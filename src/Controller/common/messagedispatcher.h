@@ -34,6 +34,7 @@ public:
 
   void visit(class WorkingModeChangeMessage&);
   void visit(class QuitRequestedMessage&);
+  void visit(class MapSnapshotRequestedMessage&);
   void visit(class TimerTickMessage&);
 
 private:

@@ -8,6 +8,8 @@ namespace Controller
 Message::~Message()
 {}
 
+/******************************************************************************/
+
 WorkingModeChangeMessage::WorkingModeChangeMessage(WorkingMode workingMode)
   : workingMode_(workingMode)
 {}
@@ -22,10 +24,21 @@ void WorkingModeChangeMessage::accept(MessageDispatcher& md)
   md.visit(*this);
 }
 
+/******************************************************************************/
+
 void QuitRequestedMessage::accept(MessageDispatcher& md)
 {
   md.visit(*this);
 }
+
+/******************************************************************************/
+
+void MapSnapshotRequestedMessage::accept(MessageDispatcher& md)
+{
+  md.visit(*this);
+}
+
+/******************************************************************************/
 
 TimerTickMessage::TimerTickMessage(time_types::duration_t timeDuration)
   : timeDuration_(timeDuration)

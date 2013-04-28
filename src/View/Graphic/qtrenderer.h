@@ -10,6 +10,8 @@
 #include <QObject>
 #include <QGraphicsEllipseItem>
 
+#include <Model/modelsnapshot.h>
+
 class QGraphicsScene;
 class QGraphicsView;
 class QMainWindow;
@@ -30,7 +32,7 @@ public:
                  qreal x, qreal y,
                  qreal predictionX, qreal predictionY,
                  qreal widthFactor = 2, qreal heightFactor = 2,
-                 qreal width = 3, qreal height = 3);
+                 qreal width = 0.0001, qreal height = 0.0001);
 
   boost::uuids::uuid getUuid() const;
 
@@ -39,21 +41,34 @@ private:
   const boost::uuids::uuid uuid_;
 };
 
+// holds street snapshot, as long as Qt needs it.
+// Wrapper to omit introducing std::shared_ptr to Qt meta types.
+// TODO Maybe later it should be drawable item (like GraphicalTrack)?
+struct GraphicalStreet
+{
+  GraphicalStreet(const std::shared_ptr<Model::WorldSnapshot::StreetSnapshot>);
+
+  const std::shared_ptr<Model::WorldSnapshot::StreetSnapshot> street;
+};
+
 class QtRenderer : public QObject
 {
   Q_OBJECT
 public:
-  QtRenderer(std::size_t width, std::size_t height, QtView* parent);
+  QtRenderer(QtView* parent);
   virtual ~QtRenderer();
 
   void show();
-  void addTrack(const Track*);
+  void addTrack(const Track*); // TODO there should be TrackSnapshot,
+                               // instead of Track
+  void addStreet(const std::shared_ptr<Model::WorldSnapshot::StreetSnapshot>);
   void clearScene();
   void requestExit();
   void close();
 
 signals:
   void addTrackSignal(GraphicalTrack*);
+  void addStreetSignal(GraphicalStreet*);
   void clearSceneSignal();
   void exitRequestedSignal();
   void showSignal();
@@ -61,6 +76,7 @@ signals:
 
 protected slots:
   void performAddTrack(GraphicalTrack*);
+  void performAddStreet(GraphicalStreet*);
   void performClearScene();
   void quitRequested();
 
