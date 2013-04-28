@@ -98,6 +98,8 @@ private:
 
   void initializeKalmanFilter();
 
+  void putTracksSnapshotIntoDB(const Snapshot&);
+
   /* after C++11's std::atomic_load<std::shared_ptr> will be implemented
    * we will use lock-free implementation, based on it,
    * instead of mutexed buffer, to return Snapshot.

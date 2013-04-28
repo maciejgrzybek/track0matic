@@ -108,14 +108,17 @@ DataManager::DataManager(const std::string& paramsPath,
 
 Snapshot DataManager::computeState(time_types::ptime_t currentTime)
 {
-  Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
-  std::stringstream m;
-  m << "Computing state with current time = " << currentTime;
-  logger.log("DataManager",m.str());
+  {
+    Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
+    std::stringstream m;
+    m << "Computing state with current time = " << currentTime;
+    logger.log("DataManager",m.str());
+  }
   auto tracks = computeTracks(TTL_,currentTime);
   // clone Tracks, to ensure safety in multithreaded environment
   Snapshot s = cloneTracksInSnapshot(tracks);
   snapshot_.put(s);
+  putTracksSnapshotIntoDB(s);
   return s;
 }
 
@@ -312,6 +315,30 @@ void DataManager::initializeKalmanFilter()
 
   filter_ = std::unique_ptr<estimation::KalmanFilter<> >(
         new estimation::KalmanFilter<>(A,B,R,Q,H));
+}
+
+void DataManager::putTracksSnapshotIntoDB(const Snapshot& snapshot)
+{
+  DB::DynDBDriver::TracksSnapshot tracksSnapshot
+      = dynDbDriver_->getNewTracksSnapshot();
+  for (const std::unique_ptr<Track>& track : *snapshot.getData())
+  {
+    DB::DynDBDriver::Track_row
+        track_row(track->getUuid(),
+                  track->getLongitude(),
+                  track->getLatitude(),
+                  track->getMetersOverSea(),
+                  track->getLongitudeVelocity(),
+                  track->getLatitudeVelocity(),
+                  track->getMetersOverSeaVelocity(),
+                  track->getPredictedLongitude(),
+                  track->getPredictedLatitude(),
+                  track->getPredictedMetersOverSea(),
+                  time_types::clock_t::to_time_t(track->getRefreshTime()));
+    tracksSnapshot.addTrack(track_row);
+  }
+
+  tracksSnapshot.storeTracks();
 }
 
 } // namespace Model
