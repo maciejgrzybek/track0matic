@@ -82,6 +82,7 @@ COMMENT ON TABLE FEATURE_DEFINITIONS IS 'Table contains types of features, which
 COMMENT ON COLUMN FEATURE_DEFINITIONS.NAME IS 'Name of feature (like "color").';
 
 CREATE TABLE TRACK_SNAPSHOTS(
+  SNAPSHOT_ID integer not null,
   TRACK_ID char(36) not null, -- IDs from boost uuids
   UPLOAD_TIME timestamp with time zone not null default current_timestamp,
   LON longitude not null,
@@ -95,8 +96,10 @@ CREATE TABLE TRACK_SNAPSHOTS(
   PREDICTED_METERS_OVER_SEA metersOverSea,
   REFRESH_TIME timestamp with time zone not null,
 
-  CONSTRAINT PK_TRACK_SNAPSHOTS PRIMARY KEY(TRACK_ID,UPLOAD_TIME)
+  CONSTRAINT PK_TRACK_SNAPSHOTS PRIMARY KEY(SNAPSHOT_ID,TRACK_ID)
 );
+
+CREATE SEQUENCE TRACK_SNAPSHOT_SEQ;
 
 -- Author: Andrzej 'fiedukow' Fiedukowicz
 CREATE TABLE SensorTypes
