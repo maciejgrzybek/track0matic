@@ -76,6 +76,21 @@ double Track::getMetersOverSea() const
   return mos_;
 }
 
+double Track::getLongitudeVelocity() const
+{
+  return lonVel_;
+}
+
+double Track::getLatitudeVelocity() const
+{
+  return latVel_;
+}
+
+double Track::getMetersOverSeaVelocity() const
+{
+  return mosVel_;
+}
+
 double Track::getPredictedLongitude() const
 {
   return predictedLon_;
