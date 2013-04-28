@@ -98,4 +98,19 @@ CREATE TABLE TRACK_SNAPSHOTS(
   CONSTRAINT PK_TRACK_SNAPSHOTS PRIMARY KEY(TRACK_ID,UPLOAD_TIME)
 );
 
+-- Author: Andrzej 'fiedukow' Fiedukowicz
+CREATE TABLE SensorTypes
+(
+  typeId SERIAL,
+  typeName varchar(64) not null,
+
+  CONSTRAINT pk_IdOfType PRIMARY KEY(typeId),
+  CONSTRAINT uq_UniqueTypeName UNIQUE(typeName)
+);
+
+COMMENT ON TABLE SensorTypes IS 'Contains names of sensor types identifying parameters they are providing';
+COMMENT ON COLUMN SensorTypes.typeId IS 'Unique ID of type of sensor';
+COMMENT ON COLUMN SensorTypes.typeName IS 'Name of type of sensor - human readable';
+
+
 END;

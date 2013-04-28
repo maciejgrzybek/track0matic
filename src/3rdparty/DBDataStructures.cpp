@@ -36,7 +36,7 @@ Street::Street(pqxx::tuple tableRow,
                          });
 }
 
-Map::Map(const StreetNodes &vertexes, Streets &edges)
+Map::Map(const StreetNodes &vertexes, const Streets &edges)
   : vertexes(vertexes),
     edges(edges)
 {
