@@ -208,6 +208,77 @@ DynDBDriver::Sensor_row::Sensor_row(int sensor_id,
 
 /******************************************************************************/
 
+DynDBDriver::TracksSnapshot
+::Transactor::Transactor(unsigned long snapshotId,
+                         const std::vector<DynDBDriver::Track_row>& tracks)
+  : snapshotId_(snapshotId),
+    tracks_(tracks)
+{}
+
+void DynDBDriver
+  ::TracksSnapshot::Transactor::operator()(pqxx::work& transaction)
+{
+  for (const DynDBDriver::Track_row& track : tracks_)
+  {
+    const std::string sql = "INSERT INTO track_snapshots "
+        "(snapshot_id,track_id,lon,lat,meters_over_sea,"
+        "lon_velocity,lat_velocity,meters_over_sea_velocity,"
+        "predicted_lon,predicted_lat,predicted_meters_over_sea,"
+        "refresh_time) "
+        "VALUES("
+        + pqxx::to_string(snapshotId_) + ",'"
+        + pqxx::to_string(Track_row::uuidToString(track.uuid)) + "',"
+        + pqxx::to_string(track.lon) + ","
+        + pqxx::to_string(track.lat) + ","
+        + pqxx::to_string(track.mos) + ","
+        + pqxx::to_string(track.lonVelocity) + ","
+        + pqxx::to_string(track.latVelocity) + ","
+        + pqxx::to_string(track.mosVelocity) + ","
+        + pqxx::to_string(track.predictedLon) + ","
+        + pqxx::to_string(track.predictedLat) + ","
+        + pqxx::to_string(track.predictedMos) + ","
+        + "to_timestamp(" + pqxx::to_string(track.refreshTime) + "))";
+    transaction.exec(sql);
+  }
+
+  transaction.commit();
+}
+
+/******************************************************************************/
+
+DynDBDriver::TracksSnapshot::TracksSnapshot(DynDBDriver& dbDriver)
+  : dbDriver_(dbDriver),
+    snapshotId_(getSnapshotIdFromSequence())
+{}
+
+void DynDBDriver::TracksSnapshot::addTrack(const DynDBDriver::Track_row& track)
+{
+  tracks_.push_back(track);
+}
+
+std::size_t DynDBDriver::TracksSnapshot::getTracksCount() const
+{
+  return tracks_.size();
+}
+
+void DynDBDriver::TracksSnapshot::storeTracks()
+{
+  Transactor trans(snapshotId_,tracks_);
+  dbDriver_.db_connection_->perform(trans); // let pqxx perform transaction
+}
+
+unsigned long DynDBDriver::TracksSnapshot::getSnapshotIdFromSequence()
+{
+  const std::string sql
+      = "SELECT nextval('track_snapshot_seq')";
+
+  pqxx::work t(*dbDriver_.db_connection_,"Track snapshot id fetcher");
+  pqxx::result result = t.exec(sql);
+  return result[0][0].as<unsigned long>();
+}
+
+/******************************************************************************/
+
 DynDBDriver::DynDBDriver(const std::string& options_path)
 {
   loadOptions(options_path);
@@ -271,29 +342,9 @@ void DynDBDriver::insertDR(const DR_row& dr)
   t.commit();
 }
 
-void DynDBDriver::insertTrack(const Track_row& track)
+DynDBDriver::TracksSnapshot DynDBDriver::getNewTracksSnapshot()
 {
-  const std::string sql = "INSERT INTO track_snapshots "
-      "(track_id,lon,lat,meters_over_sea,"
-      "lon_velocity,lat_velocity,meters_over_sea_velocity,"
-      "predicted_lon,predicted_lat,predicted_meters_over_sea,"
-      "refresh_time) "
-      "VALUES('"
-      + pqxx::to_string(Track_row::uuidToString(track.uuid)) + "',"
-      + pqxx::to_string(track.lon) + ","
-      + pqxx::to_string(track.lat) + ","
-      + pqxx::to_string(track.mos) + ","
-      + pqxx::to_string(track.lonVelocity) + ","
-      + pqxx::to_string(track.latVelocity) + ","
-      + pqxx::to_string(track.mosVelocity) + ","
-      + pqxx::to_string(track.predictedLon) + ","
-      + pqxx::to_string(track.predictedLat) + ","
-      + pqxx::to_string(track.predictedMos) + ","
-      + "to_timestamp(" + pqxx::to_string(track.refreshTime) + "))";
-
-  pqxx::work t(*db_connection_,"Track inserter");
-  t.exec(sql);
-  t.commit();
+  return TracksSnapshot(*this);
 }
 
 std::set<Sensor*> DynDBDriver::getSensors()

@@ -12,6 +12,7 @@
 
 #include <pqxx/connection>
 #include <pqxx/transaction>
+#include <pqxx/transactor>
 #include <pqxx/prepared_statement>
 
 #include <Common/logger.h>
@@ -164,6 +165,34 @@ public:
     std::string type;
   };
 
+  class TracksSnapshot
+  {
+  public:
+    TracksSnapshot(DynDBDriver& dbDriver);
+
+    void addTrack(const Track_row& track);
+    std::size_t getTracksCount() const;
+    void storeTracks();
+
+  private:
+    class Transactor : public pqxx::transactor<>
+    {
+    public:
+      Transactor(unsigned long snapshotId,const std::vector<Track_row>& tracks);
+      void operator()(pqxx::work& transaction);
+
+    private:
+      const unsigned long snapshotId_;
+      const std::vector<Track_row> tracks_;
+    };
+
+    unsigned long getSnapshotIdFromSequence();
+
+    DynDBDriver& dbDriver_;
+    const unsigned long snapshotId_;
+    std::vector<Track_row> tracks_;
+  };
+
   /**
    * @brief C-tor for DynDBDriver, basing on external options file
    * @param path to configuration file
@@ -184,7 +213,8 @@ public:
                        int beforeFirstDRId = -1);
 
   void insertDR(const DR_row& dr);
-  void insertTrack(const Track_row& track);
+
+  TracksSnapshot getNewTracksSnapshot();
 
   std::set<class Sensor*> getSensors();
 
