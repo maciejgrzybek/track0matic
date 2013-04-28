@@ -16,7 +16,10 @@ Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
     lonVel_(0), // because sensors don't provide information about velocity
     latVel_(0), // we assume that starting velocity is 0
     mosVel_(0), // TODO conside changing it,
-    lonPredictionVar_(0), // while Tracker's efficiency is not good enough
+    predictedLon_(0), // while Tracker's efficiency is not good enough
+    predictedLat_(0),
+    predictedMos_(0),
+    lonPredictionVar_(0),
     latPredictionVar_(0),
     mosPredictionVar_(0),
     refreshTime_(creationTime),
