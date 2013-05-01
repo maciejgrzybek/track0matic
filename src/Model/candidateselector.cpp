@@ -1,18 +1,20 @@
+#include "candidateselector.h"
+
 #include <vector>
 
-#include "candidateselector.h"
+#include "DB/dyndbdriver.h"
+#include <Model/sensorfactory.h>
 
 CandidateSelector::CandidateSelector(const std::set<Sensor*>& sensorsSet)
   : dbdriver_(NULL),
     sensors_(sensorsSet)
-{
-}
+{}
 
 CandidateSelector::CandidateSelector(std::shared_ptr<DB::DynDBDriver> dbdriver)
   : dbdriver_(dbdriver),
-    sensors_(dbdriver->getSensors())
-{
-}
+    sensors_(SensorFactory::getInstance()
+             .transformSensors(dbdriver->getSensors()))
+{}
 
 
 std::vector<std::set<DetectionReport> >

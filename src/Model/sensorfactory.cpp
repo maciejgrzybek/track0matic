@@ -6,12 +6,25 @@ SensorFactory& SensorFactory::getInstance()
   return instance;
 }
 
+std::set<Sensor*>
+SensorFactory::transformSensors(std::set<DB::DynDBDriver::Sensor_row*> sensors)
+{
+  std::set<Sensor*> result;
+  for (const DB::DynDBDriver::Sensor_row* row : sensors)
+  {
+    Sensor* sensor = produce(row->sensor_id,row->lon,row->lat,row->mos,
+                             row->range,row->type);
+    result.insert(sensor);
+
+    delete row;
+  }
+
+  return result;
+}
+
 Sensor* SensorFactory::produce(int id,
-                               double lon,
-                               double lat,
-                               double mos,
-                               double range,
-                               std::string type)
+                               double lon, double lat, double mos,
+                               double range, std::string type)
 {
   Sensor* sensor = nullptr;
   sensors_map_t::const_iterator iter = sensorsMap.find(id);

@@ -15,8 +15,6 @@
 #include <pqxx/transactor>
 #include <pqxx/prepared_statement>
 
-#include <Common/logger.h>
-
 class Sensor;
 
 namespace DB
@@ -92,6 +90,21 @@ public:
     time_t refreshTime;
   };
 
+  struct Sensor_row
+  {
+    Sensor_row(int sensor_id,
+               double lon, double lat, double mos,
+               double range,
+               const std::string& type);
+
+    int sensor_id;
+    double lon;
+    double lat;
+    double mos;
+    double range;
+    std::string type;
+  };
+
   class DRCursor
   {
   public:
@@ -150,21 +163,6 @@ public:
     pqxx::result result_;
   };
 
-  struct Sensor_row
-  {
-    Sensor_row(int sensor_id,
-               double lon, double lat, double mos,
-               double range,
-               const std::string& type);
-
-    int sensor_id;
-    double lon;
-    double lat;
-    double mos;
-    double range;
-    std::string type;
-  };
-
   class TracksSnapshot
   {
   public:
@@ -216,7 +214,7 @@ public:
 
   TracksSnapshot getNewTracksSnapshot();
 
-  std::set<class Sensor*> getSensors();
+  std::set<Sensor_row*> getSensors();
 
 private:
   void loadOptions(const std::string& options_path);

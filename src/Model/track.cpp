@@ -1,27 +1,25 @@
+#include "track.h"
+
 #include <boost/uuid/uuid_generators.hpp>
 #include <boost/uuid/uuid_io.hpp> // for logging purpose
 
 #include "detectionreport.h"
 
-#include "track.h"
+#include <Common/logger.h>
 
 Track::Track(std::unique_ptr<estimation::EstimationFilter<> > filter,
              double longitude, double latitude, double metersOverSea,
              double lonVar, double latVar, double mosVar,
              time_types::ptime_t creationTime)
   : estimationFilter_(std::move(filter)),
-    lon_(longitude),
-    lat_(latitude),
-    mos_(metersOverSea),
+    lon_(longitude), lat_(latitude), mos_(metersOverSea),
     lonVel_(0), // because sensors don't provide information about velocity
     latVel_(0), // we assume that starting velocity is 0
     mosVel_(0), // TODO conside changing it,
     predictedLon_(0), // while Tracker's efficiency is not good enough
     predictedLat_(0),
     predictedMos_(0),
-    lonPredictionVar_(0),
-    latPredictionVar_(0),
-    mosPredictionVar_(0),
+    lonPredictionVar_(0), latPredictionVar_(0), mosPredictionVar_(0),
     refreshTime_(creationTime),
     uuid_(boost::uuids::random_generator()()) // generate random uuid
 {

@@ -12,7 +12,7 @@
 
 #include "common.h"
 
-#include <Model/sensorfactory.h> // TODO remove this dependency
+#include <Common/logger.h>
 
 namespace DB
 {
@@ -347,7 +347,7 @@ DynDBDriver::TracksSnapshot DynDBDriver::getNewTracksSnapshot()
   return TracksSnapshot(*this);
 }
 
-std::set<Sensor*> DynDBDriver::getSensors()
+std::set<DynDBDriver::Sensor_row*> DynDBDriver::getSensors()
 {
   const std::string sql
       = "SELECT s.sensorid,s.lon,s.lat,s.mos,s.range,st.typename "
@@ -361,20 +361,18 @@ std::set<Sensor*> DynDBDriver::getSensors()
   if (resultIterator == result.end()) // if after fetching, result is empty - tell interested ones.
     throw DB::exceptions::NoResultAvailable();
 
-  std::set<Sensor*> resultSet;
+  std::set<Sensor_row*> resultSet;
 
   for (; resultIterator != result.end(); ++resultIterator)
   {
     pqxx::result::const_iterator row = resultIterator;
-    Sensor* sensor
-        = SensorFactory::getInstance()
-            .produce(row[0].as<int>(),
-                     row[1].as<double>(),
-                     row[2].as<double>(),
-                     row[3].as<double>(),
-                     row[4].as<double>(),
-                     row[5].as<std::string>());
-
+    Sensor_row* sensor
+        = new Sensor_row(row[0].as<int>(),
+                         row[1].as<double>(),
+                         row[2].as<double>(),
+                         row[3].as<double>(),
+                         row[4].as<double>(),
+                         row[5].as<std::string>());
     resultSet.insert(sensor);
   }
 

@@ -7,7 +7,11 @@
 
 #include "sensor.h"
 #include "detectionreport.h"
-#include "DB/dyndbdriver.h"
+
+namespace DB
+{
+class DynDBDriver;
+}
 
 // TODO do not group DRs from sensors from neighborhood (basis only on sensors neighborhood),
 //  instead of this, try to figure out which DR could be seen by (more) sensors and group these.
