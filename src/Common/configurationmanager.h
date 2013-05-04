@@ -6,6 +6,10 @@
 #include <string>
 #include <unordered_map>
 
+#include <boost/lexical_cast.hpp>
+
+#include <Common/logger.h>
+
 namespace Common
 {
 
@@ -110,6 +114,29 @@ public:
   };
 
   static ConfigurationManager& getInstance();
+
+  template <typename T>
+  static T getCastedValue(const std::string& moduleName, const std::string& key,
+                          const T& defaultValue)
+  {
+    ConfigurationManager& confMan = ConfigurationManager::getInstance();
+    const std::string value = confMan[moduleName][key];
+    T result = defaultValue;
+    try
+    {
+      result = boost::lexical_cast<T>(value);
+    }
+    catch (const boost::bad_lexical_cast&)
+    {
+      Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
+      std::stringstream msg;
+      msg << "Unable to cast " << moduleName << "." << key << " value "
+          << "\"" << value << "\", using default - " << result;
+      logger.log("ConfigurationManager",msg.str());
+    }
+
+    return result;
+  }
 
   std::string toString() const;
 

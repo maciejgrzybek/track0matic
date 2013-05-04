@@ -1,6 +1,8 @@
 #include <cmath>
 #include <stdexcept>
 
+#include <Common/configurationmanager.h>
+
 #include "detectionreport.h"
 #include "track.h"
 
@@ -8,8 +10,7 @@
 
 ResultComparator::ResultComparator(const feature_grade_map_t& gradeRates)
   : gradeRates_(gradeRates)
-{
-}
+{}
 
 AndComparator::AndComparator(const feature_grade_map_t& gradeRates)
   : ResultComparator(gradeRates)
@@ -50,10 +51,16 @@ double AndComparator::evaluateGrades(const feature_grade_map_t& featureGrades,
           pow((dr.getMetersOverSea() - t.getMetersOverSea()),2)
         );
 
-  if (positionResult > 10) // TODO parametrize this
-    positionResult = 10;
+    double maximumPositionRate
+        = Common::Configuration::ConfigurationManager
+            ::getCastedValue<double>("Model",
+                                     "ResultComparator.MaximumPositionRate",
+                                     100000000);
 
-  return featuresResult * positionResult/10;
+  if (positionResult > maximumPositionRate)
+    positionResult = maximumPositionRate;
+
+  return featuresResult * positionResult/maximumPositionRate;
 }
 
 
@@ -97,18 +104,26 @@ double OrComparator::evaluateGrades(const feature_grade_map_t& featureGrades,
           pow((dr.getMetersOverSea() - t.getMetersOverSea()),2)
         );
 
-  if (positionResult > 10) // TODO parametrize this
-    positionResult = 10;
+    double maximumPositionRate
+        = Common::Configuration::ConfigurationManager
+            ::getCastedValue<double>("Model",
+                                     "ResultComparator.MaximumPositionRate",
+                                     100000000);
+
+  if (positionResult > maximumPositionRate)
+    positionResult = maximumPositionRate;
+
+  double positionNormalized = positionResult/maximumPositionRate;
 
   double featuresNormalized = 0; // rate normalized to number of features
   if (i > 0)
   {
     featuresNormalized = featuresResult/i;
     return (featuresNormalized
-            + positionResult/10)/2; // take into consideration difference in position
+            + positionNormalized)/2; // take into consideration difference in position
   }
   else // if no features given
-    return positionResult/10; // only position is included
+    return positionNormalized; // only position is included
 }
 
 double AndListComparator::operator()(const rates_collection_t& c)
