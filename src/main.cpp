@@ -3,12 +3,11 @@
 #include <memory>
 #include <string>
 
-#include <boost/program_options.hpp>
-
 #include <QApplication>
 #include <QThread>
 
 #include <Common/blockingqueue.hpp>
+#include <Common/configurationmanager.h>
 #include <Common/logger.h>
 
 #include <Model/datamanager.h>
@@ -20,8 +19,6 @@
 #include <Controller/common/message.h>
 
 #include <View/qtview.h>
-
-namespace bpo = boost::program_options;
 
 class HelpRequestedException : public std::exception
 {
@@ -35,42 +32,6 @@ public:
   }
 };
 
-struct ProgramOptions
-{
-  ProgramOptions()
-    : workMode(Controller::Batch)
-  {}
-
-  ProgramOptions(Controller::WorkMode workMode)
-    : workMode(workMode)
-  {}
-
-  std::string toString() const
-  {
-    std::stringstream result;
-    std::string mode;
-    switch (workMode)
-    {
-      case Controller::Batch:
-        mode = "batch";
-        break;
-      case Controller::Online:
-        mode = "online";
-        break;
-      default:
-        assert(false && "Not implemented WorkMode!");
-        break;
-    }
-
-    result << "mode = " << mode;
-    return result.str();
-  }
-
-  Controller::WorkMode workMode;
-};
-
-ProgramOptions prepareProgramOptions(int argc, char* argv[]);
-
 int main(int argc, char* argv[])
 {
   Common::GlobalLogger& logger = Common::GlobalLogger::getInstance();
@@ -78,18 +39,14 @@ int main(int argc, char* argv[])
                     new Common::ConsoleLoggerAgent()));
   logger.log("main","Logger setup complete.");
 
-  ProgramOptions po;
-  try
-  {
-    po = prepareProgramOptions(argc,argv);
-  }
-  catch (const HelpRequestedException&)
-  {
-    return 1;
-  }
+  Common::Configuration::ConfigurationManager::KeyValueMap options
+      = Common::Configuration::getConfigurationFromFile("settings.ini");
+  Common::Configuration::ConfigurationManager& confMan
+      = Common::Configuration::ConfigurationManager::getInstance();
+  confMan.parseKeyValueMapIntoConfiguration(options);
 
   std::stringstream msg;
-  msg << "Choosen options: " << po.toString();
+  msg << "Choosen options: \n" << confMan.toString();
   logger.log("main",msg.str());
 
   QApplication app(argc,argv);
@@ -104,8 +61,7 @@ int main(int argc, char* argv[])
   std::unique_ptr<Controller::Controller> controller(
          new Controller::MainController(blockingQueue,
                                         std::move(model),
-                                        std::move(view),
-                                        po.workMode)
+                                        std::move(view))
         );
   logger.log("main","Controller instantiated.");
 
@@ -127,58 +83,4 @@ int main(int argc, char* argv[])
   /* </ugly hack> */
 
   return app.exec();
-}
-
-std::istream& operator>>(std::istream& in, Controller::WorkMode& mode)
-{
-    std::string token;
-    in >> token;
-    std::transform(token.begin(), token.end(), token.begin(), ::tolower);
-    if (token == "batch")
-      mode = Controller::Batch;
-    else if (token == "online")
-      mode = Controller::Online;
-    else
-      throw bpo::validation_error(
-          bpo::validation_error::invalid_option_value,"mode",token);
-
-    return in;
-}
-
-ProgramOptions prepareProgramOptions(int argc, char* argv[])
-{
-  ProgramOptions po;
-
-  bpo::options_description desc("Allowed options");
-  desc.add_options()
-      ("help,h", "message you're reading")
-      ("mode,m", bpo::value<Controller::WorkMode>(),
-                 "work mode - Online or Batch")
-  ;
-  bpo::variables_map vm;
-  try
-  {
-    bpo::store(bpo::parse_command_line(argc, argv, desc), vm);
-    bpo::notify(vm);
-  }
-  catch (const boost::program_options::unknown_option&)
-  {
-    std::cout << "Unrecognized option!" << std::endl;
-    std::cout << desc << std::endl;
-    throw HelpRequestedException();
-  }
-
-  if (vm.count("help") > 0)
-  {
-    std::cout << desc << std::endl;
-    throw HelpRequestedException();
-  }
-
-  if (vm.count("mode") > 0)
-  {
-    po.workMode = vm["mode"].as<Controller::WorkMode>();
-  } // if mode is not given,
-    // default constructed ProgramOptions chooses default work mode
-
-  return po;
 }

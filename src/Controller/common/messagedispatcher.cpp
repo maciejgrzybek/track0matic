@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+#include <Common/configurationmanager.h>
+
 #include <Model/model.h>
 #include <Model/modelsnapshot.h>
 
@@ -16,12 +18,10 @@ namespace Controller
 
 MessageDispatcher::MessageDispatcher(Model::Model& model,
                                      Controller& controller,
-                                     View::View& view,
-                                     WorkMode workMode)
+                                     View::View& view)
   : model_(model),
     controller_(controller),
-    view_(view),
-    workMode_(workMode)
+    view_(view)
 {}
 
 void MessageDispatcher::visit(WorkingModeChangeMessage& /*m*/)
@@ -47,18 +47,18 @@ void MessageDispatcher::visit(TimerTickMessage& /*m*/)
 {
   Model::Snapshot state;
 
-  switch (workMode_)
-  {
-    case Online:
-      state = model_.computeState(time_types::clock_t::now());
-      break;
-    case Batch:
-      state = model_.computeState();
-      break;
-    default:
-      assert(false && "Not implemented WorkMode!");
-      break;
-  }
+  Common::Configuration::ConfigurationManager& confMan
+      = Common::Configuration::ConfigurationManager::getInstance();
+
+  const std::string workMode = confMan["Controller"]["WorkMode"];
+
+  if (workMode == "online")
+    state = model_.computeState(time_types::clock_t::now());
+  else if (workMode == "batch")
+    state = model_.computeState();
+  else
+    assert(false && "Not implemented WorkMode!");
+
   view_.showState(state); // put snapshot to View
 }
 

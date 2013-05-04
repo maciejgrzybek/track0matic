@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <Controller/controller.h> // for enum WorkMode;
+#include <Controller/controller.h>
 
 namespace Model
 {
@@ -29,8 +29,7 @@ public:
   //  until MessageDispatcher is valid
   MessageDispatcher(Model::Model&,
                     Controller&,
-                    View::View&,
-                    WorkMode);
+                    View::View&);
 
   void visit(class WorkingModeChangeMessage&);
   void visit(class QuitRequestedMessage&);
@@ -41,8 +40,6 @@ private:
   Model::Model& model_;
   Controller& controller_;
   View::View& view_;
-
-  WorkMode workMode_;
 };
 
 } // namespace Controller

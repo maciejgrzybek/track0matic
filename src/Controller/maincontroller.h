@@ -24,8 +24,7 @@ class MainController : public Controller
 public:
   MainController(std::shared_ptr<Common::BlockingQueue<MessagePtr> >,
                  std::unique_ptr<Model::Model>,
-                 std::unique_ptr<View::View>,
-                 WorkMode = Batch);
+                 std::unique_ptr<View::View>);
   virtual ~MainController();
 
   virtual void operator()();

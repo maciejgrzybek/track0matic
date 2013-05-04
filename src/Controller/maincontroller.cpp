@@ -8,15 +8,13 @@ namespace Controller
 MainController
 ::MainController(std::shared_ptr<Common::BlockingQueue<MessagePtr> > bq,
                  std::unique_ptr<Model::Model> model,
-                 std::unique_ptr<View::View> view,
-                 WorkMode workMode)
+                 std::unique_ptr<View::View> view)
   : blockingQueue_(bq),
     model_(std::move(model)),
     view_(std::move(view)),
     messageDispatcher_(new MessageDispatcher(*model_,
                                              *this,
-                                             *view_,
-                                             workMode)),
+                                             *view_)),
     timersManager_(new Common::TimersManager()),
     working_(true)
 {
