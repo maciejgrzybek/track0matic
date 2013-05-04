@@ -10,7 +10,8 @@ envCopy.Append(
 
 commonDir = 'Common'
 
-sourceTargets = [ 'eventtimer.cpp',
+sourceTargets = [ 'configurationmanager.cpp',
+                  'eventtimer.cpp',
                   'logger.cpp',
                   'timersmanager.cpp' ]
 
