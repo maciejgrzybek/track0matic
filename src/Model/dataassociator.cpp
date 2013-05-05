@@ -181,7 +181,7 @@ double DataAssociator::rateDRForTrack(const DetectionReport& dr, const Track& tr
     m[name] = 0;
 
     // TODO can be optimized - linear search vs logarithmic
-    for (Feature* feature : trackFeatures)
+    /*for (Feature* feature : trackFeatures) // FIXME see below
     {
       if (feature->getName() == name)
       {
@@ -190,7 +190,7 @@ double DataAssociator::rateDRForTrack(const DetectionReport& dr, const Track& tr
         //double result = featureExtractor->compare(*drFeature,*feature);
         //m[name] = result; // we assume, that there are only one Feature with given name in set
       }
-    }
+    }*/
   }
 
   return resultComparator_->operator()(m,dr,track);
