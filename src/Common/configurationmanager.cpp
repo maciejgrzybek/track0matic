@@ -258,6 +258,9 @@ ConfigurationManager::KeyValueMap
         "batch - compute as fast as possible. When no more data is available, "
         "poll DB periodically to check for new data."
         "online - compute in real time.")
+      ("View.Renderer.VarianceFactor", bpo::value<std::string>(),
+       "Indicates how big should be circle meaning variance. "
+       "It's multiplier for circle size.")
       ;
 
   bpo::store(bpo::parse_config_file(file, desc), vm);

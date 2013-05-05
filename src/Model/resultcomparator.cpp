@@ -55,7 +55,7 @@ double AndComparator::evaluateGrades(const feature_grade_map_t& featureGrades,
         = Common::Configuration::ConfigurationManager
             ::getCastedValue<double>("Model",
                                      "ResultComparator.MaximumPositionRate",
-                                     100000000);
+                                     5000); // 5000 rate is ~200m distance overall
 
   if (positionResult > maximumPositionRate)
     positionResult = maximumPositionRate;
@@ -108,7 +108,7 @@ double OrComparator::evaluateGrades(const feature_grade_map_t& featureGrades,
         = Common::Configuration::ConfigurationManager
             ::getCastedValue<double>("Model",
                                      "ResultComparator.MaximumPositionRate",
-                                     100000000);
+                                     5000); // 5000 rate is ~200m distance overall
 
   if (positionResult > maximumPositionRate)
     positionResult = maximumPositionRate;

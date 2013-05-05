@@ -47,7 +47,7 @@ public:
                 = std::unique_ptr<FeatureExtractor>(),
               std::unique_ptr<FusionExecutor> fusionExecutor
                 = std::unique_ptr<FusionExecutor>(),
-              time_types::duration_t TTL = boost::chrono::seconds(3));
+              time_types::duration_t TTL = boost::chrono::seconds(0));
 
   /**
    * @brief Computes next state of Model.
@@ -117,8 +117,7 @@ private:
   std::unique_ptr<FusionExecutor> fusionExecutor_;
   std::unique_ptr<estimation::EstimationFilter<> > filter_;
 
-  const time_types::duration_t TTL_; // for now it's not mutable, but in future,
-                                     // can be, when tracker could be adaptive
+  time_types::duration_t TTL_;
 
   MapPtr staticMap_;
 };

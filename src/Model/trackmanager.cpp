@@ -1,13 +1,15 @@
+#include "trackmanager.h"
+
 #include <algorithm>
+
+#include <boost/uuid/uuid_io.hpp>
 
 #include <Common/logger.h>
 #include <Common/time.h>
-#include "trackmanager.h"
 
 TrackManager::TrackManager(double initializationThreshold)
   : initializationDRThreshold_(initializationThreshold)
-{
-}
+{}
 
 std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
   TrackManager::initializeTracks(const std::vector<std::set<DetectionReport> >& DRsGroups,
@@ -42,7 +44,6 @@ std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
     {
       std::shared_ptr<Track> track
           = initializeTrack(group,filter->clone());
-
       tracks_.insert(track);
       result[track] = group;
     }

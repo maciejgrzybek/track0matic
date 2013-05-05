@@ -7,6 +7,7 @@
 
 #include <Model/DB/common.h>
 
+#include <Common/configurationmanager.h>
 #include <Common/logger.h>
 
 namespace Model
@@ -24,7 +25,6 @@ DataManager::DataManager(const std::string& paramsPath,
                          std::unique_ptr<FeatureExtractor> featureExtractor,
                          std::unique_ptr<FusionExecutor> fusionExecutor,
                          time_types::duration_t TTL)
-  : TTL_(TTL)
 {
   if (dynDbDriver)
     dynDbDriver_ = dynDbDriver;
@@ -58,9 +58,16 @@ DataManager::DataManager(const std::string& paramsPath,
   if (alignmentProcessor)
     alignmentProcessor_ = std::move(alignmentProcessor);
   else
-    alignmentProcessor_ = std::unique_ptr<AlignmentProcessor>(
-          new AlignmentProcessor(boost::chrono::seconds(1)) // TODO read params from params file (options.xml)
-          );
+  {
+    unsigned seconds
+        = Common::Configuration::ConfigurationManager
+            ::getCastedValue<unsigned>("Model","AlignmentProcessor.TimeDelta",1);
+
+    time_types::seconds_t dt(seconds);
+
+    alignmentProcessor_
+        = std::unique_ptr<AlignmentProcessor>(new AlignmentProcessor(dt));
+  }
 
   if (candidateSelector)
     candidateSelector_ = std::move(candidateSelector);
@@ -72,9 +79,15 @@ DataManager::DataManager(const std::string& paramsPath,
   if (trackManager)
     trackManager_ = trackManager;
   else
-    trackManager_ = std::shared_ptr<TrackManager>(
-          new TrackManager(500000)
-          );
+  {
+    double threshold
+        = Common::Configuration::ConfigurationManager
+            ::getCastedValue<double>("Model",
+                                     "TrackManager.InitializationThreshold",
+                                     5000); // 5000 - ~200m distance
+
+    trackManager_ = std::shared_ptr<TrackManager>(new TrackManager(threshold));
+  }
 
   if (dataAssociator)
     dataAssociator_ = std::move(dataAssociator);
@@ -84,10 +97,17 @@ DataManager::DataManager(const std::string& paramsPath,
           new OrComparator(ResultComparator::feature_grade_map_t()));
     std::unique_ptr<ListResultComparator> listComparator(
           new OrListComparator());
+
+    double threshold
+        = Common::Configuration::ConfigurationManager
+            ::getCastedValue<double>("Model",
+                                     "DataAssociator.Threshold",
+                                     0.3);
+
     DataAssociator* da = new DataAssociator(trackManager_,
                                             std::move(resultComparator),
                                             std::move(listComparator),
-                                            0.3);
+                                            threshold);
     dataAssociator_ = std::unique_ptr<DataAssociator>(da);
   }
 
@@ -101,9 +121,18 @@ DataManager::DataManager(const std::string& paramsPath,
   if (fusionExecutor)
     fusionExecutor_ = std::move(fusionExecutor);
   else
-    fusionExecutor_ = std::unique_ptr<FusionExecutor>(
-          new FusionExecutor()
-          );
+    fusionExecutor_ = std::unique_ptr<FusionExecutor>(new FusionExecutor());
+
+  if (TTL == time_types::seconds_t(0))
+  { // use default value, instead of given
+    unsigned int seconds
+        = Common::Configuration::ConfigurationManager
+            ::getCastedValue<double>("Model","DataManager.TTL",3);
+
+    TTL_ = time_types::duration_t(seconds);
+  }
+  else
+    TTL_ = TTL;
 }
 
 Snapshot DataManager::computeState(time_types::ptime_t currentTime)
@@ -129,7 +158,7 @@ Snapshot DataManager::getSnapshot() const
 
 MapPtr DataManager::getMap()
 {
-  // simple caching, without refreshing.
+  // simple caching, without refreshing - read once, store and never refresh
   if (!staticMap_)
     staticMap_ = staticDbDriver_->getMap();
 

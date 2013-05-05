@@ -16,6 +16,8 @@
 
 #include <View/qtview.h>
 
+#include <Common/configurationmanager.h>
+
 #include <Model/track.h>
 
 namespace View
@@ -52,8 +54,6 @@ GraphicalStreet::GraphicalStreet(
 {}
 
 /******************************************************************************/
-
-const double QtRenderer::varianceFactor_ = 500;
 
 QtRenderer::QtRenderer(QtView* parent)
   : parent_(parent),
@@ -159,11 +159,15 @@ GraphicalTrack* QtRenderer::transformTrackFromSnapshot(const Track* track)
   qreal varX = track->getLongitudePredictionVariance();
   qreal varY = track->getLatitudePredictionVariance();
 
+  double varianceFactor
+      = Common::Configuration::ConfigurationManager
+          ::getCastedValue<double>("View","Renderer.VarianceFactor",500);
+
   GraphicalTrack* graphicalTrack = new GraphicalTrack(track->getUuid(),
                                                       x,y,
                                                       predictedX,predictedY,
-                                                      varianceFactor_*varX,
-                                                      varianceFactor_*varY);
+                                                      varianceFactor*varX,
+                                                      varianceFactor*varY);
   return graphicalTrack;
 }
 

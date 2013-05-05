@@ -1,7 +1,7 @@
+#include "dataassociator.h"
+
 #include <utility>
 #include <tuple>
-
-#include "dataassociator.h"
 
 DataAssociator::DataAssociator(std::shared_ptr<TrackManager>
                                 trackManager,

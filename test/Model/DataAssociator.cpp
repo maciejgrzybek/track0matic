@@ -4,6 +4,8 @@
 
 #include <boost/test/unit_test.hpp>
 
+#include <Common/configurationmanager.h>
+
 #include <Model/dataassociator.h>
 #include <Model/detectionreport.h>
 #include <Model/estimationfilter.hpp>
@@ -25,8 +27,22 @@ namespace Helpers
   struct Fixture
   {
     Fixture()
-      : tm_(new TrackManager(1))
+      : tm_(new TrackManager(5000))
     {
+      try
+      {
+        Common::Configuration::ConfigurationManager::KeyValueMap options
+              = Common::Configuration::getConfigurationFromFile("settings.ini");
+        Common::Configuration::ConfigurationManager& confMan
+            = Common::Configuration::ConfigurationManager::getInstance();
+        confMan.parseKeyValueMapIntoConfiguration(options);
+      }
+      catch (const std::exception&)
+      {
+        ; // workaround for multiple loading configuration,
+          // because of lack of pre-initialization block
+      }
+
       { // FIXME: really UGLY solution! Only for testing purpose,
         //  to allow fast tests
         #include "common/FiltersSetups.h"
@@ -34,10 +50,10 @@ namespace Helpers
       }
 
       std::set<DetectionReport> group = {
-        DetectionReport(1,1,0,0,0,100,95),
-        DetectionReport(2,2,1,0,0,100,95),
-        DetectionReport(2,3,1,1,0,91,90),
-        DetectionReport(3,4,0,1,0,105,99)
+        DetectionReport(1,1,     0,     0,0,100,95),
+        DetectionReport(2,2,     1,     0,0,100,95),
+        DetectionReport(2,3,1.0002,     0,0, 91,90),
+        DetectionReport(3,4,     0,0.0002,0,105,99)
       };
 
       groups_.push_back(group);
@@ -99,15 +115,15 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test, Helpers::Fixture )
 {
   std::vector<std::set<DetectionReport> > DRsGroups;
   std::set<DetectionReport> group = {
-    DetectionReport(1,8,0,0.1,0,100,95), // should be assigned to Track with DRs {1,4}
-    DetectionReport(2,9,1.0,0,0,100,95) // should be assigned to Track with DRs {2,3}
+    DetectionReport(1,8,  0,0.0002,0,100,95), // should be assigned to Track with DRs {1,4}
+    DetectionReport(2,9,1.0,     0,0,100,95) // should be assigned to Track with DRs {2,3}
   };
   DRsGroups.push_back(group);
 
   std::vector<std::set<DetectionReport> > correct;
   {
     std::set<DetectionReport> correctFirst = {
-      DetectionReport(1,8,0,0.1,0,100,95)
+      DetectionReport(1,8,0,0.0002,0,100,95)
     };
     correct.push_back(correctFirst);
   }
@@ -140,50 +156,57 @@ BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test, Helpers::Fixture )
   BOOST_CHECK(Helpers::checkConsistency(results,correct));
 }
 
+//std::set<DetectionReport> group = {
+//  DetectionReport(1,1,     0,     0,0,100,95),
+//  DetectionReport(2,2,     1,     0,0,100,95),
+//  DetectionReport(2,3,1.0002,     0,0, 91,90),
+//  DetectionReport(3,4,     0,0.0002,0,105,99)
+
 BOOST_FIXTURE_TEST_CASE( DataAssociator_simple_test2, Helpers::Fixture )
 {
   std::vector<std::set<DetectionReport> > DRsGroups;
   std::set<DetectionReport> group = {
-    DetectionReport(1,8,0,0.1,0,100,95), // should be assigned to Track with DRs {1,4}
-    DetectionReport(2,9,1.0,0,0,100,95), // should be assigned to Track with DRs {2,3}
-    DetectionReport(1,10,0,0.6,0,100,105), // should be assigned to Track with DRs {1,4}
-    DetectionReport(2,11,1.0,0.1,0,99,101), // should be assigned to Track with DRs {2,3}
+    DetectionReport(1, 8,  0,0.0002,0,100, 95), // should be assigned to Track with DRs {1,4}
+    DetectionReport(2, 9,1.0,     0,0,100, 95), // should be assigned to Track with DRs {2,3}
+    DetectionReport(1,10,  0, 0.0001,0,100,105), // should be assigned to Track with DRs {1,4}
+    DetectionReport(2,11,1.0, 0.0002,0, 99,101), // should be assigned to Track with DRs {2,3}
   };
   DRsGroups.push_back(group);
 
   std::vector<std::set<DetectionReport> > correct;
   {
     std::set<DetectionReport> correctFirst = {
-      DetectionReport(1,8,0,0.1,0,100,95),
-      DetectionReport(1,10,0,0.6,0,100,105)
+      DetectionReport(1, 8,0,0.0002,0,100, 95),
+      DetectionReport(1,10,0,0.0001,0,100,105)
     };
     correct.push_back(correctFirst);
   }
 
   {
     std::set<DetectionReport> correctSecond = {
-      DetectionReport(2,9,1.0,0,0,100,95),
-      DetectionReport(2,11,1.0,0.1,0,99,101)
+      DetectionReport(2, 9,1.0,     0,0,100, 95),
+      DetectionReport(2,11,1.0,0.0002,0, 99,101)
     };
     correct.push_back(correctSecond);
   }
 
   da_->setInput(DRsGroups);
-  da_->setDRRateThreshold(0.1);
+  da_->setDRRateThreshold(0.5);
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> >
       assigned = da_->getDRsForTracks();
 
   BOOST_REQUIRE_EQUAL(assigned.size(),2);
+
   std::map<std::shared_ptr<Track>,std::set<DetectionReport> >::const_iterator
       it = assigned.begin(); // first Track->DRs association
 
-  BOOST_REQUIRE_EQUAL(it->second.size(),2);
+  BOOST_CHECK_EQUAL(it->second.size(),2);
 
   std::vector<std::set<DetectionReport> > results;
   results.push_back(it->second);
   ++it; // second association
 
-  BOOST_REQUIRE_EQUAL(it->second.size(),2);
+  BOOST_CHECK_EQUAL(it->second.size(),2);
 
   results.push_back(it->second);
 
@@ -194,7 +217,7 @@ BOOST_AUTO_TEST_CASE( DataAssociator_track_refresh_on_association_test )
 {
 /*****************************INITIALIZATION***********************************/
 
-  TrackManager* tm_ = new TrackManager(1);
+  TrackManager* tm_ = new TrackManager(5000);
   std::unique_ptr<estimation::EstimationFilter<> > filter_;
 
   { // FIXME: really UGLY solution! Only for testing purpose,
@@ -204,10 +227,10 @@ BOOST_AUTO_TEST_CASE( DataAssociator_track_refresh_on_association_test )
   }
 
   std::set<DetectionReport> group = {
-    DetectionReport(1,1,0,0,0,100,95),
-    DetectionReport(2,2,1,0,0,100,95),
-    DetectionReport(2,3,1,1,0,91,90),
-    DetectionReport(3,4,0,1,0,105,99)
+    DetectionReport(1,1,     0,     0,0,100,95),
+    DetectionReport(2,2,     1,     0,0,100,95),
+    DetectionReport(2,3,1.0002,     0,0, 91,90),
+    DetectionReport(3,4,     0,0.0002,0,105,99)
   };
 
   std::vector<std::set<DetectionReport> > groups_;
@@ -228,10 +251,10 @@ BOOST_AUTO_TEST_CASE( DataAssociator_track_refresh_on_association_test )
   std::vector<std::set<DetectionReport> > DRsGroups;
   {
     std::set<DetectionReport> group = {
-      DetectionReport(1,8,0,0.1,0,100,95), // should be assigned to Track with DRs {1,4}
-      DetectionReport(2,9,1.0,0,0,100,95), // should be assigned to Track with DRs {2,3}
-      DetectionReport(1,10,0,0.6,0,100,105), // should be assigned to Track with DRs {1,4}
-      DetectionReport(2,11,1.0,0.1,0,99,101), // should be assigned to Track with DRs {2,3}
+      DetectionReport(1, 8,0,     0,0,100, 95), // should be assigned to Track with DRs {1,4}
+      DetectionReport(2, 9,1,     0,0,100, 95), // should be assigned to Track with DRs {2,3}
+      DetectionReport(1,10,0,0.0002,0,100,105), // should be assigned to Track with DRs {1,4}
+      DetectionReport(2,11,1,0.0001,0, 99,101), // should be assigned to Track with DRs {2,3}
     };
     DRsGroups.push_back(group);
   }
@@ -268,4 +291,3 @@ BOOST_AUTO_TEST_CASE( DataAssociator_track_refresh_on_association_test )
 }
 
 BOOST_AUTO_TEST_SUITE_END()
-

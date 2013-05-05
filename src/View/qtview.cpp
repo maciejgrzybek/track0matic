@@ -15,7 +15,7 @@ namespace Graphic
 QtView
 ::QtView(std::shared_ptr<Common::BlockingQueue<Controller::MessagePtr> >bq)
   : blockingQueue_(bq),
-    renderer_(new QtRenderer(this)) // TODO parametrize this
+    renderer_(new QtRenderer(this))
 {
   renderer_->show();
 }

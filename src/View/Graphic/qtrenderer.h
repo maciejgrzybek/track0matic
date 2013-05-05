@@ -105,7 +105,6 @@ private:
   };
 
   static GraphicalTrack* transformTrackFromSnapshot(const Track*);
-  static const double varianceFactor_;
   void drawStaticGraphics();
   void drawBackground();
   void setupMenu();
