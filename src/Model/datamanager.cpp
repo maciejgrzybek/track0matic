@@ -51,9 +51,15 @@ DataManager::DataManager(const std::string& paramsPath,
   if (reportManager)
     reportManager_ = std::move(reportManager);
   else
+  {
+    std::size_t packetSize
+        = Common::Configuration::ConfigurationManager
+            ::getCastedValue<double>("Model","ReportManager.PacketSize",20);
+
     reportManager_ = std::unique_ptr<ReportManager>(
-          new ReportManager(dynDbDriver_)
+          new ReportManager(dynDbDriver_,packetSize)
           );
+  }
 
   if (alignmentProcessor)
     alignmentProcessor_ = std::move(alignmentProcessor);

@@ -6,7 +6,7 @@
 ReportManager::ReportManager(std::shared_ptr<DB::DynDBDriver> dbdriver,
                              std::size_t packetSize)
   : dbdriver_(dbdriver),
-    drCursor_(dbdriver_->getDRCursor()), // TODO add parametrization for this
+    drCursor_(dbdriver_->getDRCursor(0,packetSize)), // TODO add parametrization for this
     packetSize_(packetSize),
     lastDR_(-1,-1,-1,-1,-1,0,0) // dummy DR
 {}

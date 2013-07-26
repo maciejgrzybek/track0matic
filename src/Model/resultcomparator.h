@@ -50,7 +50,6 @@ private:
                         const Track& t) const;
 };
 
-// TODO implement this
 class ListResultComparator
 {
 public:
